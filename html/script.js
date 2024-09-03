@@ -13,7 +13,7 @@ fetch('map.svg')
     .then(svgContent => {
         document.getElementById('map-container').innerHTML = svgContent;
         svgElement = document.querySelector('#map-container svg');
-        setupCountryClicks();
+        setupPostalCodeClicks();
         setupZoomControls();
         setupPanning();
         setupLassoSelect();
@@ -21,36 +21,36 @@ fetch('map.svg')
         originalViewBox = { x: viewBox.x, y: viewBox.y, width: viewBox.width, height: viewBox.height };
     });
 
-const selectedCountries = new Set();
+const selectedPostalCodes = new Set();
 
-function setupCountryClicks() {
+function setupPostalCodeClicks() {
     const paths = document.querySelectorAll('#map-container svg path');
     paths.forEach(path => {
         path.addEventListener('click', (e) => {
-            const countryName = e.target.id || 'Unknown';
-            toggleCountry(e.target, countryName);
+            const postalCode = e.target.id || 'Unknown';
+            togglePostalCode(e.target, postalCode);
         });
     });
 }
 
-function toggleCountry(pathElement, countryName) {
-    if (selectedCountries.has(countryName)) {
-        removeCountry(countryName);
+function togglePostalCode(pathElement, postalCode) {
+    if (selectedPostalCodes.has(postalCode)) {
+        removePostalCode(postalCode);
     } else {
-        selectedCountries.add(countryName);
+        selectedPostalCodes.add(postalCode);
         pathElement.classList.add('selected');
     }
-    updateSelectedCountriesList();
+    updateSelectedPostalCodesList();
 }
 
-function updateSelectedCountriesList() {
-    const countryList = document.getElementById('postcodes-list');
-    countryList.innerHTML = '';
-    selectedCountries.forEach(country => {
+function updateSelectedPostalCodesList() {
+    const postalCodeList = document.getElementById('postcodes-list');
+    postalCodeList.innerHTML = '';
+    selectedPostalCodes.forEach(postalCode => {
         const li = document.createElement('li');
         li.innerHTML = `
-            ${country}
-            <button class="delete-btn" title="Remove ${country}" style="display: none;">
+            ${postalCode}
+            <button class="delete-btn" title="Remove ${postalCode}" style="display: none;">
                 <i class="fas fa-times"></i>
             </button>
         `;
@@ -62,19 +62,19 @@ function updateSelectedCountriesList() {
         });
         li.querySelector('.delete-btn').addEventListener('click', (e) => {
             e.stopPropagation();
-            removeCountry(country);
+            removePostalCode(postalCode);
         });
-        countryList.appendChild(li);
+        postalCodeList.appendChild(li);
     });
 }
 
-function removeCountry(countryName) {
-    selectedCountries.delete(countryName);
-    const pathElement = document.getElementById(countryName);
+function removePostalCode(postalCode) {
+    selectedPostalCodes.delete(postalCode);
+    const pathElement = document.getElementById(postalCode);
     if (pathElement) {
         pathElement.classList.remove('selected');
     }
-    updateSelectedCountriesList();
+    updateSelectedPostalCodesList();
 }
 
 function setupZoomControls() {
@@ -202,8 +202,8 @@ function selectPathsInLasso() {
     const paths = document.querySelectorAll('#map-container svg path');
     paths.forEach(path => {
         if (isPathInLasso(path)) {
-            const countryName = path.id || 'Unknown';
-            toggleCountry(path, countryName);
+            const postalCode = path.id || 'Unknown';
+            togglePostalCode(path, postalCode);
         }
     });
 }
