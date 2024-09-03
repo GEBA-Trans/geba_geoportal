@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive World Map</title>
+    <style>
+        #map-container { width: 100%; max-width: 800px; margin: 0 auto; }
+        #map-container svg { width: 100%; height: auto; }
+        path { cursor: pointer; transition: fill 0.3s; }
+        path:hover { fill: #ffcc99; }
+        path.selected { fill: #99ccff; }
+        #country-info { margin-top: 20px; font-size: 18px; }
+        #selected-countries { margin-top: 20px; }
+        /* Add this new style for labels */
+        #map-container svg text { 
+            fill: white; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive World Map</h1>
+    <div id="map-container"></div>
+    <div id="country-info"></div>
+    <div id="selected-countries">
+        <h2>Selected Areas:</h2>
+        <ul id="country-list"></ul>
+    </div>
+
+    <script>
+        fetch('map.svg')
+            .then(response => response.text())
+            .then(svgContent => {
+                document.getElementById('map-container').innerHTML = svgContent;
+                setupCountryClicks();
+            });
+
+        const selectedCountries = new Set();
+
+        function setupCountryClicks() {
+            const paths = document.querySelectorAll('#map-container svg path');
+            paths.forEach(path => {
+                path.addEventListener('click', (e) => {
+                    const countryName = e.target.id || 'Unknown';
+                    toggleCountry(e.target, countryName);
+                });
+            });
+        }
+
+        function toggleCountry(pathElement, countryName) {
+            if (selectedCountries.has(countryName)) {
+                selectedCountries.delete(countryName);
+                pathElement.classList.remove('selected');
+            } else {
+                selectedCountries.add(countryName);
+                pathElement.classList.add('selected');
+            }
+            updateSelectedCountriesList();
+        }
+
+        function updateSelectedCountriesList() {
+            const countryList = document.getElementById('country-list');
+            countryList.innerHTML = '';
+            selectedCountries.forEach(country => {
+                const li = document.createElement('li');
+                li.textContent = country;
+                countryList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
