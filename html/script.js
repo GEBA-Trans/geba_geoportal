@@ -48,6 +48,7 @@ function updateSelectedPostalCodesList() {
     postalCodeList.innerHTML = '';
     selectedPostalCodes.forEach(postalCode => {
         const li = document.createElement('li');
+        li.setAttribute('data-postal-code', postalCode);
         li.innerHTML = `
             ${postalCode}
             <button class="delete-btn" title="Remove ${postalCode}" style="display: none;">
@@ -56,9 +57,11 @@ function updateSelectedPostalCodesList() {
         `;
         li.addEventListener('mouseenter', () => {
             li.querySelector('.delete-btn').style.display = 'inline-block';
+            highlightPostalCode(postalCode, true);
         });
         li.addEventListener('mouseleave', () => {
             li.querySelector('.delete-btn').style.display = 'none';
+            highlightPostalCode(postalCode, false);
         });
         li.querySelector('.delete-btn').addEventListener('click', (e) => {
             e.stopPropagation();
@@ -246,4 +249,20 @@ function endLasso(e) {
     selectPathsInLasso();
     clearLasso();
     toggleLasso(); // Deactivate lasso after selection
+}
+
+function highlightPostalCode(postalCode, highlight) {
+    const pathElement = document.getElementById(postalCode);
+    console.log('Highlighting:', postalCode, highlight, pathElement);
+    if (pathElement) {
+        if (highlight) {
+            pathElement.style.stroke = '#ff0000';
+            pathElement.style.strokeWidth = '2px';
+            pathElement.style.fillOpacity = '0.7';
+        } else {
+            pathElement.style.stroke = '';
+            pathElement.style.strokeWidth = '';
+            pathElement.style.fillOpacity = '';
+        }
+    }
 }
