@@ -4,7 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive World Map</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #map-container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+        #map-container svg { 
+            width: 100%; 
+            height: 100%; 
+            cursor: move; /* Change cursor to indicate draggable */
+        }
+        path { cursor: pointer; transition: fill 0.3s; }
+        path:hover { fill: #ffcc99; }
+        path.selected { fill: #99ccff; }
+        #country-info { position: absolute; bottom: 20px; left: 20px; font-size: 18px; }
+        #selected-countries { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.8); padding: 10px; border-radius: 5px; }
+        h1 { position: absolute; top: 20px; left: 20px; margin: 0; }
+        /* Add this new style for labels */
+        #map-container svg text { 
+            fill: white; 
+            font-size: 40px;
+        }
+        #zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.8);
+            padding: 5px;
+            border-radius: 5px;
+        }
+        #zoom-controls button {
+            font-size: 18px;
+            width: 30px;
+            height: 30px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        #lasso-button {
+            position: absolute;
+            top: 20px;
+            left: 200px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        #map-container svg.lasso-active {
+            cursor: crosshair;
+        }
+    </style>
 </head>
 <body>
     <h1>Interactive World Map</h1>
