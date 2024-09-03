@@ -1,5 +1,5 @@
-let currentZoom = 1;
 const zoomStep = 0.2;
+let currentZoom = 1;
 let svgElement;
 let isDragging = false;
 let startX, startY;
@@ -25,9 +25,10 @@ function loadSelectedPostalCodes() {
     }
 }
 
-fetch('map.svg')
-    .then(response => response.text())
-    .then(svgContent => {
+async function loadSVG() {
+    try {
+        const response = await fetch('map.svg');
+        const svgContent = await response.text();
         document.getElementById('map-container').innerHTML = svgContent;
         svgElement = document.querySelector('#map-container svg');
         setupPostalCodeClicks();
@@ -35,19 +36,23 @@ fetch('map.svg')
         setupPanning();
         setupLassoSelect();
         viewBox = svgElement.viewBox.baseVal;
-        originalViewBox = { x: viewBox.x, y: viewBox.y, width: viewBox.width, height: viewBox.height };
-        loadSelectedPostalCodes(); // Load saved postal codes
-    });
+        originalViewBox = { ...viewBox };
+        loadSelectedPostalCodes();
+    } catch (error) {
+        console.error('Error loading SVG:', error);
+    }
+}
+
+loadSVG();
 
 const selectedPostalCodes = new Set();
 
 function setupPostalCodeClicks() {
-    const paths = document.querySelectorAll('#map-container svg path');
-    paths.forEach(path => {
-        path.addEventListener('click', (e) => {
+    document.getElementById('map-container').addEventListener('click', (e) => {
+        if (e.target.tagName === 'path') {
             const postalCode = e.target.id || 'Unknown';
             togglePostalCode(e.target, postalCode);
-        });
+        }
     });
 }
 
@@ -59,14 +64,13 @@ function togglePostalCode(pathElement, postalCode) {
         pathElement.classList.add('selected');
     }
     updateSelectedPostalCodesList();
-    saveSelectedPostalCodes(); // Save the updated selection
+    saveSelectedPostalCodes();
 }
 
 function updateSelectedPostalCodesList() {
     const postalCodeList = document.getElementById('postcodes-list');
     postalCodeList.innerHTML = '';
     
-    // Add Clear All button
     if (selectedPostalCodes.size > 0) {
         const clearAllButton = document.createElement('button');
         clearAllButton.id = 'clear-all-button';
@@ -107,7 +111,7 @@ function removePostalCode(postalCode) {
         pathElement.classList.remove('selected');
     }
     updateSelectedPostalCodesList();
-    saveSelectedPostalCodes(); // Save the updated selection
+    saveSelectedPostalCodes();
 }
 
 function setupZoomControls() {
@@ -161,7 +165,7 @@ function stopDragging() {
 
 function zoom(step) {
     currentZoom += step;
-    currentZoom = Math.max(0.5, Math.min(currentZoom, 4)); // Limit zoom between 0.5x and 4x
+    currentZoom = Math.max(0.5, Math.min(currentZoom, 4));
 
     const newWidth = viewBox.width / currentZoom;
     const newHeight = viewBox.height / currentZoom;
@@ -184,7 +188,7 @@ function setupLassoSelect() {
 
     svgElement.addEventListener('mousedown', startLasso);
     svgElement.addEventListener('mousemove', updateLasso);
-    document.addEventListener('mouseup', endLasso); // Change this line
+    document.addEventListener('mouseup', endLasso);
 }
 
 function toggleLasso() {
@@ -255,8 +259,8 @@ function isPathInLasso(path) {
 function isPointInPolygon(point, polygon) {
     let inside = false;
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        const xi = polygon[i].x, yi = polygon[i].y;
-        const xj = polygon[j].x, yj = polygon[j].y;
+        const [xi, yi] = [polygon[i].x, polygon[i].y];
+        const [xj, yj] = [polygon[j].x, polygon[j].y];
         const intersect = ((yi > point.y) !== (yj > point.y))
             && (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
         if (intersect) inside = !inside;
@@ -278,7 +282,7 @@ function endLasso(e) {
     drawLasso();
     selectPathsInLasso();
     clearLasso();
-    toggleLasso(); // Deactivate lasso after selection
+    toggleLasso();
 }
 
 function highlightPostalCode(postalCode, highlight) {

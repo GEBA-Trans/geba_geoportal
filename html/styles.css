@@ -6,8 +6,15 @@ body { margin: 0; padding: 0; }
     cursor: move; /* Change cursor to indicate draggable */
 }
 path { cursor: pointer; transition: fill 0.3s; }
-path:hover { fill: #ffcc99; }
-path.selected { fill: #99ccff; }
+
+/* Use a CSS variable for repeated colors */
+:root {
+  --hover-color: #ffcc99;
+  --selected-color: #99ccff;
+}
+
+path:hover { fill: var(--hover-color); }
+path.selected { fill: var(--selected-color); }
 #country-info { position: absolute; bottom: 20px; left: 20px; font-size: 18px; }
 #selected-countries { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.8); padding: 10px; border-radius: 5px; }
 h1 { position: absolute; top: 20px; left: 20px; margin: 0; }
@@ -33,9 +40,13 @@ h1 { position: absolute; top: 20px; left: 20px; margin: 0; }
     background: none;
     border: 1px solid #ccc;
     border-radius: 3px;
+    transition: background-color 0.3s, transform 0.1s;
 }
 #zoom-controls button:hover {
     background-color: #f0f0f0;
+}
+#zoom-controls button:active {
+    transform: scale(0.95);
 }
 #lasso-button {
     font-size: 18px;
@@ -46,7 +57,11 @@ h1 { position: absolute; top: 20px; left: 20px; margin: 0; }
     border: 1px solid #ccc;
     border-radius: 3px;
     padding: 0 10px;
+    transition: background-color 0.3s, transform 0.1s;
 }
 #lasso-button:hover {
     background-color: #f0f0f0;
+}
+#lasso-button:active {
+    transform: scale(0.95);
 }
