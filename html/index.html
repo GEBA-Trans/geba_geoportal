@@ -30,6 +30,7 @@
             background: rgba(255,255,255,0.8);
             padding: 5px;
             border-radius: 5px;
+            display: flex; /* Add this line */
         }
         #zoom-controls button {
             font-size: 18px;
@@ -44,15 +45,19 @@
         #zoom-controls button:hover {
             background-color: #f0f0f0;
         }
+        /* Remove the #lasso-button styles */
         #lasso-button {
-            position: absolute;
-            top: 20px;
-            left: 200px;
-            padding: 5px 10px;
+            font-size: 18px;
+            height: 30px;
+            margin: 0 5px;
             cursor: pointer;
+            background: none;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 0 10px; /* Add padding for better appearance */
         }
-        #map-container svg.lasso-active {
-            cursor: crosshair;
+        #lasso-button:hover {
+            background-color: #f0f0f0;
         }
     </style>
     <!-- Add Font Awesome CSS -->
@@ -70,8 +75,8 @@
         <button id="zoom-in"><i class="fas fa-plus"></i></button>
         <button id="zoom-out"><i class="fas fa-minus"></i></button>
         <button id="reset-zoom"><i class="fas fa-sync-alt"></i></button>
+        <button id="lasso-button">Lasso Select</button>
     </div>
-    <button id="lasso-button">Lasso Select</button>
 
     <script>
         let currentZoom = 1;
