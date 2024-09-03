@@ -35,8 +35,7 @@ function setupCountryClicks() {
 
 function toggleCountry(pathElement, countryName) {
     if (selectedCountries.has(countryName)) {
-        selectedCountries.delete(countryName);
-        pathElement.classList.remove('selected');
+        removeCountry(countryName);
     } else {
         selectedCountries.add(countryName);
         pathElement.classList.add('selected');
@@ -49,9 +48,33 @@ function updateSelectedCountriesList() {
     countryList.innerHTML = '';
     selectedCountries.forEach(country => {
         const li = document.createElement('li');
-        li.textContent = country;
+        li.innerHTML = `
+            ${country}
+            <button class="delete-btn" title="Remove ${country}" style="display: none;">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        li.addEventListener('mouseenter', () => {
+            li.querySelector('.delete-btn').style.display = 'inline-block';
+        });
+        li.addEventListener('mouseleave', () => {
+            li.querySelector('.delete-btn').style.display = 'none';
+        });
+        li.querySelector('.delete-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeCountry(country);
+        });
         countryList.appendChild(li);
     });
+}
+
+function removeCountry(countryName) {
+    selectedCountries.delete(countryName);
+    const pathElement = document.getElementById(countryName);
+    if (pathElement) {
+        pathElement.classList.remove('selected');
+    }
+    updateSelectedCountriesList();
 }
 
 function setupZoomControls() {
