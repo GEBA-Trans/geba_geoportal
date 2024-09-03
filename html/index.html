@@ -37,6 +37,12 @@
             height: 30px;
             margin: 0 5px;
             cursor: pointer;
+            background: none;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        #zoom-controls button:hover {
+            background-color: #f0f0f0;
         }
         #lasso-button {
             position: absolute;
@@ -49,6 +55,8 @@
             cursor: crosshair;
         }
     </style>
+    <!-- Add Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <h1>Interactive World Map</h1>
@@ -59,9 +67,9 @@
         <ul id="country-list"></ul>
     </div>
     <div id="zoom-controls">
-        <button id="zoom-in">+</button>
-        <button id="zoom-out">-</button>
-        <button id="reset-zoom">Reset</button>
+        <button id="zoom-in"><i class="fas fa-plus"></i></button>
+        <button id="zoom-out"><i class="fas fa-minus"></i></button>
+        <button id="reset-zoom"><i class="fas fa-sync-alt"></i></button>
     </div>
     <button id="lasso-button">Lasso Select</button>
 
