@@ -45,7 +45,7 @@ function toggleCountry(pathElement, countryName) {
 }
 
 function updateSelectedCountriesList() {
-    const countryList = document.getElementById('country-list');
+    const countryList = document.getElementById('postcodes-list');
     countryList.innerHTML = '';
     selectedCountries.forEach(country => {
         const li = document.createElement('li');
