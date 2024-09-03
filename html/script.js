@@ -8,6 +8,23 @@ let originalViewBox;
 let isLassoActive = false;
 let lassoPoints = [];
 
+function saveSelectedPostalCodes() {
+    document.cookie = `selectedPostalCodes=${Array.from(selectedPostalCodes).join(',')}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
+}
+
+function loadSelectedPostalCodes() {
+    const cookieValue = document.cookie.split('; ').find(row => row.startsWith('selectedPostalCodes='));
+    if (cookieValue) {
+        const savedPostalCodes = cookieValue.split('=')[1].split(',');
+        savedPostalCodes.forEach(postalCode => {
+            const pathElement = document.getElementById(postalCode);
+            if (pathElement) {
+                togglePostalCode(pathElement, postalCode);
+            }
+        });
+    }
+}
+
 fetch('map.svg')
     .then(response => response.text())
     .then(svgContent => {
@@ -19,6 +36,7 @@ fetch('map.svg')
         setupLassoSelect();
         viewBox = svgElement.viewBox.baseVal;
         originalViewBox = { x: viewBox.x, y: viewBox.y, width: viewBox.width, height: viewBox.height };
+        loadSelectedPostalCodes(); // Load saved postal codes
     });
 
 const selectedPostalCodes = new Set();
@@ -41,11 +59,22 @@ function togglePostalCode(pathElement, postalCode) {
         pathElement.classList.add('selected');
     }
     updateSelectedPostalCodesList();
+    saveSelectedPostalCodes(); // Save the updated selection
 }
 
 function updateSelectedPostalCodesList() {
     const postalCodeList = document.getElementById('postcodes-list');
     postalCodeList.innerHTML = '';
+    
+    // Add Clear All button
+    if (selectedPostalCodes.size > 0) {
+        const clearAllButton = document.createElement('button');
+        clearAllButton.id = 'clear-all-button';
+        clearAllButton.innerHTML = '<i class="fas fa-trash-alt"></i> Clear All';
+        clearAllButton.addEventListener('click', clearAllPostalCodes);
+        postalCodeList.appendChild(clearAllButton);
+    }
+
     selectedPostalCodes.forEach(postalCode => {
         const li = document.createElement('li');
         li.setAttribute('data-postal-code', postalCode);
@@ -78,6 +107,7 @@ function removePostalCode(postalCode) {
         pathElement.classList.remove('selected');
     }
     updateSelectedPostalCodesList();
+    saveSelectedPostalCodes(); // Save the updated selection
 }
 
 function setupZoomControls() {
@@ -265,4 +295,16 @@ function highlightPostalCode(postalCode, highlight) {
             pathElement.style.fillOpacity = '';
         }
     }
+}
+
+function clearAllPostalCodes() {
+    selectedPostalCodes.forEach(postalCode => {
+        const pathElement = document.getElementById(postalCode);
+        if (pathElement) {
+            pathElement.classList.remove('selected');
+        }
+    });
+    selectedPostalCodes.clear();
+    updateSelectedPostalCodesList();
+    saveSelectedPostalCodes();
 }
