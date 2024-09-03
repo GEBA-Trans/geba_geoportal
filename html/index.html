@@ -5,16 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive World Map</title>
     <style>
-        #map-container { width: 100%; max-width: 800px; margin: 0 auto; }
-        #map-container svg { width: 100%; height: auto; }
+        body { margin: 0; padding: 0; }
+        #map-container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+        #map-container svg { 
+            width: 100%; 
+            height: 100%; 
+            cursor: move; /* Change cursor to indicate draggable */
+        }
         path { cursor: pointer; transition: fill 0.3s; }
         path:hover { fill: #ffcc99; }
         path.selected { fill: #99ccff; }
-        #country-info { margin-top: 20px; font-size: 18px; }
-        #selected-countries { margin-top: 20px; }
+        #country-info { position: absolute; bottom: 20px; left: 20px; font-size: 18px; }
+        #selected-countries { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.8); padding: 10px; border-radius: 5px; }
+        h1 { position: absolute; top: 20px; left: 20px; margin: 0; }
         /* Add this new style for labels */
         #map-container svg text { 
             fill: white; 
+            font-size: 40px;
+        }
+        #zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.8);
+            padding: 5px;
+            border-radius: 5px;
+        }
+        #zoom-controls button {
+            font-size: 18px;
+            width: 30px;
+            height: 30px;
+            margin: 0 5px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -26,13 +48,31 @@
         <h2>Selected Areas:</h2>
         <ul id="country-list"></ul>
     </div>
+    <div id="zoom-controls">
+        <button id="zoom-in">+</button>
+        <button id="zoom-out">-</button>
+        <button id="reset-zoom">Reset</button>
+    </div>
 
     <script>
+        let currentZoom = 1;
+        const zoomStep = 0.2;
+        let svgElement;
+        let isDragging = false;
+        let startX, startY;
+        let viewBox = { x: 0, y: 0, width: 0, height: 0 };
+        let originalViewBox;
+
         fetch('map.svg')
             .then(response => response.text())
             .then(svgContent => {
                 document.getElementById('map-container').innerHTML = svgContent;
+                svgElement = document.querySelector('#map-container svg');
                 setupCountryClicks();
+                setupZoomControls();
+                setupPanning();
+                viewBox = svgElement.viewBox.baseVal;
+                originalViewBox = { x: viewBox.x, y: viewBox.y, width: viewBox.width, height: viewBox.height };
             });
 
         const selectedCountries = new Set();
@@ -66,6 +106,70 @@
                 li.textContent = country;
                 countryList.appendChild(li);
             });
+        }
+
+        function setupZoomControls() {
+            const zoomIn = document.getElementById('zoom-in');
+            const zoomOut = document.getElementById('zoom-out');
+            const resetZoom = document.getElementById('reset-zoom');
+
+            zoomIn.addEventListener('click', () => zoom(zoomStep));
+            zoomOut.addEventListener('click', () => zoom(-zoomStep));
+            resetZoom.addEventListener('click', resetView);
+        }
+
+        function setupPanning() {
+            const mapContainer = document.getElementById('map-container');
+
+            mapContainer.addEventListener('mousedown', startDragging);
+            mapContainer.addEventListener('mousemove', drag);
+            mapContainer.addEventListener('mouseup', stopDragging);
+            mapContainer.addEventListener('mouseleave', stopDragging);
+        }
+
+        function startDragging(e) {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            const dx = (e.clientX - startX) * viewBox.width / svgElement.clientWidth / currentZoom;
+            const dy = (e.clientY - startY) * viewBox.height / svgElement.clientHeight / currentZoom;
+
+            viewBox.x -= dx;
+            viewBox.y -= dy;
+
+            svgElement.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+
+            startX = e.clientX;
+            startY = e.clientY;
+        }
+
+        function stopDragging() {
+            isDragging = false;
+        }
+
+        function zoom(step) {
+            currentZoom += step;
+            currentZoom = Math.max(0.5, Math.min(currentZoom, 4)); // Limit zoom between 0.5x and 4x
+
+            const newWidth = viewBox.width / currentZoom;
+            const newHeight = viewBox.height / currentZoom;
+            const newX = viewBox.x + (viewBox.width - newWidth) / 2;
+            const newY = viewBox.y + (viewBox.height - newHeight) / 2;
+
+            viewBox = { x: newX, y: newY, width: newWidth, height: newHeight };
+            svgElement.setAttribute('viewBox', `${newX} ${newY} ${newWidth} ${newHeight}`);
+        }
+
+        function resetView() {
+            currentZoom = 1;
+            viewBox = { ...originalViewBox };
+            svgElement.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
         }
     </script>
 </body>
