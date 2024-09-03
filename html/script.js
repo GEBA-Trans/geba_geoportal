@@ -1,4 +1,3 @@
-
 let currentZoom = 1;
 const zoomStep = 0.2;
 let svgElement;
@@ -129,7 +128,7 @@ function setupLassoSelect() {
 
     svgElement.addEventListener('mousedown', startLasso);
     svgElement.addEventListener('mousemove', updateLasso);
-    svgElement.addEventListener('mouseup', endLasso);
+    document.addEventListener('mouseup', endLasso); // Change this line
 }
 
 function toggleLasso() {
@@ -143,20 +142,23 @@ function toggleLasso() {
 function startLasso(e) {
     if (!isLassoActive) return;
     e.preventDefault();
-    lassoPoints = [{ x: e.clientX, y: e.clientY }];
+    const point = getSVGPoint(e.clientX, e.clientY);
+    lassoPoints = [point];
 }
 
 function updateLasso(e) {
     if (!isLassoActive || lassoPoints.length === 0) return;
     e.preventDefault();
-    lassoPoints.push({ x: e.clientX, y: e.clientY });
+    const point = getSVGPoint(e.clientX, e.clientY);
+    lassoPoints.push(point);
     drawLasso();
 }
 
-function endLasso() {
-    if (!isLassoActive) return;
-    selectPathsInLasso();
-    clearLasso();
+function getSVGPoint(x, y) {
+    const pt = svgElement.createSVGPoint();
+    pt.x = x;
+    pt.y = y;
+    return pt.matrixTransform(svgElement.getScreenCTM().inverse());
 }
 
 function drawLasso() {
@@ -210,4 +212,15 @@ function clearLasso() {
     const lasso = svgElement.querySelector('#lasso');
     if (lasso) lasso.remove();
     lassoPoints = [];
+}
+
+function endLasso(e) {
+    if (!isLassoActive || lassoPoints.length === 0) return;
+    e.preventDefault();
+    const point = getSVGPoint(e.clientX, e.clientY);
+    lassoPoints.push(point);
+    drawLasso();
+    selectPathsInLasso();
+    clearLasso();
+    toggleLasso(); // Deactivate lasso after selection
 }
