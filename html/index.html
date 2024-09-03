@@ -75,7 +75,7 @@
         <button id="zoom-in"><i class="fas fa-plus"></i></button>
         <button id="zoom-out"><i class="fas fa-minus"></i></button>
         <button id="reset-zoom"><i class="fas fa-sync-alt"></i></button>
-        <button id="lasso-button">Lasso Select</button>
+        <button id="lasso-button"><i class="fas fa-draw-polygon"></i></button>
     </div>
 
     <script>
@@ -215,7 +215,9 @@
         function toggleLasso() {
             isLassoActive = !isLassoActive;
             svgElement.classList.toggle('lasso-active', isLassoActive);
-            document.getElementById('lasso-button').textContent = isLassoActive ? 'Cancel Lasso' : 'Lasso Select';
+            const lassoButton = document.getElementById('lasso-button');
+            lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times"></i>' : '<i class="fas fa-draw-polygon"></i>';
+            lassoButton.title = isLassoActive ? 'Cancel Lasso' : 'Lasso Select';
         }
 
         function startLasso(e) {
