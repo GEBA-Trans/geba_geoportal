@@ -38,6 +38,16 @@
             margin: 0 5px;
             cursor: pointer;
         }
+        #lasso-button {
+            position: absolute;
+            top: 20px;
+            left: 200px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        #map-container svg.lasso-active {
+            cursor: crosshair;
+        }
     </style>
 </head>
 <body>
@@ -53,6 +63,7 @@
         <button id="zoom-out">-</button>
         <button id="reset-zoom">Reset</button>
     </div>
+    <button id="lasso-button">Lasso Select</button>
 
     <script>
         let currentZoom = 1;
@@ -62,6 +73,8 @@
         let startX, startY;
         let viewBox = { x: 0, y: 0, width: 0, height: 0 };
         let originalViewBox;
+        let isLassoActive = false;
+        let lassoPoints = [];
 
         fetch('map.svg')
             .then(response => response.text())
@@ -71,6 +84,7 @@
                 setupCountryClicks();
                 setupZoomControls();
                 setupPanning();
+                setupLassoSelect();
                 viewBox = svgElement.viewBox.baseVal;
                 originalViewBox = { x: viewBox.x, y: viewBox.y, width: viewBox.width, height: viewBox.height };
             });
@@ -121,8 +135,12 @@
         function setupPanning() {
             const mapContainer = document.getElementById('map-container');
 
-            mapContainer.addEventListener('mousedown', startDragging);
-            mapContainer.addEventListener('mousemove', drag);
+            mapContainer.addEventListener('mousedown', (e) => {
+                if (!isLassoActive) startDragging(e);
+            });
+            mapContainer.addEventListener('mousemove', (e) => {
+                if (!isLassoActive) drag(e);
+            });
             mapContainer.addEventListener('mouseup', stopDragging);
             mapContainer.addEventListener('mouseleave', stopDragging);
         }
@@ -170,6 +188,93 @@
             currentZoom = 1;
             viewBox = { ...originalViewBox };
             svgElement.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+        }
+
+        function setupLassoSelect() {
+            const lassoButton = document.getElementById('lasso-button');
+            lassoButton.addEventListener('click', toggleLasso);
+
+            svgElement.addEventListener('mousedown', startLasso);
+            svgElement.addEventListener('mousemove', updateLasso);
+            svgElement.addEventListener('mouseup', endLasso);
+        }
+
+        function toggleLasso() {
+            isLassoActive = !isLassoActive;
+            svgElement.classList.toggle('lasso-active', isLassoActive);
+            document.getElementById('lasso-button').textContent = isLassoActive ? 'Cancel Lasso' : 'Lasso Select';
+        }
+
+        function startLasso(e) {
+            if (!isLassoActive) return;
+            e.preventDefault();
+            lassoPoints = [{ x: e.clientX, y: e.clientY }];
+        }
+
+        function updateLasso(e) {
+            if (!isLassoActive || lassoPoints.length === 0) return;
+            e.preventDefault();
+            lassoPoints.push({ x: e.clientX, y: e.clientY });
+            drawLasso();
+        }
+
+        function endLasso() {
+            if (!isLassoActive) return;
+            selectPathsInLasso();
+            clearLasso();
+        }
+
+        function drawLasso() {
+            let existingLasso = svgElement.querySelector('#lasso');
+            if (existingLasso) existingLasso.remove();
+
+            const lasso = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            lasso.setAttribute('id', 'lasso');
+            lasso.setAttribute('d', `M ${lassoPoints.map(p => `${p.x},${p.y}`).join(' L ')}`);
+            lasso.setAttribute('fill', 'none');
+            lasso.setAttribute('stroke', 'black');
+            lasso.setAttribute('stroke-width', '2');
+            lasso.setAttribute('stroke-dasharray', '5,5');
+            svgElement.appendChild(lasso);
+        }
+
+        function selectPathsInLasso() {
+            const paths = document.querySelectorAll('#map-container svg path');
+            paths.forEach(path => {
+                if (isPathInLasso(path)) {
+                    const countryName = path.id || 'Unknown';
+                    toggleCountry(path, countryName);
+                }
+            });
+        }
+
+        function isPathInLasso(path) {
+            const bbox = path.getBBox();
+            const points = [
+                { x: bbox.x, y: bbox.y },
+                { x: bbox.x + bbox.width, y: bbox.y },
+                { x: bbox.x + bbox.width, y: bbox.y + bbox.height },
+                { x: bbox.x, y: bbox.y + bbox.height }
+            ];
+            return points.some(point => isPointInPolygon(point, lassoPoints));
+        }
+
+        function isPointInPolygon(point, polygon) {
+            let inside = false;
+            for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+                const xi = polygon[i].x, yi = polygon[i].y;
+                const xj = polygon[j].x, yj = polygon[j].y;
+                const intersect = ((yi > point.y) !== (yj > point.y))
+                    && (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
+            return inside;
+        }
+
+        function clearLasso() {
+            const lasso = svgElement.querySelector('#lasso');
+            if (lasso) lasso.remove();
+            lassoPoints = [];
         }
     </script>
 </body>
