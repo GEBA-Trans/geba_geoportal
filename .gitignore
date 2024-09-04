@@ -1,6 +1,7 @@
 # Node modules
 node_modules/
 
+
 # Build output
 dist/
 build/
@@ -20,3 +21,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Ignore node-red folder
+data/

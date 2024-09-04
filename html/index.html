@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Add this new div for WebSocket messages -->
+    <div id="websocket-messages"></div>
+
     <div id="map-container"></div>
     <div id="country-info"></div>
     <div id="selected-countries">
@@ -21,6 +24,7 @@
         <button id="reset-zoom"><i class="fas fa-sync-alt"></i></button>
         <button id="lasso-button"><i class="fas fa-draw-polygon"></i></button>
     </div>
+    
     
     <script src="script.js"></script>
 </body>

@@ -38,6 +38,7 @@ async function loadSVG() {
         viewBox = svgElement.viewBox.baseVal;
         originalViewBox = { ...viewBox };
         loadSelectedPostalCodes();
+        connectWebSocket(); // Add this line
     } catch (error) {
         console.error('Error loading SVG:', error);
     }
@@ -59,12 +60,23 @@ function setupPostalCodeClicks() {
 function togglePostalCode(pathElement, postalCode) {
     if (selectedPostalCodes.has(postalCode)) {
         removePostalCode(postalCode);
+        sendToWebSocket('deselect', postalCode);
     } else {
         selectedPostalCodes.add(postalCode);
         pathElement.classList.add('selected');
+        sendToWebSocket('select', postalCode);
     }
     updateSelectedPostalCodesList();
     saveSelectedPostalCodes();
+}
+
+function sendToWebSocket(action, postalCode) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        const message = JSON.stringify({ action, postalCode });
+        socket.send(message);
+    } else {
+        console.error('WebSocket is not connected');
+    }
 }
 
 function updateSelectedPostalCodesList() {
@@ -112,6 +124,7 @@ function removePostalCode(postalCode) {
     }
     updateSelectedPostalCodesList();
     saveSelectedPostalCodes();
+    sendToWebSocket('deselect', postalCode); // Add this line
 }
 
 function setupZoomControls() {
@@ -307,8 +320,45 @@ function clearAllPostalCodes() {
         if (pathElement) {
             pathElement.classList.remove('selected');
         }
+        sendToWebSocket('deselect', postalCode); // Add this line
     });
     selectedPostalCodes.clear();
     updateSelectedPostalCodesList();
     saveSelectedPostalCodes();
 }
+
+let socket;
+
+function connectWebSocket() {
+    socket = new WebSocket('ws://localhost:1880/ws/map');
+
+    socket.onopen = function(event) {
+        console.log('WebSocket connection established');
+    };
+
+    socket.onmessage = function(event) {
+        const message = event.data;
+        displayWebSocketMessage(message);
+    };
+
+    socket.onerror = function(error) {
+        console.error('WebSocket error:', error);
+    };
+
+    socket.onclose = function(event) {
+        console.log('WebSocket connection closed');
+        // Attempt to reconnect after a short delay
+        setTimeout(connectWebSocket, 5000);
+    };
+}
+
+function displayWebSocketMessage(message) {
+    const messagesDiv = document.getElementById('websocket-messages');
+    messagesDiv.innerHTML = ''; // Clear previous messages
+    const messageElement = document.createElement('p');
+    messageElement.textContent = message;
+    messagesDiv.appendChild(messageElement);
+}
+
+// Call this function to initiate the WebSocket connection
+connectWebSocket();
