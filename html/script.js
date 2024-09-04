@@ -13,6 +13,9 @@ function saveSelectedPostalCodes() {
     document.cookie = `selectedPostalCodes=${Array.from(selectedPostalCodes).join(',')}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
 }
 
+let isWebSocketConnected = false;
+let pendingPostalCodes = new Set();
+
 function loadSelectedPostalCodes() {
     const cookieValue = document.cookie.split('; ').find(row => row.startsWith('selectedPostalCodes='));
     if (cookieValue) {
@@ -20,9 +23,15 @@ function loadSelectedPostalCodes() {
         savedPostalCodes.forEach(postalCode => {
             const pathElement = document.getElementById(postalCode);
             if (pathElement) {
-                togglePostalCode(pathElement, postalCode);
+                selectedPostalCodes.add(postalCode);
+                pathElement.classList.add('selected');
+                pendingPostalCodes.add(postalCode);
             }
         });
+        updateSelectedPostalCodesList();
+        if (isWebSocketConnected) {
+            requestPendingCounts();
+        }
     }
 }
 
@@ -32,14 +41,16 @@ async function loadSVG() {
         const svgContent = await response.text();
         document.getElementById('map-container').innerHTML = svgContent;
         svgElement = document.querySelector('#map-container svg');
-        connectWebSocket(); // Add this line
+        connectWebSocket(); 
         setupPostalCodeClicks();
         setupZoomControls();
         setupPanning();
         setupLassoSelect(svgElement, togglePostalCode); // Pass svgElement and togglePostalCode
         viewBox = svgElement.viewBox.baseVal;
         originalViewBox = { ...viewBox };
-        loadSelectedPostalCodes();
+        
+        // Delay loading of postal codes
+        setTimeout(loadSelectedPostalCodes, 1000);
     } catch (error) {
         console.error('Error loading SVG:', error);
     }
@@ -58,7 +69,7 @@ function setupPostalCodeClicks() {
     });
 }
 
-function togglePostalCode(pathElement, postalCode) {
+function togglePostalCode(pathElement, postalCode, isInitialLoad = false) {
     if (selectedPostalCodes.has(postalCode)) {
         sendToWebSocket('deselect', postalCode);
         removePostalCode(postalCode);
@@ -67,16 +78,20 @@ function togglePostalCode(pathElement, postalCode) {
         selectedPostalCodes.add(postalCode);
         pathElement.classList.add('selected');
     }
-    updateSelectedPostalCodesList();
-    saveSelectedPostalCodes();
+    if (!isInitialLoad) {
+        updateSelectedPostalCodesList();
+        saveSelectedPostalCodes();
+    }
 }
 
+let pendingWebSocketMessages = [];
+
 function sendToWebSocket(action, postalCode) {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-        const message = JSON.stringify({ action, postalCode });
+    const message = JSON.stringify({ action, postalCode });
+    if (isWebSocketConnected) {
         socket.send(message);
     } else {
-        console.error('WebSocket is not connected');
+        pendingWebSocketMessages.push(message);
     }
 }
 
@@ -95,9 +110,10 @@ function updateSelectedPostalCodesList() {
     selectedPostalCodes.forEach(postalCode => {
         const li = document.createElement('li');
         li.setAttribute('data-postal-code', postalCode);
-        const count = postalCodeCounts.get(postalCode) || '';
-        const countDisplay = count ? `(${count}) ` : '';
-        const color = getColorForCount(count);
+        const count = postalCodeCounts.get(postalCode);
+        const countDisplay = count !== undefined ? `(${count}) ` : 
+            pendingPostalCodes.has(postalCode) ? '<i class="fas fa-spinner fa-spin"></i> ' : '';
+        const color = count !== undefined ? getColorForCount(count) : '#000';
         li.innerHTML = `
             <span class="count" style="color: ${color};">${countDisplay}</span>${postalCode}
             <button class="delete-btn" title="Remove ${postalCode}" style="display: none;">
@@ -245,7 +261,9 @@ function connectWebSocket() {
 
     socket.onopen = function(event) {
         console.log('WebSocket connection established');
-        reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+        isWebSocketConnected = true;
+        reconnectAttempts = 0;
+        requestPendingCounts();
     };
 
     socket.onmessage = function(event) {
@@ -280,7 +298,8 @@ function displayWebSocketMessage(message) {
         const data = JSON.parse(message);
         if (data.action === 'select' && data.postalCode && data.count !== undefined) {
             updatePostalCodeCount(data.postalCode, data.count);
-            updateSelectedPostalCodesList(); // Refresh the entire list
+            pendingPostalCodes.delete(data.postalCode);
+            updateSelectedPostalCodesList();
         }
     } catch (error) {
         console.error('Error parsing WebSocket message:', error);
@@ -315,5 +334,15 @@ function getColorForCount(count) {
     return `rgb(${r}, ${g}, ${b})`;
 }
 
-// Call this function to initiate the WebSocket connection
-connectWebSocket();
+function requestPendingCounts() {
+    pendingPostalCodes.forEach(postalCode => {
+        sendToWebSocket('select', postalCode);
+    });
+}
+
+function processPendingWebSocketMessages() {
+    while (pendingWebSocketMessages.length > 0) {
+        const message = pendingWebSocketMessages.shift();
+        socket.send(message);
+    }
+}
