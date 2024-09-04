@@ -336,12 +336,15 @@ function clearAllPostalCodes() {
 }
 
 let socket;
+let reconnectAttempts = 0;
+const maxReconnectAttempts = 3;
 
 function connectWebSocket() {
     socket = new WebSocket('ws://localhost:1880/ws/map');
 
     socket.onopen = function(event) {
         console.log('WebSocket connection established');
+        reconnectAttempts = 0; // Reset reconnect attempts on successful connection
     };
 
     socket.onmessage = function(event) {
@@ -355,9 +358,20 @@ function connectWebSocket() {
 
     socket.onclose = function(event) {
         console.log('WebSocket connection closed');
-        // Attempt to reconnect after a short delay
-        setTimeout(connectWebSocket, 5000);
+        attemptReconnect();
     };
+}
+
+function attemptReconnect() {
+    if (reconnectAttempts < maxReconnectAttempts) {
+        reconnectAttempts++;
+        console.log(`Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts})...`);
+        setTimeout(connectWebSocket, 5000); // Wait 5 seconds before attempting to reconnect
+    } else {
+        console.log('Max reconnect attempts reached. Giving up.');
+        // Optionally, you can notify the user that the connection has been lost
+        alert('WebSocket connection lost. Please refresh the page to try again.');
+    }
 }
 
 function displayWebSocketMessage(message) {
