@@ -97,8 +97,9 @@ function updateSelectedPostalCodesList() {
         li.setAttribute('data-postal-code', postalCode);
         const count = postalCodeCounts.get(postalCode) || '';
         const countDisplay = count ? `(${count}) ` : '';
+        const color = getColorForCount(count);
         li.innerHTML = `
-            <span class="count">${countDisplay}</span>${postalCode}
+            <span class="count" style="color: ${color};">${countDisplay}</span>${postalCode}
             <button class="delete-btn" title="Remove ${postalCode}" style="display: none;">
                 <i class="fas fa-times"></i>
             </button>
@@ -121,14 +122,15 @@ function updateSelectedPostalCodesList() {
 
 function removePostalCode(postalCode) {
     selectedPostalCodes.delete(postalCode);
-    postalCodeCounts.delete(postalCode); // Remove the count when deselecting
+    postalCodeCounts.delete(postalCode);
     const pathElement = document.getElementById(postalCode);
     if (pathElement) {
         pathElement.classList.remove('selected');
+        pathElement.style.fill = ''; // Reset the fill color
     }
     updateSelectedPostalCodesList();
     saveSelectedPostalCodes();
-    sendToWebSocket('deselect', postalCode); // Add this line
+    sendToWebSocket('deselect', postalCode);
 }
 
 function setupZoomControls() {
@@ -323,11 +325,12 @@ function clearAllPostalCodes() {
         const pathElement = document.getElementById(postalCode);
         if (pathElement) {
             pathElement.classList.remove('selected');
+            pathElement.style.fill = ''; // Reset the fill color
         }
-        sendToWebSocket('deselect', postalCode); // Add this line
+        sendToWebSocket('deselect', postalCode);
     });
     selectedPostalCodes.clear();
-    postalCodeCounts.clear(); // Clear all counts when clearing all postal codes
+    postalCodeCounts.clear();
     updateSelectedPostalCodesList();
     saveSelectedPostalCodes();
 }
@@ -371,6 +374,30 @@ function displayWebSocketMessage(message) {
 
 function updatePostalCodeCount(postalCode, count) {
     postalCodeCounts.set(postalCode, count);
+    updatePostalCodeColor(postalCode, count);
+}
+
+function updatePostalCodeColor(postalCode, count) {
+    const pathElement = document.getElementById(postalCode);
+    if (pathElement) {
+        const color = getColorForCount(count);
+        pathElement.style.fill = color;
+    }
+}
+
+function getColorForCount(count) {
+    // Ensure count is between 0 and 99
+    count = Math.max(0, Math.min(99, count));
+    
+    // Calculate the percentage (0 to 1)
+    const percentage = count / 99;
+    
+    // Calculate RGB values
+    const r = Math.round(255 * (1 - percentage));
+    const g = Math.round(255 * percentage);
+    const b = 0;
+    
+    return `rgb(${r}, ${g}, ${b})`;
 }
 
 // Call this function to initiate the WebSocket connection
