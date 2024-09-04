@@ -108,4 +108,4 @@ function endLasso(e) {
     toggleLasso();
 }
 
-export { setupLassoSelect };
+export { setupLassoSelect, isLassoActive };

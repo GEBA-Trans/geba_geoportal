@@ -1,4 +1,4 @@
-import { setupLassoSelect } from './scripts/lasso.js';
+import { setupLassoSelect, isLassoActive } from './scripts/lasso.js';
 
 const zoomStep = 0.2;
 let currentZoom = 1;
@@ -47,7 +47,12 @@ async function loadSVG() {
         setupPanning();
         setupLassoSelect(svgElement, togglePostalCode); // Pass svgElement and togglePostalCode
         viewBox = svgElement.viewBox.baseVal;
-        originalViewBox = { ...viewBox };
+        originalViewBox = {
+            x: viewBox.x,
+            y: viewBox.y,
+            width: viewBox.width,
+            height: viewBox.height
+        };
         
         // Delay loading of postal codes
         setTimeout(loadSelectedPostalCodes, 1000);
@@ -163,12 +168,12 @@ function setupPanning() {
     const mapContainer = document.getElementById('map-container');
 
     mapContainer.addEventListener('mousedown', (e) => {
-        if (typeof isLassoActive === 'undefined' || !isLassoActive) {
+        if (!isLassoActive) {
             startDragging(e);
         }
     });
     mapContainer.addEventListener('mousemove', (e) => {
-        if (typeof isLassoActive === 'undefined' || !isLassoActive) {
+        if (!isLassoActive) {
             drag(e);
         }
     });
