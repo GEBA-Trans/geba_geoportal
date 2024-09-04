@@ -7,6 +7,7 @@ let viewBox = { x: 0, y: 0, width: 0, height: 0 };
 let originalViewBox;
 let isLassoActive = false;
 let lassoPoints = [];
+const postalCodeCounts = new Map();
 
 function saveSelectedPostalCodes() {
     document.cookie = `selectedPostalCodes=${Array.from(selectedPostalCodes).join(',')}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
@@ -94,8 +95,10 @@ function updateSelectedPostalCodesList() {
     selectedPostalCodes.forEach(postalCode => {
         const li = document.createElement('li');
         li.setAttribute('data-postal-code', postalCode);
+        const count = postalCodeCounts.get(postalCode) || '';
+        const countDisplay = count ? `(${count}) ` : '';
         li.innerHTML = `
-            ${postalCode}
+            <span class="count">${countDisplay}</span>${postalCode}
             <button class="delete-btn" title="Remove ${postalCode}" style="display: none;">
                 <i class="fas fa-times"></i>
             </button>
@@ -118,6 +121,7 @@ function updateSelectedPostalCodesList() {
 
 function removePostalCode(postalCode) {
     selectedPostalCodes.delete(postalCode);
+    postalCodeCounts.delete(postalCode); // Remove the count when deselecting
     const pathElement = document.getElementById(postalCode);
     if (pathElement) {
         pathElement.classList.remove('selected');
@@ -323,6 +327,7 @@ function clearAllPostalCodes() {
         sendToWebSocket('deselect', postalCode); // Add this line
     });
     selectedPostalCodes.clear();
+    postalCodeCounts.clear(); // Clear all counts when clearing all postal codes
     updateSelectedPostalCodesList();
     saveSelectedPostalCodes();
 }
@@ -353,11 +358,19 @@ function connectWebSocket() {
 }
 
 function displayWebSocketMessage(message) {
-    const messagesDiv = document.getElementById('websocket-messages');
-    messagesDiv.innerHTML = ''; // Clear previous messages
-    const messageElement = document.createElement('p');
-    messageElement.textContent = message;
-    messagesDiv.appendChild(messageElement);
+    try {
+        const data = JSON.parse(message);
+        if (data.action === 'select' && data.postalCode && data.count !== undefined) {
+            updatePostalCodeCount(data.postalCode, data.count);
+            updateSelectedPostalCodesList(); // Refresh the entire list
+        }
+    } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+    }
+}
+
+function updatePostalCodeCount(postalCode, count) {
+    postalCodeCounts.set(postalCode, count);
 }
 
 // Call this function to initiate the WebSocket connection
