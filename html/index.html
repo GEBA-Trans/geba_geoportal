@@ -5,29 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive World Map</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Add Font Awesome CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Add this new div for WebSocket messages -->
-    <div id="websocket-messages"></div>
-
-    <div id="map-container"></div>
-    <div id="country-info"></div>
-    <div id="selected-countries">
-        <h2>Selected PostCodes:</h2>
-        <ul id="postcodes-list"></ul>
-    </div>
-    <div id="zoom-controls">
-        <button id="zoom-in"><i class="fas fa-search-plus"></i></button>
-        <button id="zoom-out"><i class="fas fa-search-minus"></i></button>
-        <button id="reset-zoom"><i class="fas fa-sync-alt"></i></button>
-        <button id="lasso-button"><i class="fas fa-draw-polygon"></i></button>
+    <div id="app-container">
+        <header>
+            <h1>Interactive World Map</h1>
+        </header>
+        <main>
+            <div id="map-container"></div>
+            <div id="sidebar">
+                <div id="selected-countries">
+                    <h2>Selected PostCodes</h2>
+                    <ul id="postcodes-list"></ul>
+                </div>
+                <div id="country-info"></div>
+            </div>
+        </main>
+        <div id="controls">
+            <div id="zoom-controls">
+                <button id="zoom-in" title="Zoom In"><i class="fas fa-search-plus"></i></button>
+                <button id="zoom-out" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
+                <button id="reset-zoom" title="Reset Zoom"><i class="fas fa-sync-alt"></i></button>
+                <button id="lasso-button" title="Lasso Select"><i class="fas fa-draw-polygon"></i></button>
+            </div>
+        </div>
+        <div id="websocket-messages"></div>
     </div>
     
-    <!-- Add this line before your main script -->
     <script type="module" src="scripts/lasso.js"></script>
-    <!-- Update your main script tag to be a module -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
