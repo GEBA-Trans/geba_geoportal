@@ -1,4 +1,4 @@
-import { setupLassoSelect } from './lasso.js';
+import { setupLassoSelect } from './scripts/lasso.js';
 
 const zoomStep = 0.2;
 let currentZoom = 1;
@@ -32,6 +32,7 @@ async function loadSVG() {
         const svgContent = await response.text();
         document.getElementById('map-container').innerHTML = svgContent;
         svgElement = document.querySelector('#map-container svg');
+        connectWebSocket(); // Add this line
         setupPostalCodeClicks();
         setupZoomControls();
         setupPanning();
@@ -39,7 +40,6 @@ async function loadSVG() {
         viewBox = svgElement.viewBox.baseVal;
         originalViewBox = { ...viewBox };
         loadSelectedPostalCodes();
-        connectWebSocket(); // Add this line
     } catch (error) {
         console.error('Error loading SVG:', error);
     }
@@ -60,12 +60,12 @@ function setupPostalCodeClicks() {
 
 function togglePostalCode(pathElement, postalCode) {
     if (selectedPostalCodes.has(postalCode)) {
-        removePostalCode(postalCode);
         sendToWebSocket('deselect', postalCode);
+        removePostalCode(postalCode);
     } else {
+        sendToWebSocket('select', postalCode);
         selectedPostalCodes.add(postalCode);
         pathElement.classList.add('selected');
-        sendToWebSocket('select', postalCode);
     }
     updateSelectedPostalCodesList();
     saveSelectedPostalCodes();
