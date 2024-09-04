@@ -147,10 +147,14 @@ function setupPanning() {
     const mapContainer = document.getElementById('map-container');
 
     mapContainer.addEventListener('mousedown', (e) => {
-        if (!isLassoActive) startDragging(e);
+        if (typeof isLassoActive === 'undefined' || !isLassoActive) {
+            startDragging(e);
+        }
     });
     mapContainer.addEventListener('mousemove', (e) => {
-        if (!isLassoActive) drag(e);
+        if (typeof isLassoActive === 'undefined' || !isLassoActive) {
+            drag(e);
+        }
     });
     mapContainer.addEventListener('mouseup', stopDragging);
     mapContainer.addEventListener('mouseleave', stopDragging);
