@@ -328,3 +328,18 @@ path.selected.delivery {
     font-size: 0.9em;
     color: #6c757d;
 }
+
+.add-all-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 10px;
+    font-size: 0.9em;
+    color: #28a745;
+    transition: color 0.2s ease;
+}
+
+.add-all-btn:hover {
+    color: #218838;
+}

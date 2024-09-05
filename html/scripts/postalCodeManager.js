@@ -82,6 +82,9 @@ function updateList(listId, postalCodes) {
                 <i class="fas fa-chevron-${isExpanded ? 'down' : 'right'}"></i>
             </button>
             <h3>${country} (${codes.length})</h3>
+            <button class="add-all-btn" title="Add all postal codes">
+                <i class="fas fa-plus-circle"></i>
+            </button>
         `;
         countryElement.appendChild(countryHeader);
         
@@ -118,6 +121,11 @@ function updateList(listId, postalCodes) {
                 toggleBtn.querySelector('i').className = `fas fa-chevron-${isExpanded ? 'right' : 'down'}`;
                 toggleCountryExpansion(country, mode);
             }
+        });
+
+        countryHeader.querySelector('.add-all-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            addAllPostalCodes(country, mode);
         });
     }
 }
@@ -279,4 +287,24 @@ function loadExpandedCountries() {
         expandedCountries[LOADING_MODE] = new Set(data[LOADING_MODE] || []);
         expandedCountries[DELIVERY_MODE] = new Set(data[DELIVERY_MODE] || []);
     }
+}
+
+function addAllPostalCodes(country, mode) {
+    const allPaths = document.querySelectorAll(`#map-container svg g#${country} path`);
+    const targetSet = mode === LOADING_MODE ? loadingPostalCodes : deliveryPostalCodes;
+    const otherSet = mode === LOADING_MODE ? deliveryPostalCodes : loadingPostalCodes;
+
+    allPaths.forEach(path => {
+        const postalCode = path.id;
+        if (postalCode) {
+            otherSet.delete(postalCode);
+            targetSet.add(postalCode);
+            path.classList.remove('selected', 'loading', 'delivery');
+            path.classList.add('selected', mode);
+            sendToWebSocket('select', postalCode);
+        }
+    });
+
+    updatePostalCodeLists();
+    saveSelectedPostalCodes();
 }
