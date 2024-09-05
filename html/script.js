@@ -286,16 +286,18 @@ function stopDragging() {
 }
 
 function zoom(step) {
-    currentZoom += step;
-    currentZoom = Math.max(0.5, Math.min(currentZoom, 4));
+    const newZoom = currentZoom + step;
+    if (newZoom >= 0.5 && newZoom <= 4) {
+        currentZoom = newZoom;
 
-    const newWidth = viewBox.width / currentZoom;
-    const newHeight = viewBox.height / currentZoom;
-    const newX = viewBox.x + (viewBox.width - newWidth) / 2;
-    const newY = viewBox.y + (viewBox.height - newHeight) / 2;
+        const newWidth = originalViewBox.width / currentZoom;
+        const newHeight = originalViewBox.height / currentZoom;
+        const newX = viewBox.x + (viewBox.width - newWidth) / 2;
+        const newY = viewBox.y + (viewBox.height - newHeight) / 2;
 
-    viewBox = { x: newX, y: newY, width: newWidth, height: newHeight };
-    svgElement.setAttribute('viewBox', `${newX} ${newY} ${newWidth} ${newHeight}`);
+        viewBox = { x: newX, y: newY, width: newWidth, height: newHeight };
+        svgElement.setAttribute('viewBox', `${newX} ${newY} ${newWidth} ${newHeight}`);
+    }
 }
 
 function resetView() {
