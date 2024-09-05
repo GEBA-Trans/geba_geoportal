@@ -14,8 +14,19 @@
         <header>
             <h1>Interactive World Map</h1>
         </header>
+        <!-- Move controls here, outside of the map container -->
+        <div id="controls">
+            <div id="zoom-controls">
+                <button id="zoom-in" title="Zoom In"><i class="fas fa-search-plus"></i></button>
+                <button id="zoom-out" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
+                <button id="reset-zoom" title="Reset Zoom"><i class="fas fa-sync-alt"></i></button>
+                <button id="lasso-button" title="Lasso Select"><i class="fas fa-draw-polygon"></i></button>
+            </div>
+        </div>
         <main>
-            <div id="map-container"></div>
+            <div id="map-container">
+                <!-- SVG map will be inserted here -->
+            </div>
             <div id="sidebar">
                 <div id="mode-toggle">
                     <button id="loading-mode" class="active">Loading</button>
@@ -33,17 +44,7 @@
             </div>
         </main>
         
-        <!-- Moved controls above the transport companies table -->
-        <div id="controls">
-            <div id="zoom-controls">
-                <button id="zoom-in" title="Zoom In"><i class="fas fa-search-plus"></i></button>
-                <button id="zoom-out" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
-                <button id="reset-zoom" title="Reset Zoom"><i class="fas fa-sync-alt"></i></button>
-                <button id="lasso-button" title="Lasso Select"><i class="fas fa-draw-polygon"></i></button>
-            </div>
-        </div>
-        
-        <!-- Transport companies table now comes after the controls -->
+        <!-- Transport companies table now comes after the main content -->
         <div id="transport-companies">
             <h2>Transport Companies</h2>
             <table id="company-table">

@@ -28,16 +28,28 @@ function initializeApp() {
             setupPanning();
             setupLassoSelect(svgElement, togglePostalCode);
             setupModeToggle();
+            setMode('loading'); // Set initial mode
             setTimeout(loadSelectedPostalCodes, 1000);
+            ensureControlsVisibility(); // Add this line
         })
         .catch(error => console.error('Error initializing app:', error));
 }
 
+// Add this new function
+function ensureControlsVisibility() {
+    const controls = document.getElementById('controls');
+    if (controls) {
+        controls.style.display = 'block';
+        controls.style.zIndex = '1000';
+    }
+}
+
+// Modify the loadSVG function
 async function loadSVG() {
     try {
         const response = await fetch('map.svg');
         const svgContent = await response.text();
-        document.getElementById('map-container').innerHTML = svgContent;
+        document.getElementById('map-container').innerHTML += svgContent; // Change this line
         svgElement = document.querySelector('#map-container svg');
         viewBox = svgElement.viewBox.baseVal;
         originalViewBox = { ...viewBox };

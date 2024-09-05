@@ -68,6 +68,7 @@ main {
 }
 
 #map-container {
+    position: relative;
     flex: 1;
     background-color: #ecf0f1;
     overflow: hidden;
@@ -112,10 +113,10 @@ main {
 }
 
 #controls {
-    position: absolute;
-    bottom: 1rem;
-    left: 1rem;
-    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem;
+    background-color: #34495e;
 }
 
 #zoom-controls {
@@ -237,4 +238,44 @@ path.selected.loading {
 
 path.selected.delivery {
     fill: #3498db;
+}
+
+#transport-companies {
+    padding: 1rem;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 1rem;
+    border-radius: 5px;
+}
+
+#transport-companies h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+#company-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#company-table th,
+#company-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+#company-table th {
+    background-color: #3498db;
+    color: white;
+    font-weight: bold;
+}
+
+#company-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#company-table tr:hover {
+    background-color: #ecf0f1;
 }
