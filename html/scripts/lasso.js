@@ -1,9 +1,10 @@
-let isLassoActive = false;
+export let isLassoActive = false;
+
 let lassoPoints = [];
 let svgElement;
 let togglePostalCodeCallback;
 
-function setupLassoSelect(svg, togglePostalCodeFunc) {
+export function setupLassoSelect(svg, togglePostalCodeFunc) {
     svgElement = svg;
     togglePostalCodeCallback = togglePostalCodeFunc;
     const lassoButton = document.getElementById('lasso-button');
@@ -35,7 +36,6 @@ function updateLasso(e) {
     const point = getSVGPoint(e.clientX, e.clientY);
     lassoPoints.push(point);
     drawLasso();
-    debugLasso(); // Add this line
 }
 
 function getSVGPoint(x, y) {
@@ -60,11 +60,9 @@ function drawLasso() {
 }
 
 function selectPathsInLasso() {
-    console.log('Starting selectPathsInLasso');
     const paths = document.querySelectorAll('#map-container svg path');
     paths.forEach(path => {
         const isInLasso = isPathInLasso(path);
-        console.log(`Path ${path.id}: isInLasso = ${isInLasso}`);
         if (isInLasso) {
             const postalCode = path.id || 'Unknown';
             togglePostalCodeCallback(path, postalCode);
@@ -74,10 +72,7 @@ function selectPathsInLasso() {
 
 function isPathInLasso(path) {
     const pathPoints = getPathPoints(path);
-    console.log(`Checking path ${path.id}, Points:`, pathPoints);
-    const result = pathPoints.some(point => isPointInPolygon(point, lassoPoints));
-    console.log(`Path ${path.id} is ${result ? 'inside' : 'outside'} lasso`);
-    return result;
+    return pathPoints.some(point => isPointInPolygon(point, lassoPoints));
 }
 
 function getPathPoints(path) {
@@ -116,7 +111,6 @@ function endLasso(e) {
     const point = getSVGPoint(e.clientX, e.clientY);
     lassoPoints.push(point);
     drawLasso();
-    console.log('Lasso points:', lassoPoints);
     selectPathsInLasso();
     clearLasso();
     toggleLasso();
@@ -131,5 +125,3 @@ function debugLasso() {
         // console.log('Lasso Attributes:', lasso.attributes);
     }
 }
-
-export { setupLassoSelect, isLassoActive };
