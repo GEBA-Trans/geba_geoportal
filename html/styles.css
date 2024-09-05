@@ -49,12 +49,12 @@ main {
     margin-bottom: 1rem;
 }
 
-#postcodes-list {
+#postalcodes-list {
     list-style-type: none;
     padding: 0;
 }
 
-#postcodes-list li {
+#postalcodes-list li {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -62,7 +62,7 @@ main {
     border-bottom: 1px solid #eee;
 }
 
-#postcodes-list li:last-child {
+#postalcodes-list li:last-child {
     border-bottom: none;
 }
 

@@ -101,7 +101,7 @@ function sendToWebSocket(action, postalCode) {
 }
 
 function updateSelectedPostalCodesList() {
-    const postalCodeList = document.getElementById('postcodes-list');
+    const postalCodeList = document.getElementById('postalcodes-list');
     postalCodeList.innerHTML = '';
     
     if (selectedPostalCodes.size > 0) {
