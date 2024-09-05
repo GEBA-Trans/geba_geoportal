@@ -1,4 +1,5 @@
 import { setupLassoSelect, isLassoActive } from './scripts/lasso.js';
+import { connectWebSocket, sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts } from './scripts/websocket.js';
 
 const zoomStep = 0.2;
 let currentZoom = 1;
@@ -34,9 +35,6 @@ function saveSelectedPostalCodes() {
     };
     document.cookie = `selectedPostalCodes=${JSON.stringify(data)}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
 }
-
-let isWebSocketConnected = false;
-let pendingPostalCodes = new Set();
 
 function loadSelectedPostalCodes() {
     const cookieValue = document.cookie.split('; ').find(row => row.startsWith('selectedPostalCodes='));
@@ -125,17 +123,6 @@ function togglePostalCode(pathElement, postalCode, isInitialLoad = false) {
     if (!isInitialLoad) {
         updatePostalCodeLists();
         saveSelectedPostalCodes();
-    }
-}
-
-let pendingWebSocketMessages = [];
-
-function sendToWebSocket(action, postalCode) {
-    const message = JSON.stringify({ action, postalCode });
-    if (isWebSocketConnected) {
-        socket.send(message);
-    } else {
-        pendingWebSocketMessages.push(message);
     }
 }
 
@@ -309,74 +296,10 @@ function highlightPostalCode(postalCode, highlight) {
     }
 }
 
-let socket;
-let reconnectAttempts = 0;
-const maxReconnectAttempts = 3;
-
-function connectWebSocket() {
-    socket = new WebSocket('ws://lx-dev:1880/ws/map');
-
-    socket.onopen = function(event) {
-        console.log('WebSocket connection established');
-        isWebSocketConnected = true;
-        reconnectAttempts = 0;
-        requestPendingCounts();
-    };
-
-    socket.onmessage = function(event) {
-        const message = event.data;
-        displayWebSocketMessage(message);
-    };
-
-    socket.onerror = function(error) {
-        console.error('WebSocket error:', error);
-    };
-
-    socket.onclose = function(event) {
-        console.log('WebSocket connection closed');
-        attemptReconnect();
-    };
-}
-
-function attemptReconnect() {
-    if (reconnectAttempts < maxReconnectAttempts) {
-        reconnectAttempts++;
-        console.log(`Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts})...`);
-        setTimeout(connectWebSocket, 5000); // Wait 5 seconds before attempting to reconnect
-    } else {
-        console.log('Max reconnect attempts reached. Giving up.');
-        // Optionally, you can notify the user that the connection has been lost
-        alert('WebSocket connection lost. Please refresh the page to try again.');
-    }
-}
-
-function displayWebSocketMessage(message) {
-    try {
-        const data = JSON.parse(message);
-        if (data.action === 'select' && data.postalCode && data.count !== undefined) {
-            updatePostalCodeCount(data.postalCode, data.count);
-            pendingPostalCodes.delete(data.postalCode);
-            updatePostalCodeLists();
-        }
-    } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-    }
-}
-
 function updatePostalCodeCount(postalCode, count) {
     postalCodeCounts.set(postalCode, count);
     updatePostalCodeLists();
 }
 
-function requestPendingCounts() {
-    pendingPostalCodes.forEach(postalCode => {
-        sendToWebSocket('select', postalCode);
-    });
-}
-
-function processPendingWebSocketMessages() {
-    while (pendingWebSocketMessages.length > 0) {
-        const message = pendingWebSocketMessages.shift();
-        socket.send(message);
-    }
-}
+// Export functions that need to be accessed by websocket.js
+export { updatePostalCodeCount, updatePostalCodeLists };
