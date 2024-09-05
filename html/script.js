@@ -14,6 +14,77 @@ let currentMode = 'loading';
 const loadingPostalCodes = new Set();
 const deliveryPostalCodes = new Set();
 
+// Constants
+const LOADING_MODE = 'loading';
+const DELIVERY_MODE = 'delivery';
+const COOKIE_NAME = 'selectedPostalCodes';
+
+function initializeApp() {
+    loadSVG()
+        .then(() => {
+            connectWebSocket();
+            setupPostalCodeClicks();
+            setupZoomControls();
+            setupPanning();
+            setupLassoSelect(svgElement, togglePostalCode);
+            setupModeToggle();
+            setTimeout(loadSelectedPostalCodes, 1000);
+        })
+        .catch(error => console.error('Error initializing app:', error));
+}
+
+async function loadSVG() {
+    try {
+        const response = await fetch('map.svg');
+        const svgContent = await response.text();
+        document.getElementById('map-container').innerHTML = svgContent;
+        svgElement = document.querySelector('#map-container svg');
+        viewBox = svgElement.viewBox.baseVal;
+        originalViewBox = { ...viewBox };
+    } catch (error) {
+        console.error('Error loading SVG:', error);
+        throw error;
+    }
+}
+
+function saveSelectedPostalCodes() {
+    const data = {
+        [LOADING_MODE]: Array.from(loadingPostalCodes),
+        [DELIVERY_MODE]: Array.from(deliveryPostalCodes)
+    };
+    document.cookie = `${COOKIE_NAME}=${JSON.stringify(data)}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
+}
+
+function loadSelectedPostalCodes() {
+    try {
+        const cookieValue = document.cookie
+            .split('; ')
+            .find(row => row.startsWith(`${COOKIE_NAME}=`));
+        if (cookieValue) {
+            const data = JSON.parse(cookieValue.split('=')[1]);
+            loadPostalCodesFromData(data[LOADING_MODE], loadingPostalCodes, LOADING_MODE);
+            loadPostalCodesFromData(data[DELIVERY_MODE], deliveryPostalCodes, DELIVERY_MODE);
+            updatePostalCodeLists();
+            if (isWebSocketConnected) {
+                requestPendingCounts();
+            }
+        }
+    } catch (error) {
+        console.error('Error loading postal codes:', error);
+    }
+}
+
+function loadPostalCodesFromData(data, targetSet, mode) {
+    data.forEach(postalCode => {
+        const pathElement = document.getElementById(postalCode);
+        if (pathElement) {
+            targetSet.add(postalCode);
+            pathElement.classList.add('selected', mode);
+            pendingPostalCodes.add(postalCode);
+        }
+    });
+}
+
 function setupModeToggle() {
     const loadingButton = document.getElementById('loading-mode');
     const deliveryButton = document.getElementById('delivery-mode');
@@ -27,70 +98,6 @@ function setMode(mode) {
     document.getElementById('loading-mode').classList.toggle('active', mode === 'loading');
     document.getElementById('delivery-mode').classList.toggle('active', mode === 'delivery');
 }
-
-function saveSelectedPostalCodes() {
-    const data = {
-        loading: Array.from(loadingPostalCodes),
-        delivery: Array.from(deliveryPostalCodes)
-    };
-    document.cookie = `selectedPostalCodes=${JSON.stringify(data)}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
-}
-
-function loadSelectedPostalCodes() {
-    const cookieValue = document.cookie.split('; ').find(row => row.startsWith('selectedPostalCodes='));
-    if (cookieValue) {
-        const data = JSON.parse(cookieValue.split('=')[1]);
-        data.loading.forEach(postalCode => {
-            const pathElement = document.getElementById(postalCode);
-            if (pathElement) {
-                loadingPostalCodes.add(postalCode);
-                pathElement.classList.add('selected', 'loading');
-                pendingPostalCodes.add(postalCode);
-            }
-        });
-        data.delivery.forEach(postalCode => {
-            const pathElement = document.getElementById(postalCode);
-            if (pathElement) {
-                deliveryPostalCodes.add(postalCode);
-                pathElement.classList.add('selected', 'delivery');
-                pendingPostalCodes.add(postalCode);
-            }
-        });
-        updatePostalCodeLists();
-        if (isWebSocketConnected) {
-            requestPendingCounts();
-        }
-    }
-}
-
-async function loadSVG() {
-    try {
-        const response = await fetch('map.svg');
-        const svgContent = await response.text();
-        document.getElementById('map-container').innerHTML = svgContent;
-        svgElement = document.querySelector('#map-container svg');
-        connectWebSocket(); 
-        setupPostalCodeClicks();
-        setupZoomControls();
-        setupPanning();
-        setupLassoSelect(svgElement, togglePostalCode); // Pass svgElement and togglePostalCode
-        viewBox = svgElement.viewBox.baseVal;
-        originalViewBox = {
-            x: viewBox.x,
-            y: viewBox.y,
-            width: viewBox.width,
-            height: viewBox.height
-        };
-        
-        // Delay loading of postal codes
-        setTimeout(loadSelectedPostalCodes, 1000);
-        setupModeToggle();
-    } catch (error) {
-        console.error('Error loading SVG:', error);
-    }
-}
-
-loadSVG();
 
 function setupPostalCodeClicks() {
     document.getElementById('map-container').addEventListener('click', (e) => {
@@ -303,3 +310,5 @@ function updatePostalCodeCount(postalCode, count) {
 
 // Export functions that need to be accessed by websocket.js
 export { updatePostalCodeCount, updatePostalCodeLists };
+
+initializeApp();
