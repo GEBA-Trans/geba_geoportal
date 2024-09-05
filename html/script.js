@@ -7,7 +7,7 @@ let svgElement;
 let isDragging = false;
 let startX, startY;
 let viewBox = { x: 0, y: 0, width: 0, height: 0 };
-let originalViewBox;
+let originalViewBox = { x: 0, y: 0, width: 0, height: 0 };
 const postalCodeCounts = new Map();
 
 let currentMode = 'loading';
@@ -52,7 +52,12 @@ async function loadSVG() {
         document.getElementById('map-container').innerHTML += svgContent; // Change this line
         svgElement = document.querySelector('#map-container svg');
         viewBox = svgElement.viewBox.baseVal;
-        originalViewBox = { ...viewBox };
+        originalViewBox = {
+            x: viewBox.x,
+            y: viewBox.y,
+            width: viewBox.width,
+            height: viewBox.height
+        };
     } catch (error) {
         console.error('Error loading SVG:', error);
         throw error;
