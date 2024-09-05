@@ -267,3 +267,9 @@ path.selected.delivery {
 .clear-all-button:active {
     background-color: #a93226;
 }
+
+#lasso {
+    pointer-events: none;
+    z-index: 1000;
+    mix-blend-mode: multiply;
+}

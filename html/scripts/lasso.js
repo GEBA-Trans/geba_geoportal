@@ -35,6 +35,7 @@ function updateLasso(e) {
     const point = getSVGPoint(e.clientX, e.clientY);
     lassoPoints.push(point);
     drawLasso();
+    debugLasso(); // Add this line
 }
 
 function getSVGPoint(x, y) {
@@ -48,13 +49,13 @@ function drawLasso() {
     let existingLasso = svgElement.querySelector('#lasso');
     if (existingLasso) existingLasso.remove();
 
-    const lasso = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const lasso = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
     lasso.setAttribute('id', 'lasso');
-    lasso.setAttribute('d', `M ${lassoPoints.map(p => `${p.x},${p.y}`).join(' L ')}`);
-    lasso.setAttribute('fill', 'none');
-    lasso.setAttribute('stroke', 'black');
+    lasso.setAttribute('points', lassoPoints.map(p => `${p.x},${p.y}`).join(' '));
+    lasso.setAttribute('fill', 'rgba(255, 0, 0, 0.1)'); // Red fill with 10% opacity
+    lasso.setAttribute('stroke', '#ff0000'); // Bright red stroke
     lasso.setAttribute('stroke-width', '2');
-    lasso.setAttribute('stroke-dasharray', '5,5');
+    lasso.setAttribute('vector-effect', 'non-scaling-stroke');
     svgElement.appendChild(lasso);
 }
 
@@ -106,6 +107,16 @@ function endLasso(e) {
     selectPathsInLasso();
     clearLasso();
     toggleLasso();
+}
+
+function debugLasso() {
+    console.log('Lasso Points:', lassoPoints);
+    console.log('SVG Element:', svgElement);
+    const lasso = svgElement.querySelector('#lasso');
+    console.log('Lasso Element:', lasso);
+    if (lasso) {
+        console.log('Lasso Attributes:', lasso.attributes);
+    }
 }
 
 export { setupLassoSelect, isLassoActive };
