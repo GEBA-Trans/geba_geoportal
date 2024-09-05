@@ -278,6 +278,7 @@ path.selected.delivery {
     padding: 10px;
     background-color: #f5f5f5;
     cursor: pointer;
+    border-radius: 4px;
 }
 
 .country-header h3 {
@@ -286,19 +287,37 @@ path.selected.delivery {
     flex-grow: 1;
 }
 
-.toggle-btn {
+.toggle-btn,
+.add-all-btn,
+.remove-country-btn {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 0;
-    margin-right: 10px;
+    padding: 5px;
     font-size: 0.9em;
-    color: #333;
-    transition: transform 0.2s ease;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    border-radius: 4px;
 }
 
-.toggle-btn:hover {
-    color: #007bff;
+.toggle-btn {
+    margin-right: 10px;
+    color: #333;
+}
+
+.add-all-btn {
+    margin-left: 5px;
+    color: #28a745;
+}
+
+.remove-country-btn {
+    margin-left: 5px;
+    color: #dc3545;
+}
+
+.toggle-btn:hover,
+.add-all-btn:hover,
+.remove-country-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 .toggle-btn[aria-expanded="true"] {
@@ -342,4 +361,8 @@ path.selected.delivery {
 
 .add-all-btn:hover {
     color: #218838;
+}
+
+.remove-country-btn:hover {
+    color: #c82333;
 }

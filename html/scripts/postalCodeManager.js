@@ -85,6 +85,9 @@ function updateList(listId, postalCodes) {
             <button class="add-all-btn" title="Add all postal codes">
                 <i class="fas fa-plus-circle"></i>
             </button>
+            <button class="remove-country-btn" title="Remove all postal codes for this country">
+                <i class="fas fa-minus-circle"></i>
+            </button>
         `;
         countryElement.appendChild(countryHeader);
         
@@ -126,6 +129,11 @@ function updateList(listId, postalCodes) {
         countryHeader.querySelector('.add-all-btn').addEventListener('click', (e) => {
             e.stopPropagation();
             addAllPostalCodes(country, mode);
+        });
+
+        countryHeader.querySelector('.remove-country-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeAllPostalCodes(country, mode);
         });
     }
 }
@@ -302,6 +310,23 @@ function addAllPostalCodes(country, mode) {
             path.classList.remove('selected', 'loading', 'delivery');
             path.classList.add('selected', mode);
             sendToWebSocket('select', postalCode);
+        }
+    });
+
+    updatePostalCodeLists();
+    saveSelectedPostalCodes();
+}
+
+function removeAllPostalCodes(country, mode) {
+    const allPaths = document.querySelectorAll(`#map-container svg g#${country} path`);
+    const targetSet = mode === LOADING_MODE ? loadingPostalCodes : deliveryPostalCodes;
+
+    allPaths.forEach(path => {
+        const postalCode = path.id;
+        if (postalCode && targetSet.has(postalCode)) {
+            targetSet.delete(postalCode);
+            path.classList.remove('selected', mode);
+            sendToWebSocket('deselect', postalCode);
         }
     });
 
