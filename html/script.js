@@ -306,7 +306,7 @@ function resetView() {
 
 function highlightPostalCode(postalCode, highlight) {
     const pathElement = document.getElementById(postalCode);
-    console.log('Highlighting:', postalCode, highlight, pathElement);
+    // console.log('Highlighting:', postalCode, highlight, pathElement);
     if (pathElement) {
         if (highlight) {
             pathElement.style.stroke = '#ff0000';

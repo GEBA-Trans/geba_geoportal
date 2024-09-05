@@ -60,9 +60,12 @@ function drawLasso() {
 }
 
 function selectPathsInLasso() {
+    console.log('Starting selectPathsInLasso');
     const paths = document.querySelectorAll('#map-container svg path');
     paths.forEach(path => {
-        if (isPathInLasso(path)) {
+        const isInLasso = isPathInLasso(path);
+        console.log(`Path ${path.id}: isInLasso = ${isInLasso}`);
+        if (isInLasso) {
             const postalCode = path.id || 'Unknown';
             togglePostalCodeCallback(path, postalCode);
         }
@@ -70,21 +73,30 @@ function selectPathsInLasso() {
 }
 
 function isPathInLasso(path) {
-    const bbox = path.getBBox();
-    const points = [
-        { x: bbox.x, y: bbox.y },
-        { x: bbox.x + bbox.width, y: bbox.y },
-        { x: bbox.x + bbox.width, y: bbox.y + bbox.height },
-        { x: bbox.x, y: bbox.y + bbox.height }
-    ];
-    return points.some(point => isPointInPolygon(point, lassoPoints));
+    const pathPoints = getPathPoints(path);
+    console.log(`Checking path ${path.id}, Points:`, pathPoints);
+    const result = pathPoints.some(point => isPointInPolygon(point, lassoPoints));
+    console.log(`Path ${path.id} is ${result ? 'inside' : 'outside'} lasso`);
+    return result;
+}
+
+function getPathPoints(path) {
+    const points = [];
+    const pathLength = path.getTotalLength();
+    const step = pathLength / 20; // Adjust this number to balance accuracy and performance
+    for (let i = 0; i <= pathLength; i += step) {
+        const point = path.getPointAtLength(i);
+        points.push(point);
+    }
+    return points;
 }
 
 function isPointInPolygon(point, polygon) {
     let inside = false;
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        const [xi, yi] = [polygon[i].x, polygon[i].y];
-        const [xj, yj] = [polygon[j].x, polygon[j].y];
+        const xi = polygon[i].x, yi = polygon[i].y;
+        const xj = polygon[j].x, yj = polygon[j].y;
+        
         const intersect = ((yi > point.y) !== (yj > point.y))
             && (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
         if (intersect) inside = !inside;
@@ -104,18 +116,19 @@ function endLasso(e) {
     const point = getSVGPoint(e.clientX, e.clientY);
     lassoPoints.push(point);
     drawLasso();
+    console.log('Lasso points:', lassoPoints);
     selectPathsInLasso();
     clearLasso();
     toggleLasso();
 }
 
 function debugLasso() {
-    console.log('Lasso Points:', lassoPoints);
-    console.log('SVG Element:', svgElement);
+    // console.log('Lasso Points:', lassoPoints);
+    // console.log('SVG Element:', svgElement);
     const lasso = svgElement.querySelector('#lasso');
-    console.log('Lasso Element:', lasso);
+    // console.log('Lasso Element:', lasso);
     if (lasso) {
-        console.log('Lasso Attributes:', lasso.attributes);
+        // console.log('Lasso Attributes:', lasso.attributes);
     }
 }
 
