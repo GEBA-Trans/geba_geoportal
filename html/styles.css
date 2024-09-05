@@ -152,3 +152,52 @@ path:hover {
 path.selected {
     stroke-width: 1;
 }
+
+#mode-toggle {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+#mode-toggle button {
+    flex: 1;
+    padding: 0.5rem;
+    border: none;
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+#mode-toggle button.active {
+    background-color: #3498db;
+    color: white;
+}
+
+#loading-postalcodes,
+#delivery-postalcodes {
+    margin-bottom: 1rem;
+}
+
+.clear-all-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    transition: background-color 0.3s;
+}
+
+.clear-all-button:hover {
+    background-color: #c0392b;
+}
+
+/* SVG styles */
+path.selected.loading {
+    fill: #f1c40f;
+}
+
+path.selected.delivery {
+    fill: #3498db;
+}

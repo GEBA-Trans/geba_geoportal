@@ -17,11 +17,18 @@
         <main>
             <div id="map-container"></div>
             <div id="sidebar">
-                <div id="selected-countries">
-                    <h2>Selected PostalCodes</h2>
-                    <ul id="postalcodes-list"></ul>
+                <div id="mode-toggle">
+                    <button id="loading-mode" class="active">Loading</button>
+                    <button id="delivery-mode">Delivery</button>
                 </div>
-                <div id="country-info"></div>
+                <div id="loading-postalcodes">
+                    <h2>Loading PostalCodes</h2>
+                    <ul id="loading-list"></ul>
+                </div>
+                <div id="delivery-postalcodes">
+                    <h2>Delivery PostalCodes</h2>
+                    <ul id="delivery-list"></ul>
+                </div>
             </div>
         </main>
         <div id="controls">

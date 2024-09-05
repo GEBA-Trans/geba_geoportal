@@ -9,8 +9,30 @@ let viewBox = { x: 0, y: 0, width: 0, height: 0 };
 let originalViewBox;
 const postalCodeCounts = new Map();
 
+let currentMode = 'loading';
+const loadingPostalCodes = new Set();
+const deliveryPostalCodes = new Set();
+
+function setupModeToggle() {
+    const loadingButton = document.getElementById('loading-mode');
+    const deliveryButton = document.getElementById('delivery-mode');
+
+    loadingButton.addEventListener('click', () => setMode('loading'));
+    deliveryButton.addEventListener('click', () => setMode('delivery'));
+}
+
+function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('loading-mode').classList.toggle('active', mode === 'loading');
+    document.getElementById('delivery-mode').classList.toggle('active', mode === 'delivery');
+}
+
 function saveSelectedPostalCodes() {
-    document.cookie = `selectedPostalCodes=${Array.from(selectedPostalCodes).join(',')}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
+    const data = {
+        loading: Array.from(loadingPostalCodes),
+        delivery: Array.from(deliveryPostalCodes)
+    };
+    document.cookie = `selectedPostalCodes=${JSON.stringify(data)}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
 }
 
 let isWebSocketConnected = false;
@@ -19,16 +41,24 @@ let pendingPostalCodes = new Set();
 function loadSelectedPostalCodes() {
     const cookieValue = document.cookie.split('; ').find(row => row.startsWith('selectedPostalCodes='));
     if (cookieValue) {
-        const savedPostalCodes = cookieValue.split('=')[1].split(',');
-        savedPostalCodes.forEach(postalCode => {
+        const data = JSON.parse(cookieValue.split('=')[1]);
+        data.loading.forEach(postalCode => {
             const pathElement = document.getElementById(postalCode);
             if (pathElement) {
-                selectedPostalCodes.add(postalCode);
-                pathElement.classList.add('selected');
+                loadingPostalCodes.add(postalCode);
+                pathElement.classList.add('selected', 'loading');
                 pendingPostalCodes.add(postalCode);
             }
         });
-        updateSelectedPostalCodesList();
+        data.delivery.forEach(postalCode => {
+            const pathElement = document.getElementById(postalCode);
+            if (pathElement) {
+                deliveryPostalCodes.add(postalCode);
+                pathElement.classList.add('selected', 'delivery');
+                pendingPostalCodes.add(postalCode);
+            }
+        });
+        updatePostalCodeLists();
         if (isWebSocketConnected) {
             requestPendingCounts();
         }
@@ -56,14 +86,13 @@ async function loadSVG() {
         
         // Delay loading of postal codes
         setTimeout(loadSelectedPostalCodes, 1000);
+        setupModeToggle();
     } catch (error) {
         console.error('Error loading SVG:', error);
     }
 }
 
 loadSVG();
-
-const selectedPostalCodes = new Set();
 
 function setupPostalCodeClicks() {
     document.getElementById('map-container').addEventListener('click', (e) => {
@@ -75,16 +104,26 @@ function setupPostalCodeClicks() {
 }
 
 function togglePostalCode(pathElement, postalCode, isInitialLoad = false) {
-    if (selectedPostalCodes.has(postalCode)) {
+    const targetSet = currentMode === 'loading' ? loadingPostalCodes : deliveryPostalCodes;
+    const otherSet = currentMode === 'loading' ? deliveryPostalCodes : loadingPostalCodes;
+
+    if (targetSet.has(postalCode)) {
+        targetSet.delete(postalCode);
+        pathElement.classList.remove('selected', currentMode);
         sendToWebSocket('deselect', postalCode);
-        removePostalCode(postalCode);
     } else {
+        otherSet.delete(postalCode);
+        targetSet.add(postalCode);
+        pathElement.classList.remove('selected', 'loading', 'delivery');
+        pathElement.classList.add('selected', currentMode);
         sendToWebSocket('select', postalCode);
-        selectedPostalCodes.add(postalCode);
-        pathElement.classList.add('selected');
     }
+
+    // Remove any inline fill style
+    pathElement.style.fill = '';
+
     if (!isInitialLoad) {
-        updateSelectedPostalCodesList();
+        updatePostalCodeLists();
         saveSelectedPostalCodes();
     }
 }
@@ -100,19 +139,24 @@ function sendToWebSocket(action, postalCode) {
     }
 }
 
-function updateSelectedPostalCodesList() {
-    const postalCodeList = document.getElementById('postalcodes-list');
-    postalCodeList.innerHTML = '';
-    
-    if (selectedPostalCodes.size > 0) {
+function updatePostalCodeLists() {
+    updateList('loading-list', loadingPostalCodes);
+    updateList('delivery-list', deliveryPostalCodes);
+}
+
+function updateList(listId, postalCodes) {
+    const list = document.getElementById(listId);
+    list.innerHTML = '';
+
+    if (postalCodes.size > 0) {
         const clearAllButton = document.createElement('button');
-        clearAllButton.id = 'clear-all-button';
+        clearAllButton.className = 'clear-all-button';
         clearAllButton.innerHTML = '<i class="fas fa-trash-alt"></i> Clear All';
-        clearAllButton.addEventListener('click', clearAllPostalCodes);
-        postalCodeList.appendChild(clearAllButton);
+        clearAllButton.addEventListener('click', () => clearAllPostalCodes(postalCodes));
+        list.appendChild(clearAllButton);
     }
 
-    selectedPostalCodes.forEach(postalCode => {
+    postalCodes.forEach(postalCode => {
         const li = document.createElement('li');
         li.setAttribute('data-postal-code', postalCode);
         const count = postalCodeCounts.get(postalCode);
@@ -121,37 +165,60 @@ function updateSelectedPostalCodesList() {
         const color = count !== undefined ? getColorForCount(count) : '#000';
         li.innerHTML = `
             <span class="count" style="color: ${color};">${countDisplay}</span>${postalCode}
-            <button class="delete-btn" title="Remove ${postalCode}" style="display: none;">
+            <button class="delete-btn" title="Remove ${postalCode}">
                 <i class="fas fa-times"></i>
             </button>
         `;
-        li.addEventListener('mouseenter', () => {
-            li.querySelector('.delete-btn').style.display = 'inline-block';
-            highlightPostalCode(postalCode, true);
-        });
-        li.addEventListener('mouseleave', () => {
-            li.querySelector('.delete-btn').style.display = 'none';
-            highlightPostalCode(postalCode, false);
-        });
-        li.querySelector('.delete-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            removePostalCode(postalCode);
-        });
-        postalCodeList.appendChild(li);
+        li.addEventListener('mouseenter', () => highlightPostalCode(postalCode, true));
+        li.addEventListener('mouseleave', () => highlightPostalCode(postalCode, false));
+        li.querySelector('.delete-btn').addEventListener('click', () => removePostalCode(postalCode));
+        list.appendChild(li);
     });
 }
 
+// Add this function back to get colors for the counts
+function getColorForCount(count) {
+    // Ensure count is between 0 and 99
+    count = Math.max(0, Math.min(99, count));
+    
+    // Calculate the percentage (0 to 1)
+    const percentage = count / 99;
+    
+    // Calculate RGB values
+    const r = Math.round(255 * (1 - percentage));
+    const g = Math.round(255 * percentage);
+    const b = 0;
+    
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
 function removePostalCode(postalCode) {
-    selectedPostalCodes.delete(postalCode);
+    loadingPostalCodes.delete(postalCode);
+    deliveryPostalCodes.delete(postalCode);
     postalCodeCounts.delete(postalCode);
     const pathElement = document.getElementById(postalCode);
     if (pathElement) {
-        pathElement.classList.remove('selected');
+        pathElement.classList.remove('selected', 'loading', 'delivery');
         pathElement.style.fill = ''; // Reset the fill color
     }
-    updateSelectedPostalCodesList();
+    updatePostalCodeLists();
     saveSelectedPostalCodes();
     sendToWebSocket('deselect', postalCode);
+}
+
+function clearAllPostalCodes(postalCodes) {
+    postalCodes.forEach(postalCode => {
+        const pathElement = document.getElementById(postalCode);
+        if (pathElement) {
+            pathElement.classList.remove('selected', 'loading', 'delivery');
+            pathElement.style.fill = ''; // Reset the fill color
+        }
+        sendToWebSocket('deselect', postalCode);
+    });
+    postalCodes.clear();
+    postalCodeCounts.clear();
+    updatePostalCodeLists();
+    saveSelectedPostalCodes();
 }
 
 function setupZoomControls() {
@@ -242,21 +309,6 @@ function highlightPostalCode(postalCode, highlight) {
     }
 }
 
-function clearAllPostalCodes() {
-    selectedPostalCodes.forEach(postalCode => {
-        const pathElement = document.getElementById(postalCode);
-        if (pathElement) {
-            pathElement.classList.remove('selected');
-            pathElement.style.fill = ''; // Reset the fill color
-        }
-        sendToWebSocket('deselect', postalCode);
-    });
-    selectedPostalCodes.clear();
-    postalCodeCounts.clear();
-    updateSelectedPostalCodesList();
-    saveSelectedPostalCodes();
-}
-
 let socket;
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 3;
@@ -304,7 +356,7 @@ function displayWebSocketMessage(message) {
         if (data.action === 'select' && data.postalCode && data.count !== undefined) {
             updatePostalCodeCount(data.postalCode, data.count);
             pendingPostalCodes.delete(data.postalCode);
-            updateSelectedPostalCodesList();
+            updatePostalCodeLists();
         }
     } catch (error) {
         console.error('Error parsing WebSocket message:', error);
@@ -313,30 +365,7 @@ function displayWebSocketMessage(message) {
 
 function updatePostalCodeCount(postalCode, count) {
     postalCodeCounts.set(postalCode, count);
-    updatePostalCodeColor(postalCode, count);
-}
-
-function updatePostalCodeColor(postalCode, count) {
-    const pathElement = document.getElementById(postalCode);
-    if (pathElement) {
-        const color = getColorForCount(count);
-        pathElement.style.fill = color;
-    }
-}
-
-function getColorForCount(count) {
-    // Ensure count is between 0 and 99
-    count = Math.max(0, Math.min(99, count));
-    
-    // Calculate the percentage (0 to 1)
-    const percentage = count / 99;
-    
-    // Calculate RGB values
-    const r = Math.round(255 * (1 - percentage));
-    const g = Math.round(255 * percentage);
-    const b = 0;
-    
-    return `rgb(${r}, ${g}, ${b})`;
+    updatePostalCodeLists();
 }
 
 function requestPendingCounts() {
