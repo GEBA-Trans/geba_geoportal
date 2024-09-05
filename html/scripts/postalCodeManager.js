@@ -78,7 +78,7 @@ function updateList(listId, postalCodes) {
         countryHeader.className = 'country-header';
         const isExpanded = expandedCountries[mode].has(country);
         countryHeader.innerHTML = `
-            <button class="toggle-btn" aria-expanded="${isExpanded}">
+            <button class="toggle-btn" aria-expanded="${isExpanded}" title="${isExpanded ? 'Collapse' : 'Expand'}">
                 <i class="fas fa-chevron-${isExpanded ? 'down' : 'right'}"></i>
             </button>
             <h3>${country} (${codes.length})</h3>
@@ -112,6 +112,10 @@ function updateList(listId, postalCodes) {
 
         countryHeader.addEventListener('click', (e) => {
             if (!e.target.closest('.delete-btn')) {
+                const toggleBtn = countryHeader.querySelector('.toggle-btn');
+                toggleBtn.setAttribute('aria-expanded', !isExpanded);
+                toggleBtn.title = isExpanded ? 'Expand' : 'Collapse';
+                toggleBtn.querySelector('i').className = `fas fa-chevron-${isExpanded ? 'right' : 'down'}`;
                 toggleCountryExpansion(country, mode);
             }
         });
