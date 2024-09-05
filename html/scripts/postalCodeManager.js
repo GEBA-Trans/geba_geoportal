@@ -14,16 +14,22 @@ let expandedCountries = {
     [DELIVERY_MODE]: new Set()
 };
 
+let isPostalCodeClicksEnabled = true;
+
 export function setupPostalCodeClicks() {
-    document.getElementById('map-container').addEventListener('click', (e) => {
-        if (e.target.tagName === 'path') {
-            const postalCode = e.target.id || 'Unknown';
-            const parentGroup = e.target.closest('g');
-            const parentId = parentGroup ? parentGroup.id : 'No parent';
-            console.log(`Clicked path: ${postalCode}, Parent group: ${parentId}`);
-            togglePostalCode(e.target, postalCode);
-        }
-    });
+    document.getElementById('map-container').addEventListener('click', handlePostalCodeClick);
+}
+
+function handlePostalCodeClick(e) {
+    if (!isPostalCodeClicksEnabled) return;
+    
+    if (e.target.tagName === 'path') {
+        const postalCode = e.target.id || 'Unknown';
+        const parentGroup = e.target.closest('g');
+        const parentId = parentGroup ? parentGroup.id : 'No parent';
+        console.log(`Clicked path: ${postalCode}, Parent group: ${parentId}`);
+        togglePostalCode(e.target, postalCode);
+    }
 }
 
 export function togglePostalCode(pathElement, postalCode, isInitialLoad = false) {
@@ -332,4 +338,12 @@ function removeAllPostalCodes(country, mode) {
 
     updatePostalCodeLists();
     saveSelectedPostalCodes();
+}
+
+export function disablePostalCodeClicks() {
+    isPostalCodeClicksEnabled = false;
+}
+
+export function enablePostalCodeClicks() {
+    isPostalCodeClicksEnabled = true;
 }
