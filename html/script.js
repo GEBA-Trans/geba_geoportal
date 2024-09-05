@@ -1,5 +1,5 @@
 import { setupLassoSelect, isLassoActive } from './scripts/lasso.js';
-import { connectWebSocket, sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts } from './scripts/websocket.js';
+import { connectWebSocket, sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts, lookupCompanies } from './scripts/websocket.js';
 
 const zoomStep = 0.2;
 let currentZoom = 1;
@@ -310,5 +310,11 @@ function updatePostalCodeCount(postalCode, count) {
 
 // Export functions that need to be accessed by websocket.js
 export { updatePostalCodeCount, updatePostalCodeLists };
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Add event listener for the lookup button
+    const lookupButton = document.getElementById('lookup-button');
+    lookupButton.addEventListener('click', lookupCompanies);
+});
 
 initializeApp();

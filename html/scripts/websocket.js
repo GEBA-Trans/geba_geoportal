@@ -1,6 +1,7 @@
 import { updatePostalCodeCount, updatePostalCodeLists } from '../script.js';
 
 let socket;
+let lookupSocket;
 let isWebSocketConnected = false;
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 3;
@@ -31,6 +32,30 @@ function connectWebSocket() {
         console.log('WebSocket connection closed');
         isWebSocketConnected = false;
         attemptReconnect();
+    };
+
+    // Connect to the lookup WebSocket
+    lookupSocket = new WebSocket('ws://lx-dev:1880/ws/lookup');
+
+    lookupSocket.onopen = function(event) {
+        console.log('Lookup WebSocket connection established');
+    };
+
+    lookupSocket.onmessage = function(event) {
+        try {
+            const data = JSON.parse(event.data);
+            updateCompanyTable(data);
+        } catch (error) {
+            console.error('Error parsing lookup WebSocket message:', error);
+        }
+    };
+
+    lookupSocket.onerror = function(error) {
+        console.error('Lookup WebSocket error:', error);
+    };
+
+    lookupSocket.onclose = function(event) {
+        console.log('Lookup WebSocket connection closed');
     };
 }
 
@@ -80,4 +105,64 @@ function processPendingWebSocketMessages() {
     }
 }
 
-export { connectWebSocket, sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts };
+function lookupCompanies() {
+    const savedPostalCodes = getSavedPostalCodes();
+    
+    const payload = {
+        loadingPostalCodes: savedPostalCodes.loading || [],
+        deliveryPostalCodes: savedPostalCodes.delivery || []
+    };
+
+    if (lookupSocket.readyState === WebSocket.OPEN) {
+        lookupSocket.send(JSON.stringify(payload));
+    } else {
+        console.error('Lookup WebSocket is not open');
+    }
+}
+
+function getSavedPostalCodes() {
+    const cookieValue = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('selectedPostalCodes='));
+    
+    if (cookieValue) {
+        try {
+            return JSON.parse(cookieValue.split('=')[1]);
+        } catch (error) {
+            console.error('Error parsing saved postal codes:', error);
+        }
+    }
+    
+    return { loading: [], delivery: [] };
+}
+
+function updateCompanyTable(data) {
+    const tableBody = document.getElementById('company-table').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = ''; // Clear existing rows
+
+    if (!data || typeof data !== 'object') {
+        console.error('Invalid data received from lookup WebSocket');
+        return;
+    }
+
+    let companies = data.companies || data;
+
+    if (!Array.isArray(companies)) {
+        console.error('Companies data is not an array:', companies);
+        return;
+    }
+
+    companies.forEach(company => {
+        if (typeof company === 'object' && company !== null) {
+            const row = tableBody.insertRow();
+            row.insertCell(0).textContent = company.name || 'N/A';
+            row.insertCell(1).textContent = company.fleetSize || 'N/A';
+            row.insertCell(2).textContent = company.coverageArea || 'N/A';
+            row.insertCell(3).textContent = company.rating || 'N/A';
+        } else {
+            console.warn('Invalid company data:', company);
+        }
+    });
+}
+
+export { connectWebSocket, sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts, lookupCompanies };
