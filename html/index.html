@@ -29,6 +29,7 @@
                     <h2>Delivery PostalCodes</h2>
                     <ul id="delivery-list"></ul>
                 </div>
+                <button id="lookup-button" class="lookup-button">Lookup</button>
             </div>
         </main>
         <div id="controls">
@@ -39,6 +40,25 @@
                 <button id="lasso-button" title="Lasso Select"><i class="fas fa-draw-polygon"></i></button>
             </div>
         </div>
+        
+        <!-- New table for transport company information -->
+        <div id="transport-companies">
+            <h2>Transport Companies</h2>
+            <table id="company-table">
+                <thead>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Fleet Size</th>
+                        <th>Coverage Area</th>
+                        <th>Rating</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table rows will be dynamically populated with JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
         <div id="websocket-messages"></div>
     </div>
     

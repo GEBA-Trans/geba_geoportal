@@ -12,6 +12,43 @@ body, html {
     height: 100vh;
 }
 
+.lookup-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.lookup-button:hover {
+    background-color: #45a049;
+}
+
+.lookup-button:active {
+    background-color: #3e8e41;
+}
+
+/* Adjust sidebar to accommodate the new button */
+#sidebar {
+    /* ... existing styles ... */
+    display: flex;
+    flex-direction: column;
+}
+
+#loading-postalcodes,
+#delivery-postalcodes {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* ... rest of existing styles ... */
+
 header {
     background-color: #2c3e50;
     color: white;
