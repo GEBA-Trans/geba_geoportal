@@ -13,6 +13,9 @@ export function setupPostalCodeClicks() {
     document.getElementById('map-container').addEventListener('click', (e) => {
         if (e.target.tagName === 'path') {
             const postalCode = e.target.id || 'Unknown';
+            const parentGroup = e.target.closest('g');
+            const parentId = parentGroup ? parentGroup.id : 'No parent';
+            console.log(`Clicked path: ${postalCode}, Parent group: ${parentId}`);
             togglePostalCode(e.target, postalCode);
         }
     });
@@ -59,24 +62,52 @@ function updateList(listId, postalCodes) {
         list.appendChild(clearAllButton);
     }
 
+    const groupedPostalCodes = groupPostalCodesByCountry(postalCodes);
+
+    for (const [country, codes] of Object.entries(groupedPostalCodes)) {
+        const countryElement = document.createElement('div');
+        countryElement.className = 'country-group';
+        countryElement.innerHTML = `<h3>${country}</h3>`;
+        
+        const codesUl = document.createElement('ul');
+        codes.forEach(postalCode => {
+            const li = document.createElement('li');
+            li.setAttribute('data-postal-code', postalCode);
+            const count = postalCodeCounts.get(postalCode);
+            const countDisplay = count !== undefined ? `(${count}) ` : 
+                pendingPostalCodes.has(postalCode) ? '<i class="fas fa-spinner fa-spin"></i> ' : '';
+            const color = count !== undefined ? getColorForCount(count) : '#000';
+            li.innerHTML = `
+                ${postalCode}<span class="count" style="color: ${color};">${countDisplay}</span>
+                <button class="delete-btn" title="Remove ${postalCode}">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            li.addEventListener('mouseenter', () => highlightPostalCode(postalCode, true));
+            li.addEventListener('mouseleave', () => highlightPostalCode(postalCode, false));
+            li.querySelector('.delete-btn').addEventListener('click', () => removePostalCode(postalCode));
+            codesUl.appendChild(li);
+        });
+        
+        countryElement.appendChild(codesUl);
+        list.appendChild(countryElement);
+    }
+}
+
+function groupPostalCodesByCountry(postalCodes) {
+    const grouped = {};
     postalCodes.forEach(postalCode => {
-        const li = document.createElement('li');
-        li.setAttribute('data-postal-code', postalCode);
-        const count = postalCodeCounts.get(postalCode);
-        const countDisplay = count !== undefined ? `(${count}) ` : 
-            pendingPostalCodes.has(postalCode) ? '<i class="fas fa-spinner fa-spin"></i> ' : '';
-        const color = count !== undefined ? getColorForCount(count) : '#000';
-        li.innerHTML = `
-            <span class="count" style="color: ${color};">${countDisplay}</span>${postalCode}
-            <button class="delete-btn" title="Remove ${postalCode}">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        li.addEventListener('mouseenter', () => highlightPostalCode(postalCode, true));
-        li.addEventListener('mouseleave', () => highlightPostalCode(postalCode, false));
-        li.querySelector('.delete-btn').addEventListener('click', () => removePostalCode(postalCode));
-        list.appendChild(li);
+        const pathElement = document.getElementById(postalCode);
+        if (pathElement) {
+            const parentGroup = pathElement.closest('g');
+            const country = parentGroup ? parentGroup.id : 'Unknown';
+            if (!grouped[country]) {
+                grouped[country] = [];
+            }
+            grouped[country].push(postalCode);
+        }
     });
+    return grouped;
 }
 
 function getColorForCount(count) {
