@@ -15,9 +15,12 @@ function initializeApp() {
             setupPanning();
             setupLassoSelect(svgElement, togglePostalCode);
             setupModeToggle();
-            setupLookupButton(); // Add this line
-            setMode('loading'); // Set initial mode
-            setTimeout(loadSelectedPostalCodes, 1000);
+            setupLookupButton();
+            setMode('loading');
+            return loadSelectedPostalCodes();
+        })
+        .then(() => {
+            console.log('Postal codes loaded');
             ensureControlsVisibility();
         })
         .catch(error => console.error('Error initializing app:', error));

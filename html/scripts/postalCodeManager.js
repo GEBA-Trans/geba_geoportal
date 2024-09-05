@@ -3,11 +3,16 @@ import { sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendi
 const LOADING_MODE = 'loading';
 const DELIVERY_MODE = 'delivery';
 const COOKIE_NAME = 'selectedPostalCodes';
+const EXPANDED_COUNTRIES_COOKIE = 'expandedCountries';
 
 let currentMode = 'loading';
 const loadingPostalCodes = new Set();
 const deliveryPostalCodes = new Set();
 const postalCodeCounts = new Map();
+let expandedCountries = {
+    [LOADING_MODE]: new Set(),
+    [DELIVERY_MODE]: new Set()
+};
 
 export function setupPostalCodeClicks() {
     document.getElementById('map-container').addEventListener('click', (e) => {
@@ -63,13 +68,26 @@ function updateList(listId, postalCodes) {
     }
 
     const groupedPostalCodes = groupPostalCodesByCountry(postalCodes);
+    const mode = listId === 'loading-list' ? LOADING_MODE : DELIVERY_MODE;
 
     for (const [country, codes] of Object.entries(groupedPostalCodes)) {
         const countryElement = document.createElement('div');
         countryElement.className = 'country-group';
-        countryElement.innerHTML = `<h3>${country}</h3>`;
+        
+        const countryHeader = document.createElement('div');
+        countryHeader.className = 'country-header';
+        const isExpanded = expandedCountries[mode].has(country);
+        countryHeader.innerHTML = `
+            <button class="toggle-btn" aria-expanded="${isExpanded}">
+                <i class="fas fa-chevron-${isExpanded ? 'down' : 'right'}"></i>
+            </button>
+            <h3>${country} (${codes.length})</h3>
+        `;
+        countryElement.appendChild(countryHeader);
         
         const codesUl = document.createElement('ul');
+        codesUl.className = 'postal-codes-list';
+        codesUl.style.display = isExpanded ? 'block' : 'none';
         codes.forEach(postalCode => {
             const li = document.createElement('li');
             li.setAttribute('data-postal-code', postalCode);
@@ -91,6 +109,12 @@ function updateList(listId, postalCodes) {
         
         countryElement.appendChild(codesUl);
         list.appendChild(countryElement);
+
+        countryHeader.addEventListener('click', (e) => {
+            if (!e.target.closest('.delete-btn')) {
+                toggleCountryExpansion(country, mode);
+            }
+        });
     }
 }
 
@@ -175,22 +199,27 @@ export function setMode(mode) {
 }
 
 export function loadSelectedPostalCodes() {
-    try {
-        const cookieValue = document.cookie
-            .split('; ')
-            .find(row => row.startsWith(`${COOKIE_NAME}=`));
-        if (cookieValue) {
-            const data = JSON.parse(cookieValue.split('=')[1]);
-            loadPostalCodesFromData(data[LOADING_MODE], loadingPostalCodes, LOADING_MODE);
-            loadPostalCodesFromData(data[DELIVERY_MODE], deliveryPostalCodes, DELIVERY_MODE);
-            updatePostalCodeLists();
-            if (isWebSocketConnected) {
-                requestPendingCounts();
+    return new Promise((resolve, reject) => {
+        try {
+            loadExpandedCountries();
+            const cookieValue = document.cookie
+                .split('; ')
+                .find(row => row.startsWith(`${COOKIE_NAME}=`));
+            if (cookieValue) {
+                const data = JSON.parse(cookieValue.split('=')[1]);
+                loadPostalCodesFromData(data[LOADING_MODE], loadingPostalCodes, LOADING_MODE);
+                loadPostalCodesFromData(data[DELIVERY_MODE], deliveryPostalCodes, DELIVERY_MODE);
+                updatePostalCodeLists();
+                if (isWebSocketConnected) {
+                    requestPendingCounts();
+                }
             }
+            resolve();
+        } catch (error) {
+            console.error('Error loading postal codes:', error);
+            reject(error);
         }
-    } catch (error) {
-        console.error('Error loading postal codes:', error);
-    }
+    });
 }
 
 function loadPostalCodesFromData(data, targetSet, mode) {
@@ -217,4 +246,33 @@ export function getSelectedPostalCodes() {
         loading: Array.from(loadingPostalCodes),
         delivery: Array.from(deliveryPostalCodes)
     };
+}
+
+export function toggleCountryExpansion(country, mode) {
+    if (expandedCountries[mode].has(country)) {
+        expandedCountries[mode].delete(country);
+    } else {
+        expandedCountries[mode].add(country);
+    }
+    saveExpandedCountries();
+    updatePostalCodeLists();
+}
+
+function saveExpandedCountries() {
+    const data = {
+        [LOADING_MODE]: Array.from(expandedCountries[LOADING_MODE]),
+        [DELIVERY_MODE]: Array.from(expandedCountries[DELIVERY_MODE])
+    };
+    document.cookie = `${EXPANDED_COUNTRIES_COOKIE}=${JSON.stringify(data)}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
+}
+
+function loadExpandedCountries() {
+    const cookieValue = document.cookie
+        .split('; ')
+        .find(row => row.startsWith(`${EXPANDED_COUNTRIES_COOKIE}=`));
+    if (cookieValue) {
+        const data = JSON.parse(cookieValue.split('=')[1]);
+        expandedCountries[LOADING_MODE] = new Set(data[LOADING_MODE] || []);
+        expandedCountries[DELIVERY_MODE] = new Set(data[DELIVERY_MODE] || []);
+    }
 }
