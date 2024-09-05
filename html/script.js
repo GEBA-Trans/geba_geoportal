@@ -262,7 +262,7 @@ let reconnectAttempts = 0;
 const maxReconnectAttempts = 3;
 
 function connectWebSocket() {
-    socket = new WebSocket('ws://localhost:1880/ws/map');
+    socket = new WebSocket('ws://lx-dev:1880/ws/map');
 
     socket.onopen = function(event) {
         console.log('WebSocket connection established');
