@@ -1,5 +1,5 @@
 import { sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts } from './websocket.js';
-import { isPointInPolygon } from './lasso.js';  // Import this function from lasso.js
+import { isPointInPolygon } from './lasso.js';
 
 const LOADING_MODE = 'loading';
 const DELIVERY_MODE = 'delivery';
@@ -51,10 +51,17 @@ export function togglePostalCode(pathElement, postalCode, isInitialLoad = false)
 
     pathElement.style.fill = '';
 
-    // Find text within the postal code area
-    const textInArea = findTextInPath(pathElement);
-    if (textInArea.length > 0) {
-        console.log(`Text found in ${postalCode}:`, textInArea.map(text => `${postalCode}: ${text}`));
+    // Find elements within the postal code area
+    const elementsInArea = findTextInPath(pathElement);
+    if (elementsInArea.length > 0) {
+        console.log(`Elements found in ${postalCode}:`);
+        elementsInArea.forEach(item => {
+            console.log(`${postalCode}: ${item.element.tagName}`);
+            console.log(`XML Path: ${item.xmlPath}`);
+            if (item.element.textContent.trim()) {
+                console.log(`Text Content: ${item.element.textContent.trim()}`);
+            }
+        });
     }
 
     if (!isInitialLoad) {
@@ -66,11 +73,13 @@ export function togglePostalCode(pathElement, postalCode, isInitialLoad = false)
 function findTextInPath(pathElement) {
     const pathPoints = getPathPoints(pathElement);
     const svgElement = pathElement.ownerSVGElement;
-    const textElements = svgElement.querySelectorAll('text');
-    const textInArea = [];
+    const allElements = svgElement.querySelectorAll('*');
+    const elementsInArea = [];
 
-    textElements.forEach(textElement => {
-        const bbox = textElement.getBBox();
+    allElements.forEach(element => {
+        if (element === pathElement) return; // Skip the path itself
+
+        const bbox = element.getBBox();
         const centerX = bbox.x + bbox.width / 2;
         const centerY = bbox.y + bbox.height / 2;
         const point = svgElement.createSVGPoint();
@@ -78,11 +87,31 @@ function findTextInPath(pathElement) {
         point.y = centerY;
 
         if (isPointInPolygon(point, pathPoints)) {
-            textInArea.push(textElement.textContent);
+            elementsInArea.push({
+                element: element,
+                xmlPath: getXmlPath(element)
+            });
         }
     });
 
-    return textInArea;
+    return elementsInArea;
+}
+
+function getXmlPath(element) {
+    const path = [];
+    while (element && element.nodeType === Node.ELEMENT_NODE) {
+        let index = 0;
+        let sibling = element;
+        while (sibling) {
+            if (sibling.nodeName === element.nodeName) {
+                index++;
+            }
+            sibling = sibling.previousElementSibling;
+        }
+        path.unshift(`${element.nodeName}[${index}]`);
+        element = element.parentNode;
+    }
+    return '/' + path.join('/');
 }
 
 function getPathPoints(path) {
