@@ -86,7 +86,7 @@ function getPathPoints(path) {
     return points;
 }
 
-function isPointInPolygon(point, polygon) {
+export function isPointInPolygon(point, polygon) {
     let inside = false;
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
         const xi = polygon[i].x, yi = polygon[i].y;

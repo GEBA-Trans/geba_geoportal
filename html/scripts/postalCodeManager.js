@@ -1,4 +1,5 @@
 import { sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts } from './websocket.js';
+import { isPointInPolygon } from './lasso.js';  // Import this function from lasso.js
 
 const LOADING_MODE = 'loading';
 const DELIVERY_MODE = 'delivery';
@@ -50,10 +51,49 @@ export function togglePostalCode(pathElement, postalCode, isInitialLoad = false)
 
     pathElement.style.fill = '';
 
+    // Find text within the postal code area
+    const textInArea = findTextInPath(pathElement);
+    if (textInArea.length > 0) {
+        console.log(`Text found in ${postalCode}:`, textInArea.map(text => `${postalCode}: ${text}`));
+    }
+
     if (!isInitialLoad) {
         updatePostalCodeLists();
         saveSelectedPostalCodes();
     }
+}
+
+function findTextInPath(pathElement) {
+    const pathPoints = getPathPoints(pathElement);
+    const svgElement = pathElement.ownerSVGElement;
+    const textElements = svgElement.querySelectorAll('text');
+    const textInArea = [];
+
+    textElements.forEach(textElement => {
+        const bbox = textElement.getBBox();
+        const centerX = bbox.x + bbox.width / 2;
+        const centerY = bbox.y + bbox.height / 2;
+        const point = svgElement.createSVGPoint();
+        point.x = centerX;
+        point.y = centerY;
+
+        if (isPointInPolygon(point, pathPoints)) {
+            textInArea.push(textElement.textContent);
+        }
+    });
+
+    return textInArea;
+}
+
+function getPathPoints(path) {
+    const points = [];
+    const pathLength = path.getTotalLength();
+    const step = pathLength / 20; // Adjust this number to balance accuracy and performance
+    for (let i = 0; i <= pathLength; i += step) {
+        const point = path.getPointAtLength(i);
+        points.push(point);
+    }
+    return points;
 }
 
 export function updatePostalCodeLists() {
