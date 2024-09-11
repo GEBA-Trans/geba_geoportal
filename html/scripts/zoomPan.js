@@ -9,6 +9,8 @@ let viewBox;
 
 const zoomStep = 0.2;
 
+let zoomFactorDisplay; // Add this line
+
 export function initializeZoomPan(svg, origViewBox) {
     svgElement = svg;
     originalViewBox = origViewBox;
@@ -19,10 +21,18 @@ export function setupZoomControls() {
     const zoomIn = document.getElementById('zoom-in');
     const zoomOut = document.getElementById('zoom-out');
     const resetZoom = document.getElementById('reset-zoom');
+    zoomFactorDisplay = document.getElementById('zoom-factor'); // Add this line
 
     zoomIn.addEventListener('click', () => zoom(zoomStep));
     zoomOut.addEventListener('click', () => zoom(-zoomStep));
     resetZoom.addEventListener('click', resetView);
+    
+    // Add mouse wheel zoom
+    svgElement.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const zoomDirection = e.deltaY < 0 ? zoomStep : -zoomStep;
+        zoom(zoomDirection);
+    });
 }
 
 export function setupPanning() {
@@ -64,7 +74,7 @@ function stopDragging() {
 
 function zoom(step) {
     const newZoom = currentZoom + step;
-    if (newZoom >= 0.5 && newZoom <= 4) {
+    if (newZoom >= 0.5 && newZoom <= 15) { // Update max zoom if needed
         currentZoom = newZoom;
 
         const newWidth = originalViewBox.width / currentZoom;
@@ -74,6 +84,9 @@ function zoom(step) {
 
         viewBox = { x: newX, y: newY, width: newWidth, height: newHeight };
         updateSvgViewBox();
+
+        // Update the zoom factor display
+        zoomFactorDisplay.textContent = `Zoom: ${currentZoom.toFixed(1)}x`; // Add this line
     }
 }
 
