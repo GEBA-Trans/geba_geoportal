@@ -1,6 +1,10 @@
 export async function loadSVG() {
     try {
-        const response = await fetch('map2.svg');
+        // Parse the URL to get the map filename
+        const urlParams = new URLSearchParams(window.location.search);
+        const mapFilename = urlParams.get('map') || 'map.svg';
+
+        const response = await fetch(mapFilename);
         const svgContent = await response.text();
         document.getElementById('map-container').innerHTML += svgContent;
         const svgElement = document.querySelector('#map-container svg');
