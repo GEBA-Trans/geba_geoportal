@@ -14,10 +14,10 @@ export function setupLookupButton() {
     lookupButton.addEventListener('click', lookupCompanies);
 }
 
-export function ensureControlsVisibility() {
-    const controls = document.getElementById('controls');
-    if (controls) {
-        controls.style.display = 'block';
-        controls.style.zIndex = '1000';
-    }
-}
+// export function ensureControlsVisibility() {
+//     const controls = document.getElementById('controls');
+//     if (controls) {
+//         controls.style.display = 'block';
+//         controls.style.zIndex = '1000';
+//     }
+// }

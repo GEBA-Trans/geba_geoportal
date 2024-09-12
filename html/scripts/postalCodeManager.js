@@ -324,6 +324,12 @@ function loadPostalCodesFromData(data, targetSet, mode) {
             targetSet.add(postalCode);
             pathElement.classList.add('selected', mode);
             pendingPostalCodes.add(postalCode);
+        } else {
+            // If the path element is not found, show it in the list as gray
+            const missingPostalCodeElement = document.createElement('li'); // Create a list item
+            missingPostalCodeElement.textContent = postalCode;
+            missingPostalCodeElement.style.color = 'gray'; // Set color to gray
+            document.getElementById(`${mode}-list`).appendChild(missingPostalCodeElement); // Append to the appropriate list
         }
     });
 }

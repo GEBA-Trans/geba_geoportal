@@ -4,6 +4,16 @@ export async function loadSVG() {
         const urlParams = new URLSearchParams(window.location.search);
         const mapFilename = urlParams.get('map') || 'map.svg';
 
+        // Set the selected option in the dropdown
+        const regionSelect = document.getElementById('regions');
+        if (mapFilename === 'GEBA_map_5.svg') {
+            regionSelect.value = '/?map=GEBA_map_5.svg'; // Set to Europe
+        } else if (mapFilename === 'GEBA_map_benelux.svg') {
+            regionSelect.value = '/?map=GEBA_map_benelux.svg'; // Set to Benelux
+        } else {
+            regionSelect.value = ''; // Default option
+        }
+
         const response = await fetch(mapFilename);
         const svgContent = await response.text();
         document.getElementById('map-container').innerHTML += svgContent;
