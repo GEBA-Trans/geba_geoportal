@@ -46,10 +46,14 @@ export function togglePostalCode(pathElement, postalCode, isInitialLoad = false)
         targetSet.add(postalCode);
         pathElement.classList.remove('selected', 'loading', 'delivery');
         pathElement.classList.add('selected', currentMode);
+        
+        // {{ edit_1 }}: Set the fill color based on the selected color
+        const selectedColor = currentMode === 'loading' ? document.getElementById('loading-color').value : document.getElementById('delivery-color').value;
+        pathElement.style.fill = selectedColor; // Apply the selected color
         sendToWebSocket('select', postalCode);
     }
 
-    pathElement.style.fill = '';
+    pathElement.style.fill = ''; // This line can be removed if the color is set above
 
     // Find elements within the postal code area
     const elementsInArea = findTextInPath(pathElement);
