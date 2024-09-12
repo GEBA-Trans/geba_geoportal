@@ -366,3 +366,11 @@ path.selected.delivery {
 .remove-country-btn:hover {
     color: #c82333;
 }
+
+#zoom-factor {
+    display: flex; /* Use flexbox for centering */
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+    padding: 0 1rem; /* Add some padding for better spacing */
+    font-weight: 500; /* Optional: make the text bolder */
+}
