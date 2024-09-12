@@ -374,3 +374,31 @@ path.selected.delivery {
     padding: 0 1rem; /* Add some padding for better spacing */
     font-weight: 500; /* Optional: make the text bolder */
 }
+
+/* Add styles for the region-select to match zoom-controls */
+#region-select {
+    display: flex;
+    align-items: center;
+    background-color: white; /* Match the background of zoom-controls */
+    border-radius: 25px; /* Match the border radius */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Match the shadow */
+    padding: 0.5rem; /* Add padding for spacing */
+    margin-left: 1rem; /* Add margin to separate from zoom controls */
+}
+
+#region-select label {
+    margin-right: 0.5rem; /* Space between label and select */
+}
+
+#region-select select {
+    border: none; /* Remove default border */
+    padding: 0.5rem; /* Add padding for better appearance */
+    font-size: 1rem; /* Match font size */
+    color: #2980b9; /* Match text color */
+    background-color: transparent; /* Make background transparent */
+    cursor: pointer; /* Change cursor to pointer */
+}
+
+#region-select select:hover {
+    background-color: #ecf0f1; /* Change background on hover */
+}
