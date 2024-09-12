@@ -67,7 +67,6 @@ function drag(e) {
 
     updateSvgViewBox();
 
-    // Update start positions for the next drag event
     startX = e.clientX;
     startY = e.clientY;
 }
@@ -98,6 +97,9 @@ function resetView() {
     currentZoom = 1;
     viewBox = { ...originalViewBox };
     updateSvgViewBox();
+    
+    // Update the zoom factor display
+    zoomFactorDisplay.textContent = `Zoom: ${currentZoom.toFixed(1)}x`; // Add this line
 }
 
 function updateSvgViewBox() {
