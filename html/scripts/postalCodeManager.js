@@ -305,6 +305,9 @@ export function loadSelectedPostalCodes() {
                 loadPostalCodesFromData(data[LOADING_MODE], loadingPostalCodes, LOADING_MODE);
                 loadPostalCodesFromData(data[DELIVERY_MODE], deliveryPostalCodes, DELIVERY_MODE);
                 updatePostalCodeLists();
+                // Update the colors for the loaded postal codes
+                updatePostalCodeSelectionColor('loading', document.getElementById('loading-color').value);
+                updatePostalCodeSelectionColor('delivery', document.getElementById('delivery-color').value);
                 if (isWebSocketConnected) {
                     requestPendingCounts();
                 }
@@ -324,12 +327,6 @@ function loadPostalCodesFromData(data, targetSet, mode) {
             targetSet.add(postalCode);
             pathElement.classList.add('selected', mode);
             pendingPostalCodes.add(postalCode);
-        } else {
-            // If the path element is not found, show it in the list as gray
-            const missingPostalCodeElement = document.createElement('li'); // Create a list item
-            missingPostalCodeElement.textContent = postalCode;
-            missingPostalCodeElement.style.color = 'gray'; // Set color to gray
-            document.getElementById(`${mode}-list`).appendChild(missingPostalCodeElement); // Append to the appropriate list
         }
     });
 }
@@ -421,4 +418,28 @@ export function disablePostalCodeClicks() {
 
 export function enablePostalCodeClicks() {
     isPostalCodeClicksEnabled = true;
+}
+
+// Add event listeners for color pickers
+document.getElementById('loading-color').addEventListener('input', (e) => {
+    const color = e.target.value;
+    document.getElementById('loading-mode').style.backgroundColor = color; // Update button color
+    updatePostalCodeSelectionColor('loading', color); // Update selection color
+});
+
+document.getElementById('delivery-color').addEventListener('input', (e) => {
+    const color = e.target.value;
+    document.getElementById('delivery-mode').style.backgroundColor = color; // Update button color
+    updatePostalCodeSelectionColor('delivery', color); // Update selection color
+});
+
+// Function to update postal code selection color
+function updatePostalCodeSelectionColor(mode, color) {
+    const postalCodes = mode === 'loading' ? loadingPostalCodes : deliveryPostalCodes;
+    postalCodes.forEach(postalCode => {
+        const pathElement = document.getElementById(postalCode);
+        if (pathElement) {
+            pathElement.style.fill = color; // Update the fill color of the postal code
+        }
+    });
 }
