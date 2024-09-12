@@ -55,15 +55,19 @@ function startDragging(e) {
 function drag(e) {
     if (!isDragging || isLassoActive) return;
     e.preventDefault();
+    console.log('starting pan');
 
-    const dx = (e.clientX - startX) * viewBox.width / svgElement.clientWidth / currentZoom;
-    const dy = (e.clientY - startY) * viewBox.height / svgElement.clientHeight / currentZoom;
+    // Calculate the change in mouse position
+    const dx = (e.clientX - startX);
+    const dy = (e.clientY - startY);
 
-    viewBox.x -= dx;
-    viewBox.y -= dy;
+    // Adjust viewBox based on the zoom level
+    viewBox.x -= dx * (originalViewBox.width / svgElement.clientWidth);
+    viewBox.y -= dy * (originalViewBox.height / svgElement.clientHeight);
 
     updateSvgViewBox();
 
+    // Update start positions for the next drag event
     startX = e.clientX;
     startY = e.clientY;
 }
