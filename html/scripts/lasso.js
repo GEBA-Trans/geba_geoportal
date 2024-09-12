@@ -83,8 +83,11 @@ function getPathPoints(path) {
     console.log('Step Size:', step); // Debug: log the step size for point sampling
     for (let i = 0; i <= pathLength; i += step) {
         const point = path.getPointAtLength(i);
-        points.push(point);
-        console.log(`Point ${i}:`, point); // Debug: log each sampled point
+        // Check if the point is already in the array
+        if (!points.some(p => p.x === point.x && p.y === point.y)) {
+            points.push(point);
+            console.log(`Point ${i}:`, point); // Debug: log each sampled point
+        }
     }
     console.log('Total Points Collected:', points.length); // Debug: log the total number of points collected
     return points;
@@ -117,7 +120,7 @@ function endLasso(e) {
     drawLasso();
     selectPathsInLasso();
     clearLasso();
-    // toggleLasso(); // Removed to keep lasso active
+    toggleLasso();
 }
 
 function debugLasso() {
