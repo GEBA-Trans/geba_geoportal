@@ -366,7 +366,26 @@ path.selected.delivery {
 .remove-country-btn:hover {
     color: #c82333;
 }
+.color-picker {
+    /* display: none; Hide the default color input */
+}
 
+#mode-toggle button {
+    position: relative;
+    padding-right: 30px; /* Add padding to the right for the color picker */
+}
+
+#mode-toggle button .color-picker {
+    position: absolute;
+    top: 50%;
+    right: 10px; /* Position it on the right */
+    transform: translateY(-50%); /* Center vertically */
+    width: 20px; /* Adjust size as needed */
+    height: 20px; /* Adjust size as needed */
+    /* border-radius: 50%; Make it a circle */
+    border: none; /* Remove border */
+    background-color: currentColor; /* Fill with the button's text color */
+}
 #zoom-factor {
     display: flex; /* Use flexbox for centering */
     align-items: center; /* Center vertically */

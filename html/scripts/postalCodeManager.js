@@ -423,13 +423,13 @@ export function enablePostalCodeClicks() {
 // Add event listeners for color pickers
 document.getElementById('loading-color').addEventListener('input', (e) => {
     const color = e.target.value;
-    document.getElementById('loading-mode').style.backgroundColor = color; // Update button color
+    // document.getElementById('loading-mode').style.backgroundColor = color; // Update button color
     updatePostalCodeSelectionColor('loading', color); // Update selection color
 });
 
 document.getElementById('delivery-color').addEventListener('input', (e) => {
     const color = e.target.value;
-    document.getElementById('delivery-mode').style.backgroundColor = color; // Update button color
+    // document.getElementById('delivery-mode').style.backgroundColor = color; // Update button color
     updatePostalCodeSelectionColor('delivery', color); // Update selection color
 });
 
