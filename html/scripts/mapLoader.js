@@ -23,7 +23,7 @@ export async function loadSVG() {
         const paths = svgElement.querySelectorAll('path');
         paths.forEach(path => {
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.textContent = path.id; // Set the text to the path's ID
+            text.textContent = path.id.substring(3); // Remove the first three characters from the path's ID
             text.setAttribute("x", path.getBBox().x + path.getBBox().width / 2); // Center the text
             text.setAttribute("y", path.getBBox().y + path.getBBox().height / 2); // Center the text
             text.setAttribute("text-anchor", "middle"); // Center alignment
