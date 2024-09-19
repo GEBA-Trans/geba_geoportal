@@ -101,33 +101,33 @@ export function togglePostalCode(pathElement, postalCode, isInitialLoad = false)
 //     return elementsInArea;
 // }
 
-function getXmlPath(element) {
-    const path = [];
-    while (element && element.nodeType === Node.ELEMENT_NODE) {
-        let index = 0;
-        let sibling = element;
-        while (sibling) {
-            if (sibling.nodeName === element.nodeName) {
-                index++;
-            }
-            sibling = sibling.previousElementSibling;
-        }
-        path.unshift(`${element.nodeName}[${index}]`);
-        element = element.parentNode;
-    }
-    return '/' + path.join('/');
-}
+// function getXmlPath(element) {
+//     const path = [];
+//     while (element && element.nodeType === Node.ELEMENT_NODE) {
+//         let index = 0;
+//         let sibling = element;
+//         while (sibling) {
+//             if (sibling.nodeName === element.nodeName) {
+//                 index++;
+//             }
+//             sibling = sibling.previousElementSibling;
+//         }
+//         path.unshift(`${element.nodeName}[${index}]`);
+//         element = element.parentNode;
+//     }
+//     return '/' + path.join('/');
+// }
 
-function getPathPoints(path) {
-    const points = [];
-    const pathLength = path.getTotalLength();
-    const step = pathLength / 20; // Adjust this number to balance accuracy and performance
-    for (let i = 0; i <= pathLength; i += step) {
-        const point = path.getPointAtLength(i);
-        points.push(point);
-    }
-    return points;
-}
+// function getPathPoints(path) {
+//     const points = [];
+//     const pathLength = path.getTotalLength();
+//     const step = pathLength / 20; // Adjust this number to balance accuracy and performance
+//     for (let i = 0; i <= pathLength; i += step) {
+//         const point = path.getPointAtLength(i);
+//         points.push(point);
+//     }
+//     return points;
+// }
 
 export function updatePostalCodeLists() {
     updateList('loading-list', loadingPostalCodes);
