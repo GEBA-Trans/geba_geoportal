@@ -19,8 +19,12 @@ function toggleLasso() {
     isLassoActive = !isLassoActive;
     svgElement.classList.toggle('lasso-active', isLassoActive);
     const lassoButton = document.getElementById('lasso-button');
-    lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times"></i>' : '<i class="fas fa-draw-polygon"></i>';
+    const lassoStatus = document.getElementById('lasso-status'); // Get the lasso status element
+    lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times" style="color: red;"></i>' : '<i class="fas fa-draw-polygon"></i>';
     lassoButton.title = isLassoActive ? 'Cancel Lasso' : 'Lasso Select';
+    
+    // Show or hide the lasso status message
+    lassoStatus.style.display = isLassoActive ? 'flex' : 'none'; // Update this line
 }
 
 function startLasso(e) {
@@ -120,7 +124,7 @@ function endLasso(e) {
     drawLasso();
     selectPathsInLasso();
     clearLasso();
-    toggleLasso();
+    // toggleLasso();
 }
 
 function debugLasso() {
