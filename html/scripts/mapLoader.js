@@ -18,6 +18,29 @@ export async function loadSVG() {
         const svgContent = await response.text();
         document.getElementById('map-container').innerHTML += svgContent;
         const svgElement = document.querySelector('#map-container svg');
+        
+        // Add labels for each path
+        const paths = svgElement.querySelectorAll('path');
+        paths.forEach(path => {
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.textContent = path.id; // Set the text to the path's ID
+            text.setAttribute("x", path.getBBox().x + path.getBBox().width / 2); // Center the text
+            text.setAttribute("y", path.getBBox().y + path.getBBox().height / 2); // Center the text
+            text.setAttribute("text-anchor", "middle"); // Center alignment
+            text.setAttribute("font-size", "10"); // Set font size
+            text.setAttribute("fill", "black"); // Set text color
+            text.setAttribute("pointer-events", "none"); // Prevent text from being selectable
+            svgElement.appendChild(text); // Append the text to the SVG
+
+            // Add hover effect
+            path.addEventListener('mouseover', () => {
+                text.setAttribute("font-size", "14"); // Increase font size on hover
+            });
+            path.addEventListener('mouseout', () => {
+                text.setAttribute("font-size", "10"); // Reset font size when not hovering
+            });
+        });
+
         const viewBox = svgElement.viewBox.baseVal;
         const originalViewBox = {
             x: viewBox.x,
