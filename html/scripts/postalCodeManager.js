@@ -56,17 +56,17 @@ export function togglePostalCode(pathElement, postalCode, isInitialLoad = false)
     pathElement.style.fill = ''; // This line can be removed if the color is set above
 
     // Find elements within the postal code area
-    const elementsInArea = findTextInPath(pathElement);
-    if (elementsInArea.length > 0) {
-        console.log(`Elements found in ${postalCode}:`);
-        elementsInArea.forEach(item => {
-            console.log(`${postalCode}: ${item.element.tagName}`);
-            console.log(`XML Path: ${item.xmlPath}`);
-            if (item.element.textContent.trim()) {
-                console.log(`Text Content: ${item.element.textContent.trim()}`);
-            }
-        });
-    }
+    // const elementsInArea = findTextInPath(pathElement);
+    // if (elementsInArea.length > 0) {
+    //     console.log(`Elements found in ${postalCode}:`);
+    //     elementsInArea.forEach(item => {
+    //         console.log(`${postalCode}: ${item.element.tagName}`);
+    //         console.log(`XML Path: ${item.xmlPath}`);
+    //         if (item.element.textContent.trim()) {
+    //             console.log(`Text Content: ${item.element.textContent.trim()}`);
+    //         }
+    //     });
+    // }
 
     if (!isInitialLoad) {
         updatePostalCodeLists();
@@ -74,32 +74,32 @@ export function togglePostalCode(pathElement, postalCode, isInitialLoad = false)
     }
 }
 
-function findTextInPath(pathElement) {
-    const pathPoints = getPathPoints(pathElement);
-    const svgElement = pathElement.ownerSVGElement;
-    const allElements = svgElement.querySelectorAll('*');
-    const elementsInArea = [];
+// function findTextInPath(pathElement) {
+//     const pathPoints = getPathPoints(pathElement);
+//     const svgElement = pathElement.ownerSVGElement;
+//     const allElements = svgElement.querySelectorAll('*');
+//     const elementsInArea = [];
 
-    allElements.forEach(element => {
-        if (element === pathElement) return; // Skip the path itself
+//     allElements.forEach(element => {
+//         if (element === pathElement) return; // Skip the path itself
 
-        const bbox = element.getBBox();
-        const centerX = bbox.x + bbox.width / 2;
-        const centerY = bbox.y + bbox.height / 2;
-        const point = svgElement.createSVGPoint();
-        point.x = centerX;
-        point.y = centerY;
+//         const bbox = element.getBBox();
+//         const centerX = bbox.x + bbox.width / 2;
+//         const centerY = bbox.y + bbox.height / 2;
+//         const point = svgElement.createSVGPoint();
+//         point.x = centerX;
+//         point.y = centerY;
 
-        if (isPointInPolygon(point, pathPoints)) {
-            elementsInArea.push({
-                element: element,
-                xmlPath: getXmlPath(element)
-            });
-        }
-    });
+//         if (isPointInPolygon(point, pathPoints)) {
+//             elementsInArea.push({
+//                 element: element,
+//                 xmlPath: getXmlPath(element)
+//             });
+//         }
+//     });
 
-    return elementsInArea;
-}
+//     return elementsInArea;
+// }
 
 function getXmlPath(element) {
     const path = [];
