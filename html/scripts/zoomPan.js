@@ -57,9 +57,9 @@ function drag(e) {
     e.preventDefault();
     console.log('starting pan');
 
-    // Calculate the change in mouse position
-    const dx = (e.clientX - startX);
-    const dy = (e.clientY - startY);
+    // Calculate the change in mouse position, scaled by the current zoom level
+    const dx = (e.clientX - startX) / currentZoom; // Adjusted for zoom
+    const dy = (e.clientY - startY) / currentZoom; // Adjusted for zoom
     
     // Adjust viewBox based on the zoom level
     viewBox.x -= dx * (originalViewBox.width / svgElement.clientWidth);
