@@ -19,12 +19,28 @@ function toggleLasso() {
     isLassoActive = !isLassoActive;
     svgElement.classList.toggle('lasso-active', isLassoActive);
     const lassoButton = document.getElementById('lasso-button');
-    const lassoStatus = document.getElementById('lasso-status'); // Get the lasso status element
+    const lassoStatus = document.getElementById('lasso-status');
     lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times" style="color: red;"></i>' : '<i class="fas fa-draw-polygon"></i>';
     lassoButton.title = isLassoActive ? 'Cancel Lasso' : 'Lasso Select';
-    
+
     // Show or hide the lasso status message
-    lassoStatus.style.display = isLassoActive ? 'flex' : 'none'; // Update this line
+    lassoStatus.style.display = isLassoActive ? 'flex' : 'none';
+
+    // Apply grayscale to unselected postal codes
+    if (isLassoActive) {
+        const paths = document.querySelectorAll('#map-container svg path');
+        paths.forEach(path => {
+            if (!path.classList.contains('selected')) {
+                path.style.filter = 'grayscale(100%)';
+            }
+        });
+    } else {
+        // Remove grayscale filter when lasso is inactive
+        const paths = document.querySelectorAll('#map-container svg path');
+        paths.forEach(path => {
+            path.style.filter = '';
+        });
+    }
 }
 
 function startLasso(e) {
@@ -70,6 +86,8 @@ function selectPathsInLasso() {
         if (isInLasso) {
             const postalCode = path.id || 'Unknown';
             togglePostalCodeCallback(path, postalCode);
+            path.classList.add('selected'); // Ensure selected paths are marked
+            path.style.filter = ''; // Remove grayscale for selected paths
         }
     });
 }
