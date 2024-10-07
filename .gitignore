@@ -24,4 +24,12 @@ Thumbs.db
 
 # Ignore node-red folder
 data/
-html/*.svg
+html/ENG-PC-EU-1381-simplified.svg
+html/ENG-PC-EU-1381.svg
+html/GEBA_map_1.svg
+html/GEBA_map_2.svg
+html/GEBA_map_3.svg
+html/GEBA_map_4.svg
+html/GEBA_map_5.svg
+html/GEBA_map_6.svg
+html/GEBA_map_central_europe.svg
