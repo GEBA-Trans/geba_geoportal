@@ -1,4 +1,4 @@
-export async function loadSVG() {
+export async function loadSVG(textZoom = 1) {
     try {
         // Parse the URL to get the map filename
         const urlParams = new URLSearchParams(window.location.search);
@@ -27,17 +27,19 @@ export async function loadSVG() {
             text.setAttribute("x", path.getBBox().x + path.getBBox().width / 2); // Center the text
             text.setAttribute("y", path.getBBox().y + path.getBBox().height / 2); // Center the text
             text.setAttribute("text-anchor", "middle"); // Center alignment
-            text.setAttribute("font-size", "10"); // Set font size
+            text.setAttribute("font-size", `${10 * textZoom}`); // Set font size based on text zoom
             text.setAttribute("fill", "black"); // Set text color
             text.setAttribute("pointer-events", "none"); // Prevent text from being selectable
             svgElement.appendChild(text); // Append the text to the SVG
 
-            // Add hover effect
+            // Add hover effect with debug info
             path.addEventListener('mouseover', () => {
-                text.setAttribute("font-size", "14"); // Increase font size on hover
+                console.log(`Mouse over path: ${path.id}, increasing font size to ${14 * textZoom}`); // Debug info
+                text.setAttribute("font-size", `${14 * textZoom}`); // Increase font size on hover
             });
             path.addEventListener('mouseout', () => {
-                text.setAttribute("font-size", "10"); // Reset font size when not hovering
+                console.log(`Mouse out of path: ${path.id}, resetting font size to ${10 * textZoom}`); // Debug info
+                text.setAttribute("font-size", `${10 * textZoom}`); // Reset font size when not hovering
             });
         });
 
@@ -54,3 +56,23 @@ export async function loadSVG() {
         throw error;
     }
 }
+
+document.getElementById('map-container').addEventListener('mouseover', (event) => {
+    const path = event.target.closest('path');
+    if (path) {
+        const text = document.getElementById(`text-${path.id}`);
+        if (text) {
+            text.setAttribute("font-size", "14");
+        }
+    }
+});
+
+document.getElementById('map-container').addEventListener('mouseout', (event) => {
+    const path = event.target.closest('path');
+    if (path) {
+        const text = document.getElementById(`text-${path.id}`);
+        if (text) {
+            text.setAttribute("font-size", "10");
+        }
+    }
+});

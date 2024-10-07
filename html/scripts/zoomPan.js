@@ -55,21 +55,18 @@ function startDragging(e) {
 function drag(e) {
     if (!isDragging || isLassoActive) return;
     e.preventDefault();
-    console.log('starting pan');
 
-    // Calculate the change in mouse position, scaled by the current zoom level
-    const dx = (e.clientX - startX) / currentZoom; // Adjusted for zoom
-    const dy = (e.clientY - startY) / currentZoom; // Adjusted for zoom
-    
-    // Adjust viewBox based on the zoom level
-    viewBox.x -= dx * (originalViewBox.width / svgElement.clientWidth);
-    viewBox.y -= dy * (originalViewBox.height / svgElement.clientHeight);
-    
-    updateSvgViewBox();
-    
-    // Update start positions for the next drag event
-    startX = e.clientX;
-    startY = e.clientY;
+    requestAnimationFrame(() => {
+        const dx = (e.clientX - startX) / currentZoom;
+        const dy = (e.clientY - startY) / currentZoom;
+
+        viewBox.x -= dx * (originalViewBox.width / svgElement.clientWidth);
+        viewBox.y -= dy * (originalViewBox.height / svgElement.clientHeight);
+        updateSvgViewBox();
+
+        startX = e.clientX;
+        startY = e.clientY;
+    });
 }
 
 function stopDragging() {
