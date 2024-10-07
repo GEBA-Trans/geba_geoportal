@@ -430,3 +430,7 @@ path.selected.delivery {
 #region-select select:hover {
     background-color: #ecf0f1; /* Change background on hover */
 }
+
+.lasso-active {
+    filter: grayscale(100%);
+}
