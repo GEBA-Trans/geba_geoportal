@@ -31,7 +31,7 @@ function toggleLasso() {
         const paths = document.querySelectorAll('#map-container svg path');
         paths.forEach(path => {
             if (!path.classList.contains('selected')) {
-                path.style.filter = 'grayscale(100%)';
+                path.style.filter = 'grayscale(75%)';
             }
         });
     } else {
