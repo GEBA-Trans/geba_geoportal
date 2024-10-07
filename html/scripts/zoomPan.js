@@ -60,13 +60,14 @@ function drag(e) {
     // Calculate the change in mouse position
     const dx = (e.clientX - startX);
     const dy = (e.clientY - startY);
-
+    
     // Adjust viewBox based on the zoom level
     viewBox.x -= dx * (originalViewBox.width / svgElement.clientWidth);
     viewBox.y -= dy * (originalViewBox.height / svgElement.clientHeight);
-
+    
     updateSvgViewBox();
-
+    
+    // Update start positions for the next drag event
     startX = e.clientX;
     startY = e.clientY;
 }
