@@ -7,13 +7,6 @@ services:
       - ./html:/usr/share/nginx/html
     depends_on:
       - connect
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.geoportal-secure.entrypoints=websecure"
-      - "traefik.http.routers.geoportal-secure.rule=Host(`geoportal.gebatrans.app`)"
-      - "traefik.http.routers.geoportal-secure.service=geoportal"
-      - "traefik.http.services.geoportal.loadbalancer.server.port=3000"
 
 
   connect:
