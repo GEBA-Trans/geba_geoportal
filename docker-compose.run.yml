@@ -1,18 +1,17 @@
 services:
   web:
-    image: geba_geoportal-web:latest
-    ports:
-      - "8080:80"
+    image: gebatrans/geba_geoportal:latest
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.geoportal-secure.entrypoints=websecure"
-      - "traefik.http.routers.geoportal-secure.rule=Host(`geoportal.gebatrans.app`)"
+      - "traefik.http.routers.geoportal-secure.rule=Host(`geoportal.staging.gebatrans.app`)"
       - "traefik.http.routers.geoportal-secure.service=geoportal"
-      - "traefik.http.services.geoportal.loadbalancer.server.port=3000"
+      - "traefik.http.services.geoportal.loadbalancer.server.port=80"
     depends_on:
       - geoportal-connect
-
+    networks:
+      proxy: null
   geoportal-connect:
     container_name: geoportal-connect
     image: nodered/node-red
@@ -22,3 +21,15 @@ services:
       - "1880:1880"
     volumes:
       - ./data:/data
+    networks:
+      proxy: null
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - traefik.http.routers.geoportal-connect.rule=Host(`geoportal.staging.gebatrans.app`) && PathPrefix(`/ws`)
+      - "traefik.http.routers.geoportal-connect.entrypoints=websecure"
+      - "traefik.http.services.geoportal-connect.loadbalancer.server.port=1880"
+
+networks:
+  proxy:
+    external: true
