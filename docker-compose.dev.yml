@@ -12,7 +12,7 @@ services:
     container_name: geoportal-connect
     image: nodered/node-red
     environment:
-      - WEBSOCKET_URL=ws://connect.gebatrans.app/ws/map
+      - WEBSOCKET_HOST=connect.staging.gebatrans.app
     ports:
       - "1880:1880"
     volumes:
