@@ -1,0 +1,29 @@
+name: Publish Docker image
+on:
+  release:
+    types: [published]
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Update version
+        uses: brettdorrans/write-version-to-file@master
+        with:
+          filename: "./app/views/partials/_version.html.haml"
+          placeholder: "${VERSION}"
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          context: .
+          tags: gebatrans/geba_geoportal:latest,gebatrans/geba_geoportal:${{ github.event.release.tag_name }}.
