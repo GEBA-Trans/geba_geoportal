@@ -6,11 +6,13 @@ services:
     volumes:
       - ./html:/usr/share/nginx/html
     depends_on:
-      - connect
+      - geoportal-connect
 
-
-  connect:
+  geoportal-connect:
+    container_name: geoportal-connect
     image: nodered/node-red
+    environment:
+      - WEBSOCKET_URL=ws://connect.gebatrans.app/ws/map
     ports:
       - "1880:1880"
     volumes:

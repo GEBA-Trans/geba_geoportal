@@ -9,7 +9,8 @@ let pendingWebSocketMessages = [];
 let pendingPostalCodes = new Set();
 
 function connectWebSocket() {
-    socket = new WebSocket('ws://lx-dev:1880/ws/map');
+    console.log('Attempting to connect to WebSocket at ws://' + window.location.hostname + ':1880/ws/map');
+    socket = new WebSocket(`ws://${window.location.hostname}:1880/ws/map`);
 
     socket.onopen = function(event) {
         console.log('WebSocket connection established');
@@ -35,7 +36,7 @@ function connectWebSocket() {
     };
 
     // Connect to the lookup WebSocket
-    lookupSocket = new WebSocket('ws://lx-dev:1880/ws/lookup');
+    lookupSocket = new WebSocket(`ws://${window.location.hostname}:1880/ws/lookup`); // This line should be corrected
 
     lookupSocket.onopen = function(event) {
         console.log('Lookup WebSocket connection established');

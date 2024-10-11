@@ -10,3 +10,15 @@ services:
       - "traefik.http.routers.geoportal-secure.rule=Host(`geoportal.gebatrans.app`)"
       - "traefik.http.routers.geoportal-secure.service=geoportal"
       - "traefik.http.services.geoportal.loadbalancer.server.port=3000"
+    depends_on:
+      - geoportal-connect
+
+  geoportal-connect:
+    container_name: geoportal-connect
+    image: nodered/node-red
+    environment:
+      - WEBSOCKET_URL=ws://connect.gebatrans.app/ws/map
+    ports:
+      - "1880:1880"
+    volumes:
+      - ./data:/data

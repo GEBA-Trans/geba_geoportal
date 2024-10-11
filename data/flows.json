@@ -1,0 +1,413 @@
+[
+    {
+        "id": "58c7f7e83196ef44",
+        "type": "tab",
+        "label": "GeoPortal websocket",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "0156106eb7844c79",
+        "type": "tab",
+        "label": "Global Settings",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "24768e2fe67b6e66",
+        "type": "group",
+        "z": "58c7f7e83196ef44",
+        "name": "each selected point",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "e2ce18803eb9b981",
+            "3fa733d667f24e9e",
+            "2274759a6a583737",
+            "cbec0b761bb34955",
+            "185a17c97c3b7372",
+            "be1c1fdb653ecbd5",
+            "ec508446184ce421",
+            "784a9c232bea915c",
+            "d4fdf5fc82239ee8"
+        ],
+        "x": 374,
+        "y": 159,
+        "w": 952,
+        "h": 182
+    },
+    {
+        "id": "4b8513a3ea3e620c",
+        "type": "group",
+        "z": "58c7f7e83196ef44",
+        "name": "on lookup",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "8891940ca93a0a7e",
+            "e225fb84d214eb5e",
+            "5c6d0be8944008e3",
+            "420d55f528f911f1",
+            "fb9730d9052ab05f"
+        ],
+        "x": 374,
+        "y": 359,
+        "w": 952,
+        "h": 122
+    },
+    {
+        "id": "aae82fba46156eb6",
+        "type": "websocket-listener",
+        "path": "/ws/map",
+        "wholemsg": "false"
+    },
+    {
+        "id": "4e8561b9beda570f",
+        "type": "websocket-listener",
+        "path": "/ws/lookup",
+        "wholemsg": "false"
+    },
+    {
+        "id": "e2ce18803eb9b981",
+        "type": "inject",
+        "z": "58c7f7e83196ef44",
+        "g": "24768e2fe67b6e66",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 960,
+        "y": 200,
+        "wires": [
+            [
+                "ec508446184ce421"
+            ]
+        ]
+    },
+    {
+        "id": "3fa733d667f24e9e",
+        "type": "json",
+        "z": "58c7f7e83196ef44",
+        "g": "24768e2fe67b6e66",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 650,
+        "y": 240,
+        "wires": [
+            [
+                "cbec0b761bb34955",
+                "d4fdf5fc82239ee8"
+            ]
+        ]
+    },
+    {
+        "id": "2274759a6a583737",
+        "type": "debug",
+        "z": "58c7f7e83196ef44",
+        "g": "24768e2fe67b6e66",
+        "name": "debug 2",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1220,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "cbec0b761bb34955",
+        "type": "change",
+        "z": "58c7f7e83196ef44",
+        "g": "24768e2fe67b6e66",
+        "name": "Return Random Number",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload.count",
+                "pt": "msg",
+                "to": "$floor($random()*100)\t",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 910,
+        "y": 240,
+        "wires": [
+            [
+                "2274759a6a583737",
+                "ec508446184ce421"
+            ]
+        ]
+    },
+    {
+        "id": "185a17c97c3b7372",
+        "type": "inject",
+        "z": "58c7f7e83196ef44",
+        "g": "24768e2fe67b6e66",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"action\":\"select\",\"postalCode\":\"path104\"}",
+        "payloadType": "str",
+        "x": 470,
+        "y": 200,
+        "wires": [
+            [
+                "3fa733d667f24e9e"
+            ]
+        ]
+    },
+    {
+        "id": "be1c1fdb653ecbd5",
+        "type": "debug",
+        "z": "58c7f7e83196ef44",
+        "g": "24768e2fe67b6e66",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "ec508446184ce421",
+        "type": "websocket out",
+        "z": "58c7f7e83196ef44",
+        "g": "24768e2fe67b6e66",
+        "name": "",
+        "server": "aae82fba46156eb6",
+        "client": "",
+        "x": 1230,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "784a9c232bea915c",
+        "type": "websocket in",
+        "z": "58c7f7e83196ef44",
+        "g": "24768e2fe67b6e66",
+        "name": "Map",
+        "server": "aae82fba46156eb6",
+        "client": "",
+        "x": 450,
+        "y": 240,
+        "wires": [
+            [
+                "3fa733d667f24e9e",
+                "be1c1fdb653ecbd5"
+            ]
+        ]
+    },
+    {
+        "id": "8891940ca93a0a7e",
+        "type": "websocket in",
+        "z": "58c7f7e83196ef44",
+        "g": "4b8513a3ea3e620c",
+        "name": "",
+        "server": "4e8561b9beda570f",
+        "client": "",
+        "x": 480,
+        "y": 400,
+        "wires": [
+            [
+                "420d55f528f911f1"
+            ]
+        ]
+    },
+    {
+        "id": "e225fb84d214eb5e",
+        "type": "websocket out",
+        "z": "58c7f7e83196ef44",
+        "g": "4b8513a3ea3e620c",
+        "name": "",
+        "server": "4e8561b9beda570f",
+        "client": "",
+        "x": 1220,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "5c6d0be8944008e3",
+        "type": "debug",
+        "z": "58c7f7e83196ef44",
+        "g": "4b8513a3ea3e620c",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 860,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "420d55f528f911f1",
+        "type": "json",
+        "z": "58c7f7e83196ef44",
+        "g": "4b8513a3ea3e620c",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 650,
+        "y": 400,
+        "wires": [
+            [
+                "5c6d0be8944008e3",
+                "fb9730d9052ab05f"
+            ]
+        ]
+    },
+    {
+        "id": "fb9730d9052ab05f",
+        "type": "change",
+        "z": "58c7f7e83196ef44",
+        "g": "4b8513a3ea3e620c",
+        "name": "return companies",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"companies\":[{\"name\":\"Fast Freight Ltd.\",\"fleetSize\":50,\"coverageArea\":\"National\",\"rating\":4.5},{\"name\":\"Local Logistics Co.\",\"fleetSize\":25,\"coverageArea\":\"Regional\",\"rating\":4.2},{\"name\":\"Global Shipping Inc.\",\"fleetSize\":113,\"coverageArea\":\"International\",\"rating\":4.8},{\"name\":\"City Express Deliveries\",\"fleetSize\":15,\"coverageArea\":\"Local\",\"rating\":4}]}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 890,
+        "y": 400,
+        "wires": [
+            [
+                "e225fb84d214eb5e"
+            ]
+        ]
+    },
+    {
+        "id": "d4fdf5fc82239ee8",
+        "type": "debug",
+        "z": "58c7f7e83196ef44",
+        "g": "24768e2fe67b6e66",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 860,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "3ed886625239a5d0",
+        "type": "function",
+        "z": "0156106eb7844c79",
+        "name": "process.env",
+        "func": "msg.payload = process.env\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "process",
+                "module": "process"
+            }
+        ],
+        "x": 510,
+        "y": 240,
+        "wires": [
+            [
+                "9ca3edbd6857853f"
+            ]
+        ]
+    },
+    {
+        "id": "b35ef390a46ff129",
+        "type": "inject",
+        "z": "0156106eb7844c79",
+        "name": "List env vars",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 290,
+        "y": 240,
+        "wires": [
+            [
+                "3ed886625239a5d0"
+            ]
+        ]
+    },
+    {
+        "id": "9ca3edbd6857853f",
+        "type": "debug",
+        "z": "0156106eb7844c79",
+        "name": "debug env variables",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 880,
+        "y": 240,
+        "wires": []
+    }
+]

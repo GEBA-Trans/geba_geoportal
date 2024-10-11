@@ -2,14 +2,3 @@ services:
   web:
     build: 
       context: .
-    ports:
-      - "8080:80"
-    depends_on:
-      - connect
-
-  connect:
-    image: nodered/node-red
-    ports:
-      - "1880:1880"
-    volumes:
-      - ./data:/data
