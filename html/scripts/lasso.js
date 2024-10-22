@@ -23,10 +23,8 @@ function toggleLasso() {
     lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times" style="color: red;"></i>' : '<i class="fas fa-draw-polygon"></i>';
     lassoButton.title = isLassoActive ? 'Cancel Lasso' : 'Lasso Select';
 
-    // Show or hide the lasso status message
     lassoStatus.style.display = isLassoActive ? 'flex' : 'none';
 
-    // Apply grayscale to unselected postal codes
     if (isLassoActive) {
         const paths = document.querySelectorAll('#map-container svg path');
         paths.forEach(path => {
@@ -34,12 +32,14 @@ function toggleLasso() {
                 path.style.filter = 'grayscale(75%)';
             }
         });
+        debugCounters.timeTaken = 0; // Reset timeTaken when activating lasso
+        showDebugCounters();
     } else {
-        // Remove grayscale filter when lasso is inactive
         const paths = document.querySelectorAll('#map-container svg path');
         paths.forEach(path => {
             path.style.filter = '';
         });
+        hideDebugCounters();
     }
 }
 
@@ -48,6 +48,9 @@ function startLasso(e) {
     e.preventDefault();
     const point = getSVGPoint(e.clientX, e.clientY);
     lassoPoints = [point];
+    lassoStartTime = performance.now(); // Record the start time
+    debugCounters.lassoPoints = 1;
+    updateDebugCounters();
 }
 
 function updateLasso(e) {
@@ -55,6 +58,8 @@ function updateLasso(e) {
     e.preventDefault();
     const point = getSVGPoint(e.clientX, e.clientY);
     lassoPoints.push(point);
+    debugCounters.lassoPoints = lassoPoints.length;
+    updateDebugCounters();
     drawLasso();
 }
 
@@ -81,38 +86,56 @@ function drawLasso() {
 
 function selectPathsInLasso() {
     const paths = document.querySelectorAll('#map-container svg path');
+    debugCounters.pathsChecked = 0;
+    debugCounters.pathsSelected = 0;
     paths.forEach(path => {
+        debugCounters.pathsChecked++;
         const isInLasso = isPathInLasso(path);
         if (isInLasso) {
+            debugCounters.pathsSelected++;
             const postalCode = path.id || 'Unknown';
             togglePostalCodeCallback(path, postalCode);
-            path.classList.add('selected'); // Ensure selected paths are marked
-            path.style.filter = ''; // Remove grayscale for selected paths
+            path.classList.add('selected');
+            path.style.filter = '';
         }
+        updateDebugCounters();
     });
 }
 
 function isPathInLasso(path) {
-    const pathPoints = getPathPoints(path);
-    return pathPoints.some(point => isPointInPolygon(point, lassoPoints));
+    const { points } = getPathPoints(path);
+    return points.some(point => isPointInPolygon(point, lassoPoints));
 }
 
 function getPathPoints(path) {
     const points = [];
     const pathLength = path.getTotalLength();
-    const step = pathLength / 4; // Adjust this number to balance accuracy and performance
-    console.log('Path Length:', pathLength); // Debug: log the total length of the path
-    console.log('Step Size:', step); // Debug: log the step size for point sampling
+    const step = pathLength / 8; // Adjust this number to balance accuracy and performance
+    console.log('Path Length:', pathLength);
+    console.log('Step Size:', step);
+
+    const svg = path.ownerSVGElement;
+    const debugGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    debugGroup.setAttribute("id", "debug-points");
+    svg.appendChild(debugGroup);
+
     for (let i = 0; i <= pathLength; i += step) {
         const point = path.getPointAtLength(i);
-        // Check if the point is already in the array
         if (!points.some(p => p.x === point.x && p.y === point.y)) {
             points.push(point);
-            console.log(`Point ${i}:`, point); // Debug: log each sampled point
+            console.log(`Point ${i}:`, point);
+
+            // Create a visible point on the SVG
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", point.x);
+            circle.setAttribute("cy", point.y);
+            circle.setAttribute("r", "2");
+            circle.setAttribute("fill", "red");
+            debugGroup.appendChild(circle);
         }
     }
-    console.log('Total Points Collected:', points.length); // Debug: log the total number of points collected
-    return points;
+    console.log('Total Points Collected:', points.length);
+    return { points, svg };
 }
 
 export function isPointInPolygon(point, polygon) {
@@ -140,9 +163,24 @@ function endLasso(e) {
     const point = getSVGPoint(e.clientX, e.clientY);
     lassoPoints.push(point);
     drawLasso();
+    
+    const endTime = performance.now();
+    const timeTaken = endTime - lassoStartTime;
+    debugCounters.timeTaken = timeTaken.toFixed(2); // Round to 2 decimal places
+    
     selectPathsInLasso();
+    updateDebugCounters(); // Update counters one last time
     clearLasso();
-    // toggleLasso();
+    
+    // Remove debug points after a short delay
+    setTimeout(() => {
+        const debugGroup = svgElement.querySelector('#debug-points');
+        if (debugGroup) {
+            svgElement.removeChild(debugGroup);
+        }
+    }, 2000);
+
+    // Don't reset the timeTaken here
 }
 
 function debugLasso() {
@@ -152,5 +190,62 @@ function debugLasso() {
     // console.log('Lasso Element:', lasso);
     if (lasso) {
         // console.log('Lasso Attributes:', lasso.attributes);
+    }
+}
+
+// Add these variables at the top of the file
+let debugCounters = {
+    lassoPoints: 0,
+    pathsChecked: 0,
+    pathsSelected: 0,
+    timeTaken: 0
+};
+
+// Add this function to update the debug counters on screen
+function updateDebugCounters() {
+    let debugElement = document.getElementById('lasso-debug');
+    if (!debugElement) {
+        debugElement = document.createElement('div');
+        debugElement.id = 'lasso-debug';
+        debugElement.style.position = 'fixed';
+        debugElement.style.top = '10px';
+        debugElement.style.right = '10px';
+        debugElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        debugElement.style.color = 'white';
+        debugElement.style.padding = '10px';
+        debugElement.style.borderRadius = '5px';
+        debugElement.style.fontFamily = 'monospace';
+        debugElement.style.zIndex = '1000';
+        debugElement.style.cursor = 'pointer';
+        document.body.appendChild(debugElement);
+        
+        // Add click event listener to hide debug counters
+        debugElement.addEventListener('click', hideDebugCounters);
+    }
+    debugElement.innerHTML = `
+        Lasso Points: ${debugCounters.lassoPoints}<br>
+        Paths Checked: ${debugCounters.pathsChecked}<br>
+        Paths Selected: ${debugCounters.pathsSelected}<br>
+        Time Taken: ${debugCounters.timeTaken || '0.00'} ms<br>
+        (Click to hide)
+    `;
+}
+
+// Add this variable at the top of the file
+let lassoStartTime;
+
+function showDebugCounters() {
+    const debugElement = document.getElementById('lasso-debug');
+    if (debugElement) {
+        debugElement.style.display = 'block';
+    } else {
+        updateDebugCounters();
+    }
+}
+
+function hideDebugCounters() {
+    const debugElement = document.getElementById('lasso-debug');
+    if (debugElement) {
+        debugElement.style.display = 'none';
     }
 }
