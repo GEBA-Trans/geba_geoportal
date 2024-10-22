@@ -80,7 +80,7 @@ function initializeApp() {
     loadSVG()
         .then(({ svgElement, originalViewBox }) => {
             initializeZoomPan(svgElement, originalViewBox);
-            connectWebSocket();
+            // connectWebSocket();
             setupPostalCodeClicks();
             setupZoomControls();
             setupPanning();
