@@ -36,7 +36,6 @@ The Interactive World Map is a web application that allows users to explore diff
 - Use the zoom controls to navigate the map.
 - Select a region from the dropdown to load the corresponding map.
 - Click on postal codes to select or deselect them.
-- Play the truck game by clicking the "Truck Game" button to start finding postal codes.
 
 ## Contributing
 Contributions are welcome! Please submit a pull request or open an issue for any enhancements or bug fixes.

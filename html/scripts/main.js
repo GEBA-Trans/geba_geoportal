@@ -4,7 +4,6 @@ import { setupPostalCodeClicks, loadSelectedPostalCodes, setMode, togglePostalCo
 import { setupModeToggle, setupLookupButton } from './uiSetup.js';
 import { connectWebSocket } from './websocket.js';
 import { setupLassoSelect } from './lasso.js';
-import { initializeTruckGame } from './truckGame.js'; // Add this import
 
 async function loadRegionOptions() {
     try {
@@ -88,7 +87,6 @@ function initializeApp() {
             setupLassoSelect(svgElement, togglePostalCode);
             setupModeToggle();
             setupLookupButton();
-            // initializeTruckGame(svgElement); // Add this line
             setMode('loading');
             return loadSelectedPostalCodes();
         })
