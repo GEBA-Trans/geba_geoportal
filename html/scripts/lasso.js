@@ -1,18 +1,24 @@
 export let isLassoActive = false;
+let currentMode; // Add this line to keep track of the current mode
 
 let lassoPoints = [];
 let svgElement;
-let togglePostalCodeCallback;
+let addPostalCodeCallback;
 
-export function setupLassoSelect(svg, togglePostalCodeFunc) {
+export function setupLassoSelect(svg, addPostalCodeFunc) {
     svgElement = svg;
-    togglePostalCodeCallback = togglePostalCodeFunc;
+    addPostalCodeCallback = addPostalCodeFunc;
     const lassoButton = document.getElementById('lasso-button');
     lassoButton.addEventListener('click', toggleLasso);
 
     svgElement.addEventListener('mousedown', startLasso);
     svgElement.addEventListener('mousemove', updateLasso);
     document.addEventListener('mouseup', endLasso);
+}
+
+// Add this new function to set the current mode
+export function setLassoMode(mode) {
+    currentMode = mode;
 }
 
 function toggleLasso() {
@@ -94,7 +100,7 @@ function selectPathsInLasso() {
         if (isInLasso) {
             debugCounters.pathsSelected++;
             const postalCode = path.id || 'Unknown';
-            togglePostalCodeCallback(path, postalCode);
+            addToSelection(path, postalCode);
             path.classList.add('selected');
             path.style.filter = '';
         }
@@ -247,5 +253,12 @@ function hideDebugCounters() {
     const debugElement = document.getElementById('lasso-debug');
     if (debugElement) {
         debugElement.style.display = 'none';
+    }
+}
+
+// New function to add to selection
+function addToSelection(path, postalCode) {
+    if (!path.classList.contains('selected') || !path.classList.contains(currentMode)) {
+        addPostalCodeCallback(path, postalCode, currentMode, true); // Add 'true' to indicate it's from lasso
     }
 }
