@@ -441,3 +441,12 @@ path.selected.delivery {
 /* .lasso-active {
     filter: grayscale(50%);
 } */
+
+/* Add this to your existing CSS */
+#regions optgroup {
+    font-weight: bold;
+}
+
+#regions option {
+    font-weight: normal;
+}

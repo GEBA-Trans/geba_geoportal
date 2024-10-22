@@ -2,12 +2,15 @@ export async function loadSVG(textZoom = 1) {
     try {
         // Parse the URL to get the map filename
         const urlParams = new URLSearchParams(window.location.search);
-        const mapFilename = urlParams.get('map') || 'GEBA_map_benelux.svg';
+        const mapFilename = urlParams.get('map') || 'GEBA_MAP_BENELUX.svg';
+
+        // Update the path to include the 'maps' subfolder
+        const mapPath = `maps/${mapFilename}`;
 
         // Set the selected option in the dropdown
         const regionSelect = document.getElementById('regions');
 
-        const response = await fetch(mapFilename);
+        const response = await fetch(mapPath);
         const svgContent = await response.text();
         document.getElementById('map-container').innerHTML += svgContent;
         const svgElement = document.querySelector('#map-container svg');
