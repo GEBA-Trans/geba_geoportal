@@ -1,5 +1,5 @@
 import { sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts } from './websocket.js';
-import { isPointInPolygon } from './lasso.js';
+import { isPointInPolygon, setLassoMode } from './lasso.js';
 
 const LOADING_MODE = 'loading';
 const DELIVERY_MODE = 'delivery';
@@ -33,101 +33,38 @@ function handlePostalCodeClick(e) {
     }
 }
 
-export function togglePostalCode(pathElement, postalCode, isInitialLoad = false) {
-    const targetSet = currentMode === 'loading' ? loadingPostalCodes : deliveryPostalCodes;
-    const otherSet = currentMode === 'loading' ? deliveryPostalCodes : loadingPostalCodes;
+export function togglePostalCode(pathElement, postalCode, mode, isFromLasso = false) {
+    const targetSet = mode === 'loading' ? loadingPostalCodes : deliveryPostalCodes;
+    const otherSet = mode === 'loading' ? deliveryPostalCodes : loadingPostalCodes;
 
-    if (targetSet.has(postalCode)) {
-        targetSet.delete(postalCode);
-        pathElement.classList.remove('selected', currentMode);
-        sendToWebSocket('deselect', postalCode);
-    } else {
+    if (isFromLasso) {
+        // Always add when using lasso
         otherSet.delete(postalCode);
         targetSet.add(postalCode);
         pathElement.classList.remove('selected', 'loading', 'delivery');
-        pathElement.classList.add('selected', currentMode);
-        
-        // {{ edit_1 }}: Set the fill color based on the selected color
-        const selectedColor = currentMode === 'loading' ? document.getElementById('loading-color').value : document.getElementById('delivery-color').value;
-        pathElement.style.fill = selectedColor; // Apply the selected color
+        pathElement.classList.add('selected', mode);
         sendToWebSocket('select', postalCode);
+    } else {
+        // Toggle when clicking individually
+        if (targetSet.has(postalCode)) {
+            targetSet.delete(postalCode);
+            pathElement.classList.remove('selected', mode);
+            sendToWebSocket('deselect', postalCode);
+        } else {
+            otherSet.delete(postalCode);
+            targetSet.add(postalCode);
+            pathElement.classList.remove('selected', 'loading', 'delivery');
+            pathElement.classList.add('selected', mode);
+            sendToWebSocket('select', postalCode);
+        }
     }
 
-    pathElement.style.fill = ''; // This line can be removed if the color is set above
+    const selectedColor = mode === 'loading' ? document.getElementById('loading-color').value : document.getElementById('delivery-color').value;
+    pathElement.style.fill = targetSet.has(postalCode) ? selectedColor : '';
 
-    // Find elements within the postal code area
-    // const elementsInArea = findTextInPath(pathElement);
-    // if (elementsInArea.length > 0) {
-    //     console.log(`Elements found in ${postalCode}:`);
-    //     elementsInArea.forEach(item => {
-    //         console.log(`${postalCode}: ${item.element.tagName}`);
-    //         console.log(`XML Path: ${item.xmlPath}`);
-    //         if (item.element.textContent.trim()) {
-    //             console.log(`Text Content: ${item.element.textContent.trim()}`);
-    //         }
-    //     });
-    // }
-
-    if (!isInitialLoad) {
-        updatePostalCodeLists();
-        saveSelectedPostalCodes();
-    }
+    updatePostalCodeLists();
+    saveSelectedPostalCodes();
 }
-
-// function findTextInPath(pathElement) {
-//     const pathPoints = getPathPoints(pathElement);
-//     const svgElement = pathElement.ownerSVGElement;
-//     const allElements = svgElement.querySelectorAll('*');
-//     const elementsInArea = [];
-
-//     allElements.forEach(element => {
-//         if (element === pathElement) return; // Skip the path itself
-
-//         const bbox = element.getBBox();
-//         const centerX = bbox.x + bbox.width / 2;
-//         const centerY = bbox.y + bbox.height / 2;
-//         const point = svgElement.createSVGPoint();
-//         point.x = centerX;
-//         point.y = centerY;
-
-//         if (isPointInPolygon(point, pathPoints)) {
-//             elementsInArea.push({
-//                 element: element,
-//                 xmlPath: getXmlPath(element)
-//             });
-//         }
-//     });
-
-//     return elementsInArea;
-// }
-
-// function getXmlPath(element) {
-//     const path = [];
-//     while (element && element.nodeType === Node.ELEMENT_NODE) {
-//         let index = 0;
-//         let sibling = element;
-//         while (sibling) {
-//             if (sibling.nodeName === element.nodeName) {
-//                 index++;
-//             }
-//             sibling = sibling.previousElementSibling;
-//         }
-//         path.unshift(`${element.nodeName}[${index}]`);
-//         element = element.parentNode;
-//     }
-//     return '/' + path.join('/');
-// }
-
-// function getPathPoints(path) {
-//     const points = [];
-//     const pathLength = path.getTotalLength();
-//     const step = pathLength / 20; // Adjust this number to balance accuracy and performance
-//     for (let i = 0; i <= pathLength; i += step) {
-//         const point = path.getPointAtLength(i);
-//         points.push(point);
-//     }
-//     return points;
-// }
 
 export function updatePostalCodeLists() {
     updateList('loading-list', loadingPostalCodes);
@@ -295,6 +232,7 @@ export function setMode(mode) {
     currentMode = mode;
     document.getElementById('loading-mode').classList.toggle('active', mode === 'loading');
     document.getElementById('delivery-mode').classList.toggle('active', mode === 'delivery');
+    setLassoMode(mode); // Add this line to update the lasso mode
 }
 
 export function loadSelectedPostalCodes() {
