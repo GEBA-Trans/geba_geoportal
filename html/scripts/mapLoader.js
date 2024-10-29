@@ -4,10 +4,10 @@ function getColorVariation(color, factor) {
     const g = parseInt(color.slice(3, 5), 16);
     const b = parseInt(color.slice(5, 7), 16);
 
-    // Calculate variation
-    const newR = Math.min(255, Math.max(0, Math.floor(r * factor)));
-    const newG = Math.min(255, Math.max(0, Math.floor(g * factor)));
-    const newB = Math.min(255, Math.max(0, Math.floor(b * factor)));
+    // Calculate variation with more difference
+    const newR = Math.min(255, Math.max(0, Math.floor(r * factor + (factor > 1 ? 10 : -10))));
+    const newG = Math.min(255, Math.max(0, Math.floor(g * factor + (factor > 1 ? 10 : -10))));
+    const newB = Math.min(255, Math.max(0, Math.floor(b * factor + (factor > 1 ? 10 : -10))));
 
     // Convert back to hex
     return `#${((1 << 24) + (newR << 16) + (newG << 8) + newB).toString(16).slice(1)}`;
@@ -47,26 +47,35 @@ export async function loadSVG(textZoom = 1) {
             text.setAttribute("pointer-events", "none"); // Prevent text from being selectable
             svgElement.appendChild(text); // Append the text to the SVG
 
-            // Set the fill color based on the path's ID
-            const countryId = path.id; // Assuming path.id corresponds to the keys in colors.json
+            // Set the fill color based on the path's ID or group's ID
+            const countryId = path.id.includes('-') ? path.parentElement.id : path.id; // Check if ID contains '-' and look at parent if true
+            console.log(`Processing path ID: ${path.id}, countryId: ${countryId}`); // Debug info for path ID
+            
+            // Check for countryId first
             if (colors[countryId]) {
-                path.setAttribute("fill", colors[countryId]); // Override fill color
-
-                // Color sub-paths with a variation
-                const subPaths = path.querySelectorAll('path'); // Select sub-paths
-                subPaths.forEach(subPath => {
-                    const variationColor = getColorVariation(colors[countryId], 0.8); // Lighter shade
-                    subPath.setAttribute("fill", variationColor); // Set variation color
-                });
+                const variationColor = getColorVariation(colors[countryId], 0.8 + (Math.random() * 0.2)); // Lighter shade with slight randomness
+                path.setAttribute("fill", variationColor); // Set variation color
+                console.log(`Setting fill color for ${countryId}: ${variationColor}`); // Debug info
+            } 
+            
+            // Check for offset color only if path ID contains '-'
+            if (path.id.includes('-')) { // Check if ID contains '-' for offset color
+                const parentCountryId = path.parentElement.id; // Get parent country ID
+                console.log(`Parent country ID: ${parentCountryId}`); // Debug info for parent country ID
+                if (colors[parentCountryId]) {
+                    const offsetVariationColor = getColorVariation(colors[parentCountryId], 0.8 + (Math.random() * 0.2)); // Offset variation with slight randomness
+                    path.setAttribute("fill", offsetVariationColor); // Set offset variation color
+                    console.log(`Setting offset fill color for ${parentCountryId}: ${offsetVariationColor}`); // Debug info
+                } else {
+                    console.log(`No color found for parent country ID: ${parentCountryId}`); // Debug info if no color found
+                }
             }
 
             // Add hover effect with debug info
             path.addEventListener('mouseover', () => {
-                console.log(`Mouse over path: ${path.id}, increasing font size to ${14 * textZoom}`); // Debug info
                 text.setAttribute("font-size", `${14 * textZoom}`); // Increase font size on hover
             });
             path.addEventListener('mouseout', () => {
-                console.log(`Mouse out of path: ${path.id}, resetting font size to ${10 * textZoom}`); // Debug info
                 text.setAttribute("font-size", `${10 * textZoom}`); // Reset font size when not hovering
             });
         });
