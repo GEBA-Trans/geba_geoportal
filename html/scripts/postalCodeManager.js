@@ -175,7 +175,12 @@ function groupPostalCodesByCountry(postalCodes) {
             grouped['Hidden'].push(postalCode);
             console.warn(`Postal code not found: ${postalCode}`);
         }
+
     });
+    if (grouped['Hidden'].length === 0) {
+        console.warn('i should delete hidden');
+        delete grouped['Hidden'];
+    }
     return grouped;
 }
 
