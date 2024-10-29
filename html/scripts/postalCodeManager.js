@@ -35,11 +35,11 @@ function handlePostalCodeClick(e) {
 
 export function togglePostalCode(pathElement, postalCode, mode, isFromLasso = false) {
     const targetSet = mode === 'loading' ? loadingPostalCodes : deliveryPostalCodes;
-    const otherSet = mode === 'loading' ? deliveryPostalCodes : loadingPostalCodes;
+    const hiddenSet = mode === 'loading' ? deliveryPostalCodes : loadingPostalCodes;
 
     if (isFromLasso) {
         // Always add when using lasso
-        otherSet.delete(postalCode);
+        hiddenSet.delete(postalCode);
         targetSet.add(postalCode);
         pathElement.classList.remove('selected', 'loading', 'delivery');
         pathElement.classList.add('selected', mode);
@@ -51,7 +51,7 @@ export function togglePostalCode(pathElement, postalCode, mode, isFromLasso = fa
             pathElement.classList.remove('selected', mode);
             // sendToWebSocket('deselect', postalCode);
         } else {
-            otherSet.delete(postalCode);
+            hiddenSet.delete(postalCode);
             targetSet.add(postalCode);
             pathElement.classList.remove('selected', 'loading', 'delivery');
             pathElement.classList.add('selected', mode);
@@ -113,16 +113,18 @@ function updateList(listId, postalCodes) {
         codes.forEach(postalCode => {
             const li = document.createElement('li');
             li.setAttribute('data-postal-code', postalCode);
-            // const count = postalCodeCounts.get(postalCode);
-            // const countDisplay = count !== undefined ? `(${count}) ` : 
-            //     pendingPostalCodes.has(postalCode) ? '<i class="fas fa-spinner fa-spin"></i> ' : '';
-            // const color = count !== undefined ? getColorForCount(count) : '#000';
+            const pathElement = document.getElementById(postalCode);
+            const isValidPostalCode = pathElement !== null;
+
             li.innerHTML = `
                 ${postalCode}
                 <button class="delete-btn" title="Remove ${postalCode}">
                     <i class="fas fa-times"></i>
                 </button>
             `;
+            if (!isValidPostalCode) {
+                li.classList.add('greyed-out'); // Add class for greyed-out style
+            }
             li.addEventListener('mouseenter', () => highlightPostalCode(postalCode, true));
             li.addEventListener('mouseleave', () => highlightPostalCode(postalCode, false));
             li.querySelector('.delete-btn').addEventListener('click', () => removePostalCode(postalCode));
@@ -156,6 +158,7 @@ function updateList(listId, postalCodes) {
 
 function groupPostalCodesByCountry(postalCodes) {
     const grouped = {};
+    
     postalCodes.forEach(postalCode => {
         const pathElement = document.getElementById(postalCode);
         if (pathElement) {
@@ -165,8 +168,26 @@ function groupPostalCodesByCountry(postalCodes) {
                 grouped[country] = [];
             }
             grouped[country].push(postalCode);
+        } else {
+            // If postal code is not found, add it to the 'Hidden' category
+            if (!grouped['Hidden']) {
+                grouped['Hidden'] = [];
+            }
+            grouped['Hidden'].push(postalCode);
+            console.warn(`Postal code not found: ${postalCode}`);
         }
+
     });
+    if (grouped['Hidden'] && grouped['Hidden'].length === 0) {
+        console.warn('i should delete hidden');
+        delete grouped['Hidden'];
+    }
+    // Move the 'Hidden' group to the end
+    if (grouped['Hidden']) {
+        const hiddenGroup = grouped['Hidden'];
+        delete grouped['Hidden'];
+        grouped['Hidden'] = hiddenGroup;
+    }
     return grouped;
 }
 
@@ -265,15 +286,19 @@ export function loadSelectedPostalCodes() {
 function loadPostalCodesFromData(data, targetSet, mode) {
     data.forEach(postalCode => {
         const pathElement = document.getElementById(postalCode);
+        targetSet.add(postalCode);
         if (pathElement) {
-            targetSet.add(postalCode);
-            pathElement.classList.add('selected', mode);
+            
             // pendingPostalCodes.add(postalCode);
+        } else {
+            console.warn(`Postal code not found: ${postalCode}`);
         }
     });
 }
 
 function saveSelectedPostalCodes() {
+
+    // this should also save "hidden" postal codes
     const data = {
         [LOADING_MODE]: Array.from(loadingPostalCodes),
         [DELIVERY_MODE]: Array.from(deliveryPostalCodes)
@@ -320,12 +345,12 @@ function loadExpandedCountries() {
 function addAllPostalCodes(country, mode) {
     const allPaths = document.querySelectorAll(`#map-container svg g#${country} path`);
     const targetSet = mode === LOADING_MODE ? loadingPostalCodes : deliveryPostalCodes;
-    const otherSet = mode === LOADING_MODE ? deliveryPostalCodes : loadingPostalCodes;
+    const hiddenSet = mode === LOADING_MODE ? deliveryPostalCodes : loadingPostalCodes;
 
     allPaths.forEach(path => {
         const postalCode = path.id;
         if (postalCode) {
-            otherSet.delete(postalCode);
+            hiddenSet.delete(postalCode);
             targetSet.add(postalCode);
             path.classList.remove('selected', 'loading', 'delivery');
             path.classList.add('selected', mode);
