@@ -1,4 +1,4 @@
-import { sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts } from './websocket.js';
+// import { sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts } from './websocket.js';
 import { isPointInPolygon, setLassoMode } from './lasso.js';
 
 const LOADING_MODE = 'loading';
@@ -43,19 +43,19 @@ export function togglePostalCode(pathElement, postalCode, mode, isFromLasso = fa
         targetSet.add(postalCode);
         pathElement.classList.remove('selected', 'loading', 'delivery');
         pathElement.classList.add('selected', mode);
-        sendToWebSocket('select', postalCode);
+        // sendToWebSocket('select', postalCode);
     } else {
         // Toggle when clicking individually
         if (targetSet.has(postalCode)) {
             targetSet.delete(postalCode);
             pathElement.classList.remove('selected', mode);
-            sendToWebSocket('deselect', postalCode);
+            // sendToWebSocket('deselect', postalCode);
         } else {
             otherSet.delete(postalCode);
             targetSet.add(postalCode);
             pathElement.classList.remove('selected', 'loading', 'delivery');
             pathElement.classList.add('selected', mode);
-            sendToWebSocket('select', postalCode);
+            // sendToWebSocket('select', postalCode);
         }
     }
 
@@ -113,12 +113,12 @@ function updateList(listId, postalCodes) {
         codes.forEach(postalCode => {
             const li = document.createElement('li');
             li.setAttribute('data-postal-code', postalCode);
-            const count = postalCodeCounts.get(postalCode);
-            const countDisplay = count !== undefined ? `(${count}) ` : 
-                pendingPostalCodes.has(postalCode) ? '<i class="fas fa-spinner fa-spin"></i> ' : '';
-            const color = count !== undefined ? getColorForCount(count) : '#000';
+            // const count = postalCodeCounts.get(postalCode);
+            // const countDisplay = count !== undefined ? `(${count}) ` : 
+            //     pendingPostalCodes.has(postalCode) ? '<i class="fas fa-spinner fa-spin"></i> ' : '';
+            // const color = count !== undefined ? getColorForCount(count) : '#000';
             li.innerHTML = `
-                ${postalCode}<span class="count" style="color: ${color};">${countDisplay}</span>
+                ${postalCode}
                 <button class="delete-btn" title="Remove ${postalCode}">
                     <i class="fas fa-times"></i>
                 </button>
@@ -190,7 +190,7 @@ function removePostalCode(postalCode) {
     }
     updatePostalCodeLists();
     saveSelectedPostalCodes();
-    sendToWebSocket('deselect', postalCode);
+    // sendToWebSocket('deselect', postalCode);
 }
 
 function clearAllPostalCodes(postalCodes) {
@@ -200,7 +200,7 @@ function clearAllPostalCodes(postalCodes) {
             pathElement.classList.remove('selected', 'loading', 'delivery');
             pathElement.style.fill = '';
         }
-        sendToWebSocket('deselect', postalCode);
+        // sendToWebSocket('deselect', postalCode);
     });
     postalCodes.clear();
     postalCodeCounts.clear();
@@ -250,9 +250,9 @@ export function loadSelectedPostalCodes() {
                 // Update the colors for the loaded postal codes
                 updatePostalCodeSelectionColor('loading', document.getElementById('loading-color').value);
                 updatePostalCodeSelectionColor('delivery', document.getElementById('delivery-color').value);
-                if (isWebSocketConnected) {
-                    requestPendingCounts();
-                }
+                // if (isWebSocketConnected) {
+                //     requestPendingCounts();
+                // }
             }
             resolve();
         } catch (error) {
@@ -268,7 +268,7 @@ function loadPostalCodesFromData(data, targetSet, mode) {
         if (pathElement) {
             targetSet.add(postalCode);
             pathElement.classList.add('selected', mode);
-            pendingPostalCodes.add(postalCode);
+            // pendingPostalCodes.add(postalCode);
         }
     });
 }
@@ -329,7 +329,7 @@ function addAllPostalCodes(country, mode) {
             targetSet.add(postalCode);
             path.classList.remove('selected', 'loading', 'delivery');
             path.classList.add('selected', mode);
-            sendToWebSocket('select', postalCode);
+            // sendToWebSocket('select', postalCode);
         }
     });
 
@@ -346,7 +346,7 @@ function removeAllPostalCodes(country, mode) {
         if (postalCode && targetSet.has(postalCode)) {
             targetSet.delete(postalCode);
             path.classList.remove('selected', mode);
-            sendToWebSocket('deselect', postalCode);
+            // sendToWebSocket('deselect', postalCode);
         }
     });
 
