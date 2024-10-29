@@ -157,9 +157,7 @@ function updateList(listId, postalCodes) {
 }
 
 function groupPostalCodesByCountry(postalCodes) {
-    const grouped = {
-        'Hidden': [] // Initialize the 'Hidden' category
-    };
+    const grouped = {};
     
     postalCodes.forEach(postalCode => {
         const pathElement = document.getElementById(postalCode);
@@ -172,14 +170,23 @@ function groupPostalCodesByCountry(postalCodes) {
             grouped[country].push(postalCode);
         } else {
             // If postal code is not found, add it to the 'Hidden' category
+            if (!grouped['Hidden']) {
+                grouped['Hidden'] = [];
+            }
             grouped['Hidden'].push(postalCode);
             console.warn(`Postal code not found: ${postalCode}`);
         }
 
     });
-    if (grouped['Hidden'].length === 0) {
+    if (grouped['Hidden'] && grouped['Hidden'].length === 0) {
         console.warn('i should delete hidden');
         delete grouped['Hidden'];
+    }
+    // Move the 'Hidden' group to the end
+    if (grouped['Hidden']) {
+        const hiddenGroup = grouped['Hidden'];
+        delete grouped['Hidden'];
+        grouped['Hidden'] = hiddenGroup;
     }
     return grouped;
 }
