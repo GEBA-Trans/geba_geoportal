@@ -4,6 +4,15 @@
     "text": "Select a region"
   },
   {
+    "optgroup": "Countries",
+    "options": [
+      {
+        "value": "/?map=GEBA_MAP_EU_COUNTRIES.svg",
+        "text": "Europe Countries"
+      }
+    ]
+  },
+  {
     "optgroup": "Regions",
     "options": [
       {
@@ -13,10 +22,6 @@
       {
         "value": "/?map=GEBA_MAP_BENELUX.svg",
         "text": "Benelux"
-      },
-      {
-        "value": "/?map=GEBA_MAP_EU_COUNTRIES.svg",
-        "text": "Europe Countries"
       },
       {
         "value": "/?map=GEBA_MAP_ALPENLANDEN.svg",
