@@ -29,7 +29,8 @@ function handlePostalCodeClick(e) {
         const parentGroup = e.target.closest('g');
         const parentId = parentGroup ? parentGroup.id : 'No parent';
         console.log(`Clicked path: ${postalCode}, Parent group: ${parentId}`);
-        togglePostalCode(e.target, postalCode);
+        const mode = currentMode;
+        togglePostalCode(e.target, postalCode, mode);
     }
 }
 
