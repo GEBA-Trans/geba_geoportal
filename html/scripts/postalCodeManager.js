@@ -265,15 +265,19 @@ export function loadSelectedPostalCodes() {
 function loadPostalCodesFromData(data, targetSet, mode) {
     data.forEach(postalCode => {
         const pathElement = document.getElementById(postalCode);
+        targetSet.add(postalCode);
         if (pathElement) {
-            targetSet.add(postalCode);
-            pathElement.classList.add('selected', mode);
+            
             // pendingPostalCodes.add(postalCode);
+        } else {
+            console.warn(`Postal code not found: ${postalCode}`);
         }
     });
 }
 
 function saveSelectedPostalCodes() {
+
+    // this should also save "hidden" postal codes
     const data = {
         [LOADING_MODE]: Array.from(loadingPostalCodes),
         [DELIVERY_MODE]: Array.from(deliveryPostalCodes)
