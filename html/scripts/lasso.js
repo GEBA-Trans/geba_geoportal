@@ -129,15 +129,15 @@ function getPathPoints(path) {
         const point = path.getPointAtLength(i);
         if (!points.some(p => p.x === point.x && p.y === point.y)) {
             points.push(point);
-            console.log(`Point ${i}:`, point);
+            // console.log(`Point ${i}:`, point);
 
-            // Create a visible point on the SVG
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", point.x);
-            circle.setAttribute("cy", point.y);
-            circle.setAttribute("r", "2");
-            circle.setAttribute("fill", "red");
-            debugGroup.appendChild(circle);
+            // Create a visible point on the SVG for debug purposes
+            // const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            // circle.setAttribute("cx", point.x);
+            // circle.setAttribute("cy", point.y);
+            // circle.setAttribute("r", "2");
+            // circle.setAttribute("fill", "red");
+            // debugGroup.appendChild(circle);
         }
     }
     console.log('Total Points Collected:', points.length);
