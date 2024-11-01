@@ -13,10 +13,36 @@ function getColorVariation(color, factor) {
     return `#${((1 << 24) + (newR << 16) + (newG << 8) + newB).toString(16).slice(1)}`;
 }
 
+function toggleCountryVisibility(country, isVisible) {
+    console.log(`Toggling visibility for country: ${country}, isVisible: ${isVisible}`);
+    
+    const paths = document.querySelectorAll(`path[id^="${country}"]`);
+    console.log(`Found ${paths.length} paths for country ${country}:`, paths);
+    
+    const texts = document.querySelectorAll(`text`);
+    console.log(`Found ${texts.length} text elements`);
+    
+    paths.forEach(path => {
+        console.log(`Setting display: ${isVisible ? 'block' : 'none'} for path:`, path);
+        path.style.display = isVisible ? 'block' : 'none';
+        
+        // Find and toggle the corresponding text element
+        const pathId = path.id.substring(3); // Remove the first three characters
+        console.log(`Looking for text elements matching pathId: ${pathId}`);
+        
+        texts.forEach(text => {
+            if (text.textContent === pathId) {
+                console.log(`Found matching text element:`, text);
+                text.style.display = isVisible ? 'block' : 'none';
+            }
+        });
+    });
+}
+
 export async function loadSVG(textZoom = 1) {
     try {
         const loadedCountries = []; // Initialize the array here
-        
+
         // Parse the URL to get the map filename
         const urlParams = new URLSearchParams(window.location.search);
         const mapFilename = urlParams.get('map') || 'GEBA_MAP_BENELUX.svg';
@@ -57,7 +83,6 @@ export async function loadSVG(textZoom = 1) {
             if (colors[countryId]) {
                 const variationColor = getColorVariation(colors[countryId], 0.8 + (Math.random() * 0.2)); // Lighter shade with slight randomness
                 path.setAttribute("fill", variationColor); // Set variation color
-                loadedCountries.push(countryId); // Add country to array
                 console.log(`Setting fill color for ${countryId}: ${variationColor}`); // Debug info
             } 
             
@@ -68,7 +93,6 @@ export async function loadSVG(textZoom = 1) {
                 if (colors[parentCountryId]) {
                     const offsetVariationColor = getColorVariation(colors[parentCountryId], 0.8 + (Math.random() * 0.2)); // Offset variation with slight randomness
                     path.setAttribute("fill", offsetVariationColor); // Set offset variation color
-                    loadedCountries.push(parentCountryId); // Add parent country to array
                     console.log(`Setting offset fill color for ${parentCountryId}: ${offsetVariationColor}`); // Debug info
                 } else {
                     console.log(`No color found for parent country ID: ${parentCountryId}`); // Debug info if no color found
@@ -82,52 +106,45 @@ export async function loadSVG(textZoom = 1) {
             path.addEventListener('mouseout', () => {
                 text.setAttribute("font-size", `${10 * textZoom}`); // Reset font size when not hovering
             });
+
+            loadedCountries.push(countryId);
         });
 
-        // Create the country list with toggle switches
-        console.log('Loaded countries:', [...new Set(loadedCountries)]); // Log unique loaded countries
-        const countryListElement = document.getElementById('countries'); // Get the country list element
-        countryListElement.innerHTML = ''; // Clear existing list
+        // Create country list with toggles
+        console.log('Loaded countries:', [...new Set(loadedCountries)]);
+        const countryListElement = document.getElementById('countries');
+        countryListElement.innerHTML = '';
         [...new Set(loadedCountries)].forEach(country => {
             const listItem = document.createElement('li');
             listItem.className = 'country-item';
             
-            // Create container for country name and toggle
             const container = document.createElement('div');
             container.className = 'country-container';
             
-            // Add country name
             const countryName = document.createElement('span');
             countryName.textContent = country;
             
-            // Create toggle switch
             const toggleLabel = document.createElement('label');
             toggleLabel.className = 'switch';
             
             const toggleInput = document.createElement('input');
             toggleInput.type = 'checkbox';
-            toggleInput.checked = true; // Default to checked
+            toggleInput.checked = true;
             
             const toggleSpan = document.createElement('span');
             toggleSpan.className = 'slider';
             
-            // Add event listener for toggle
             toggleInput.addEventListener('change', (e) => {
-                const paths = document.querySelectorAll(`path[id^="${country}"]`);
-                paths.forEach(path => {
-                    path.style.display = e.target.checked ? 'block' : 'none';
-                });
+                console.log(`Toggle changed for country ${country}:`, e.target.checked);
+                toggleCountryVisibility(country, e.target.checked);
             });
             
-            // Assemble the toggle switch
             toggleLabel.appendChild(toggleInput);
             toggleLabel.appendChild(toggleSpan);
             
-            // Assemble the container
             container.appendChild(countryName);
             container.appendChild(toggleLabel);
             
-            // Add container to list item
             listItem.appendChild(container);
             countryListElement.appendChild(listItem);
         });
