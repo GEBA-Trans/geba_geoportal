@@ -15,14 +15,17 @@ function getColorVariation(color, factor) {
 
 export async function loadSVG(textZoom = 1) {
     try {
-        const loadedCountries = []; // Declare the array here
-
+        const loadedCountries = []; // Initialize the array here
+        
         // Parse the URL to get the map filename
         const urlParams = new URLSearchParams(window.location.search);
         const mapFilename = urlParams.get('map') || 'GEBA_MAP_BENELUX.svg';
 
         // Update the path to include the 'maps' subfolder
         const mapPath = `maps/${mapFilename}`;
+
+        // Set the selected option in the dropdown
+        const regionSelect = document.getElementById('regions');
 
         // Fetch colors from the JSON file
         const colorsResponse = await fetch('data/colors.json');
@@ -48,14 +51,14 @@ export async function loadSVG(textZoom = 1) {
 
             // Set the fill color based on the path's ID or group's ID
             const countryId = path.id.includes('-') ? path.parentElement.id : path.id; // Check if ID contains '-' and look at parent if true
-            // console.log(`Processing path ID: ${path.id}, countryId: ${countryId}`); // Debug info for path ID
+            console.log(`Processing path ID: ${path.id}, countryId: ${countryId}`); // Debug info for path ID
             
             // Check for countryId first
             if (colors[countryId]) {
                 const variationColor = getColorVariation(colors[countryId], 0.8 + (Math.random() * 0.2)); // Lighter shade with slight randomness
                 path.setAttribute("fill", variationColor); // Set variation color
-                // console.log(`Setting fill color for ${countryId}: ${variationColor}`); // Debug info
-                loadedCountries.push(countryId); // Add country to the loadedCountries array
+                loadedCountries.push(countryId); // Add country to array
+                console.log(`Setting fill color for ${countryId}: ${variationColor}`); // Debug info
             } 
             
             // Check for offset color only if path ID contains '-'
@@ -65,10 +68,10 @@ export async function loadSVG(textZoom = 1) {
                 if (colors[parentCountryId]) {
                     const offsetVariationColor = getColorVariation(colors[parentCountryId], 0.8 + (Math.random() * 0.2)); // Offset variation with slight randomness
                     path.setAttribute("fill", offsetVariationColor); // Set offset variation color
-                    // console.log(`Setting offset fill color for ${parentCountryId}: ${offsetVariationColor}`); // Debug info
-                    loadedCountries.push(parentCountryId); // Add parent country to the loadedCountries array
+                    loadedCountries.push(parentCountryId); // Add parent country to array
+                    console.log(`Setting offset fill color for ${parentCountryId}: ${offsetVariationColor}`); // Debug info
                 } else {
-                    // console.log(`No color found for parent country ID: ${parentCountryId}`); // Debug info if no color found
+                    console.log(`No color found for parent country ID: ${parentCountryId}`); // Debug info if no color found
                 }
             }
 
@@ -81,6 +84,54 @@ export async function loadSVG(textZoom = 1) {
             });
         });
 
+        // Create the country list with toggle switches
+        console.log('Loaded countries:', [...new Set(loadedCountries)]); // Log unique loaded countries
+        const countryListElement = document.getElementById('countries'); // Get the country list element
+        countryListElement.innerHTML = ''; // Clear existing list
+        [...new Set(loadedCountries)].forEach(country => {
+            const listItem = document.createElement('li');
+            listItem.className = 'country-item';
+            
+            // Create container for country name and toggle
+            const container = document.createElement('div');
+            container.className = 'country-container';
+            
+            // Add country name
+            const countryName = document.createElement('span');
+            countryName.textContent = country;
+            
+            // Create toggle switch
+            const toggleLabel = document.createElement('label');
+            toggleLabel.className = 'switch';
+            
+            const toggleInput = document.createElement('input');
+            toggleInput.type = 'checkbox';
+            toggleInput.checked = true; // Default to checked
+            
+            const toggleSpan = document.createElement('span');
+            toggleSpan.className = 'slider';
+            
+            // Add event listener for toggle
+            toggleInput.addEventListener('change', (e) => {
+                const paths = document.querySelectorAll(`path[id^="${country}"]`);
+                paths.forEach(path => {
+                    path.style.display = e.target.checked ? 'block' : 'none';
+                });
+            });
+            
+            // Assemble the toggle switch
+            toggleLabel.appendChild(toggleInput);
+            toggleLabel.appendChild(toggleSpan);
+            
+            // Assemble the container
+            container.appendChild(countryName);
+            container.appendChild(toggleLabel);
+            
+            // Add container to list item
+            listItem.appendChild(container);
+            countryListElement.appendChild(listItem);
+        });
+
         const viewBox = svgElement.viewBox.baseVal;
         const originalViewBox = {
             x: viewBox.x,
@@ -88,16 +139,6 @@ export async function loadSVG(textZoom = 1) {
             width: viewBox.width,
             height: viewBox.height
         };
-
-        console.log('Loaded countries:', [...new Set(loadedCountries)]); // Log unique loaded countries
-        const countryListElement = document.getElementById('countries'); // Get the country list element
-        countryListElement.innerHTML = ''; // Clear existing list
-        [...new Set(loadedCountries)].forEach(country => { // Iterate over unique countries
-            const listItem = document.createElement('li'); // Create a list item
-            listItem.textContent = country; // Set the text to the country name
-            countryListElement.appendChild(listItem); // Append the list item to the country list
-        });
-
         return { svgElement, originalViewBox };
     } catch (error) {
         console.error('Error loading SVG:', error);
