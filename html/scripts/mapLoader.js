@@ -1,3 +1,5 @@
+const TOGGLE_STATES_COOKIE = 'countryToggleStates';
+
 function getColorVariation(color, factor) {
     // Convert hex color to RGB
     const r = parseInt(color.slice(1, 3), 16);
@@ -39,6 +41,9 @@ function toggleCountryVisibility(country, isVisible) {
     const allToggles = Array.from(document.querySelectorAll('.country-item input[type="checkbox"]'));
     const allChecked = allToggles.every(toggle => toggle.checked);
     toggleAllCheckbox.checked = allChecked;
+
+    // Save toggle states after each change
+    saveToggleStates();
 }
 
 function setupToggleAll() {
@@ -56,6 +61,36 @@ function setupToggleAll() {
             }
         });
     });
+}
+
+function saveToggleStates() {
+    const toggleStates = {};
+    document.querySelectorAll('.country-item input[type="checkbox"]').forEach(toggle => {
+        const countryName = toggle.closest('.country-item').querySelector('span').textContent;
+        toggleStates[countryName] = toggle.checked;
+    });
+    document.cookie = `${TOGGLE_STATES_COOKIE}=${JSON.stringify(toggleStates)}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
+}
+
+function loadToggleStates() {
+    const cookieValue = document.cookie
+        .split('; ')
+        .find(row => row.startsWith(`${TOGGLE_STATES_COOKIE}=`));
+    
+    if (cookieValue) {
+        const toggleStates = JSON.parse(cookieValue.split('=')[1]);
+        Object.entries(toggleStates).forEach(([country, isVisible]) => {
+            // Use a more reliable selector
+            const countryItem = Array.from(document.querySelectorAll('.country-item'))
+                .find(item => item.querySelector('span').textContent === country);
+            const toggle = countryItem?.querySelector('input[type="checkbox"]');
+            
+            if (toggle) {
+                toggle.checked = isVisible;
+                toggleCountryVisibility(country, isVisible);
+            }
+        });
+    }
 }
 
 export async function loadSVG(textZoom = 1) {
@@ -169,6 +204,8 @@ export async function loadSVG(textZoom = 1) {
         });
 
         setupToggleAll();
+        // Move loadToggleStates() after the country list is created
+        setTimeout(() => loadToggleStates(), 0); // Use setTimeout to ensure DOM is ready
 
         const viewBox = svgElement.viewBox.baseVal;
         const originalViewBox = {
