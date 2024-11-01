@@ -2,7 +2,7 @@ import { isLassoActive } from './lasso.js';
 
 let svgElement;
 let originalViewBox;
-let currentZoom = 1;
+let currentZoom = 1.0;
 let isDragging = false;
 let startX, startY;
 let viewBox;
