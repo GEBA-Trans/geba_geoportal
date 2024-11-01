@@ -95,6 +95,11 @@ function selectPathsInLasso() {
     debugCounters.pathsChecked = 0;
     debugCounters.pathsSelected = 0;
     paths.forEach(path => {
+        // Skip paths that are not visible or have a hidden parent
+        if (path.style.display === 'none') return;
+        const parentGroup = path.closest('g');
+        if (parentGroup && parentGroup.style.display === 'none') return;
+        
         debugCounters.pathsChecked++;
         const isInLasso = isPathInLasso(path);
         if (isInLasso) {
