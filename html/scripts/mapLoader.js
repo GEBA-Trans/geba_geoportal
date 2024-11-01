@@ -168,7 +168,13 @@ export async function loadSVG(textZoom = 1) {
         console.log('Loaded countries:', [...new Set(loadedCountries)]);
         const countryListElement = document.getElementById('countries');
         countryListElement.innerHTML = '';
-        [...new Set(loadedCountries)].forEach(country => {
+
+        // Sort the unique countries alphabetically
+        const sortedCountries = [...new Set(loadedCountries)].sort((a, b) => 
+            a.localeCompare(b, undefined, {sensitivity: 'base'})
+        );
+
+        sortedCountries.forEach(country => {
             const listItem = document.createElement('li');
             listItem.className = 'country-item';
             
