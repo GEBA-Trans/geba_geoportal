@@ -127,7 +127,17 @@ export async function loadSVG(textZoom = 1) {
             text.setAttribute("font-size", `${10 * textZoom}`); // Set font size based on text zoom
             text.setAttribute("fill", "black"); // Set text color
             text.setAttribute("pointer-events", "none"); // Prevent text from being selectable
-            svgElement.appendChild(text); // Append the text to the SVG
+    // Find the parent group or create one if it doesn't exist
+    let parentGroup = path.parentElement;
+    if (parentGroup.tagName !== 'g') {
+        // If path isn't in a group, wrap it in one
+        parentGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        path.parentElement.insertBefore(parentGroup, path);
+        parentGroup.appendChild(path);
+    }
+    
+    // Add the text to the same group as the path
+    parentGroup.appendChild(text);
 
             // Set the fill color based on the path's ID or group's ID
             const countryId = path.id.includes('-') ? path.parentElement.id : path.id; // Check if ID contains '-' and look at parent if true
