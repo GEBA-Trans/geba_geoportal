@@ -166,12 +166,15 @@ export async function loadSVG(textZoom = 1) {
             // Add hover effect with debug info
             path.addEventListener('mouseover', () => {
                 text.setAttribute("font-size", `${14 * textZoom}`); // Increase font size on hover
+                document.getElementById('map-container').style.cursor = 'pointer'; // Change cursor for postal codes
             });
             path.addEventListener('mouseout', () => {
                 text.setAttribute("font-size", `${10 * textZoom}`); // Reset font size when not hovering
+                document.getElementById('map-container').style.cursor = ''; // Reset cursor
             });
 
             loadedCountries.push(countryId);
+
         });
 
         // Create country list with toggles
@@ -237,22 +240,3 @@ export async function loadSVG(textZoom = 1) {
     }
 }
 
-document.getElementById('map-container').addEventListener('mouseover', (event) => {
-    const path = event.target.closest('path');
-    if (path) {
-        const text = document.getElementById(`text-${path.id}`);
-        if (text) {
-            text.setAttribute("font-size", "14");
-        }
-    }
-});
-
-document.getElementById('map-container').addEventListener('mouseout', (event) => {
-    const path = event.target.closest('path');
-    if (path) {
-        const text = document.getElementById(`text-${path.id}`);
-        if (text) {
-            text.setAttribute("font-size", "10");
-        }
-    }
-});
