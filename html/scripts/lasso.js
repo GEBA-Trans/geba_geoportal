@@ -24,6 +24,8 @@ export function setLassoMode(mode) {
 function toggleLasso() {
     isLassoActive = !isLassoActive;
     svgElement.classList.toggle('lasso-active', isLassoActive);
+    document.body.classList.toggle('lasso-active', isLassoActive);
+
     const lassoButton = document.getElementById('lasso-button');
     const lassoStatus = document.getElementById('lasso-status');
     lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times" style="color: red;"></i>' : '<i class="fas fa-draw-polygon"></i>';
