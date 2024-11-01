@@ -23,7 +23,7 @@
       {
         "value": "/?map=GEBA_MAP_EU.svg",
         "text": "GEBA Europe",
-        "countries": ["NEDERLAND", "DUITSLAND", "POLEN", "TSJECHIE", "SLOWAKIJE", "OOSTENRIJK", "HONGARIJE", "ZWITSERLAND"]
+        "countries": ["BELGIE","DENEMARKEN","DUITSLAND","ENGELAND","FRANKRIJK","HONGARIJE","ITALIE","KROATIE","LUXEMBURG","NEDERLAND","OOSTENRIJK","POLEN","SLOVENIE","SLOWAKIJE","SPANJE","TSJECHIE","ZWITSERLAND"]
       },
       {
         "value": "/?map=GEBA_MAP_EU.svg",
