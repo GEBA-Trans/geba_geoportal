@@ -534,3 +534,18 @@ input:checked + .slider:before {
     font-size: 14px;
     color: #333;
 }
+
+#map-container {
+    cursor: grab; /* Default cursor when not using lasso */
+}
+
+#map-container:active {
+    cursor: grabbing; /* Cursor when the mouse is pressed down */
+}
+#map-container.lasso-active {
+    cursor: crosshair; /* Change to your desired cursor style */
+}
+
+path.postal-code {
+    cursor: pointer; /* Change cursor to pointer for postal codes */
+}

@@ -23,7 +23,16 @@ export function setLassoMode(mode) {
 
 function toggleLasso() {
     isLassoActive = !isLassoActive;
-    svgElement.classList.toggle('lasso-active', isLassoActive);
+    const mapContainer = document.getElementById('map-container');
+    mapContainer.classList.toggle('lasso-active', isLassoActive);
+
+    // Change cursor based on lasso state
+    if (isLassoActive) {
+        mapContainer.style.cursor = 'crosshair'; // Cursor for lasso active
+    } else {
+        mapContainer.style.cursor = 'grab'; // Cursor for pan hand when lasso is not active
+    }
+
     const lassoButton = document.getElementById('lasso-button');
     const lassoStatus = document.getElementById('lasso-status');
     lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times" style="color: red;"></i>' : '<i class="fas fa-draw-polygon"></i>';
