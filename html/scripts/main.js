@@ -77,7 +77,6 @@ async function populateRegionDropdown() {
         select.addEventListener('change', (event) => {
             const selectedOption = event.target.selectedOptions[0];
             handleRegionChange(selectedOption);
-            window.location.href = event.target.value;
         });
     } catch (error) {
         console.error('Error populating region dropdown:', error);
@@ -94,13 +93,13 @@ function handleRegionChange(selectedOption) {
     // Get the selected map value (strip the "/?map=" prefix)
     const selectedMap = selectedOption.value.replace('/?map=', '');
 
-    // Only redirect if the map is different
-    if (selectedMap && selectedMap !== currentMap) {
+    // Only redirect if the map is actually different
+    if (selectedMap && selectedMap !== currentMap && !selectedOption.dataset.countries) {
         window.location.href = selectedOption.value;
         return;
     }
 
-    // Otherwise, just toggle the countries
+    // Otherwise, just toggle the countries without page reload
     const countries = selectedOption.dataset.countries ? 
         JSON.parse(selectedOption.dataset.countries) : [];
 
