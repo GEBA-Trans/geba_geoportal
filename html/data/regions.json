@@ -17,199 +17,33 @@
     "options": [
       {
         "value": "/?map=GEBA_MAP_EU.svg",
-        "text": "Europe"
+        "text": "Europe",
+        "countries": ["ALBANIE","BELGIE","BOSNIE--HER","BULGARIJE","DENEMARKEN","DUITSLAND","ENGELAND","ESTLAND","FINLAND","FRANKRIJK","HONGARIJE","IERLAND","ITALIE","KROATIE","LETLAND","LITHOUWE","LUXEMBURG","MACEDONIE","MOLDAVIE","MONTENEGRO","NEDERLAND","NOORWEGEN","OEKRAINE","OOSTENRIJK","POLEN","PORTUGAL","ROEMENIE","SERVIE","SLOVENIE","SLOWAKIJE","SPANJE","TSJECHIE","ZWEDEN","ZWITSERLAND"]
       },
       {
-        "value": "/?map=GEBA_MAP_BENELUX.svg",
-        "text": "Benelux"
+        "value": "/?map=GEBA_MAP_EU.svg",
+        "text": "GEBA Europe",
+        "countries": ["NEDERLAND", "DUITSLAND", "POLEN", "TSJECHIE", "SLOWAKIJE", "OOSTENRIJK", "HONGARIJE", "ZWITSERLAND"]
       },
       {
-        "value": "/?map=GEBA_MAP_ALPENLANDEN.svg",
-        "text": "Alpenlanden"
+        "value": "/?map=GEBA_MAP_EU.svg",
+        "text": "Benelux",
+        "countries": ["NEDERLAND", "BELGIE", "LUXEMBURG"]
       },
       {
-        "value": "/?map=GEBA_MAP_BALKAN.svg",
-        "text": "Balkan"
+        "value": "/?map=GEBA_MAP_EU.svg",
+        "text": "Alpenlanden",
+        "countries": ["OOSTENRIJK", "ZWITSERLAND", "DUITSLAND", "ITALIE", "FRANKRIJK", "SLOVENIE"]
       },
       {
-        "value": "/?map=GEBA_MAP_SCANDINAVIA.svg",
-        "text": "Scandinavia"
+        "value": "/?map=GEBA_MAP_EU.svg",
+        "text": "Balkan",
+        "countries": ["ALBANIE", "BOSNIE--HER", "BULGARIJE", "KROATIE", "KOSOVO", "MACEDONIE", "MONTENEGRO", "ROEMENIE", "SERVIE", "SLOVENIE"]
       },
       {
-        "value": "/?map=GEBA_MAP_Visegrád_Groep.svg",
-        "text": "Visegrád Group"
-      }
-    ]
-  },
-  {
-    "optgroup": "Benelux",
-    "options": [
-      {
-        "value": "/?map=GEBA_COUNTRY_BE.svg",
-        "text": "Belgium"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_NL.svg",
-        "text": "Netherlands"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_LU.svg",
-        "text": "Luxembourg"
-      }
-    ]
-  },
-  {
-    "optgroup": "Scandinavia",
-    "options": [
-      {
-        "value": "/?map=GEBA_COUNTRY_NO.svg",
-        "text": "Norway"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_SE.svg",
-        "text": "Sweden"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_DK.svg",
-        "text": "Denmark"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_FI.svg",
-        "text": "Finland"
-      }
-    ]
-  },
-  {
-    "optgroup": "Balkan",
-    "options": [
-      {
-        "value": "/?map=GEBA_COUNTRY_AL.svg",
-        "text": "Albania"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_BA.svg",
-        "text": "Bosnia and Herzegovina"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_ME.svg",
-        "text": "Montenegro"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_MK.svg",
-        "text": "North Macedonia"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_RS.svg",
-        "text": "Serbia"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_HR.svg",
-        "text": "Croatia"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_BG.svg",
-        "text": "Bulgaria"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_RO.svg",
-        "text": "Romania"
-      }
-    ]
-  },
-  {
-    "optgroup": "Visegrád Group",
-    "options": [
-      {
-        "value": "/?map=GEBA_COUNTRY_CZ.svg",
-        "text": "Czech Republic"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_HU.svg",
-        "text": "Hungary"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_PL.svg",
-        "text": "Poland"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_SK.svg",
-        "text": "Slovakia"
-      }
-    ]
-  },
-  {
-    "optgroup": "Western Europe",
-    "options": [
-      {
-        "value": "/?map=GEBA_COUNTRY_DE.svg",
-        "text": "Germany"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_FR.svg",
-        "text": "France"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_GB.svg",
-        "text": "United Kingdom"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_IE.svg",
-        "text": "Ireland"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_AT.svg",
-        "text": "Austria"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_CH.svg",
-        "text": "Switzerland"
-      }
-    ]
-  },
-  {
-    "optgroup": "Southern Europe",
-    "options": [
-      {
-        "value": "/?map=GEBA_COUNTRY_IT.svg",
-        "text": "Italy"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_ES.svg",
-        "text": "Spain"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_PT.svg",
-        "text": "Portugal"
-      }
-    ]
-  },
-  {
-    "optgroup": "Baltic States",
-    "options": [
-      {
-        "value": "/?map=GEBA_COUNTRY_EE.svg",
-        "text": "Estonia"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_LT.svg",
-        "text": "Lithuania"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_LV.svg",
-        "text": "Latvia"
-      }
-    ]
-  },
-  {
-    "optgroup": "Eastern Europe",
-    "options": [
-      {
-        "value": "/?map=GEBA_COUNTRY_MD.svg",
-        "text": "Moldova"
-      },
-      {
-        "value": "/?map=GEBA_COUNTRY_UA.svg",
-        "text": "Ukraine"
+        "value": "/?map=GEBA_MAP_EU.svg",
+        "text": "Scandinavia",
+        "countries": ["DENEMARKEN", "NOORWEGEN", "ZWEDEN"]
       }
     ]
   }

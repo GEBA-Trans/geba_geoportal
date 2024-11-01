@@ -15,7 +15,7 @@ function getColorVariation(color, factor) {
     return `#${((1 << 24) + (newR << 16) + (newG << 8) + newB).toString(16).slice(1)}`;
 }
 
-function toggleCountryVisibility(country, isVisible) {
+export function toggleCountryVisibility(country, isVisible) {
     console.log(`Toggling visibility for country: ${country}, isVisible: ${isVisible}`);
     
     // Get both the country group and any paths that start with the country code
