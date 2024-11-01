@@ -1,4 +1,4 @@
-import { loadSVG } from './mapLoader.js';
+import { loadSVG, toggleCountryVisibility } from './mapLoader.js';
 import { initializeZoomPan, setupZoomControls, setupPanning } from './zoomPan.js';
 import { setupPostalCodeClicks, loadSelectedPostalCodes, setMode, togglePostalCode } from './postalCodeManager.js';
 import { setupModeToggle, setupLookupButton } from './uiSetup.js';
@@ -47,6 +47,10 @@ async function populateRegionDropdown() {
                     const optionElement = document.createElement('option');
                     optionElement.value = option.value;
                     optionElement.textContent = option.text;
+                    // Store countries data as a data attribute
+                    if (option.countries) {
+                        optionElement.dataset.countries = JSON.stringify(option.countries);
+                    }
                     optgroup.appendChild(optionElement);
                 });
                 
@@ -63,17 +67,60 @@ async function populateRegionDropdown() {
         // Set the initial selected option based on the current URL
         const urlParams = new URLSearchParams(window.location.search);
         const currentMap = urlParams.get('map');
-        if (currentMap) {
-            select.value = `/?map=${currentMap}`;
-        }
+        // if (currentMap) {
+        //     const value = `/?map=${currentMap}`;
+        //     select.value = value;
+        //     handleRegionChange(select.selectedOptions[0]);
+        // }
 
         // Add event listener to handle selection change
         select.addEventListener('change', (event) => {
-            window.location.href = event.target.value;
+            const selectedOption = event.target.selectedOptions[0];
+            handleRegionChange(selectedOption);
         });
     } catch (error) {
         console.error('Error populating region dropdown:', error);
     }
+}
+
+function handleRegionChange(selectedOption) {
+    if (!selectedOption) return;
+
+    // Get the current map from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentMap = urlParams.get('map');
+    
+    // Get the selected map value (strip the "/?map=" prefix)
+    const selectedMap = selectedOption.value.replace('/?map=', '');
+
+    // Only redirect if the map is actually different
+    if (selectedMap && selectedMap !== currentMap && !selectedOption.dataset.countries) {
+        window.location.href = selectedOption.value;
+        return;
+    }
+
+    // Otherwise, just toggle the countries without page reload
+    const countries = selectedOption.dataset.countries ? 
+        JSON.parse(selectedOption.dataset.countries) : [];
+
+    // Get all country toggles
+    const countryToggles = document.querySelectorAll('.country-item input[type="checkbox"]');
+    
+    // Toggle countries based on selection
+    countryToggles.forEach(toggle => {
+        const countryItem = toggle.closest('.country-item');
+        const countryName = countryItem.querySelector('span').textContent;
+        
+        // Check if the country should be visible for this region
+        const shouldBeVisible = countries.length === 0 || 
+            countries.some(c => countryName.toLowerCase().includes(c.toLowerCase()));
+        
+        // Only toggle if the state is different
+        if (toggle.checked !== shouldBeVisible) {
+            toggle.checked = shouldBeVisible;
+            toggleCountryVisibility(countryName, shouldBeVisible);
+        }
+    });
 }
 
 function initializeApp() {

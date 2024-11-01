@@ -1,3 +1,5 @@
+const TOGGLE_STATES_COOKIE = 'countryToggleStates';
+
 function getColorVariation(color, factor) {
     // Convert hex color to RGB
     const r = parseInt(color.slice(1, 3), 16);
@@ -13,8 +15,88 @@ function getColorVariation(color, factor) {
     return `#${((1 << 24) + (newR << 16) + (newG << 8) + newB).toString(16).slice(1)}`;
 }
 
+export function toggleCountryVisibility(country, isVisible) {
+    console.log(`Toggling visibility for country: ${country}, isVisible: ${isVisible}`);
+    
+    // Get both the country group and any paths that start with the country code
+    const countryGroup = document.querySelector(`g[id="${country}"]`);
+    const paths = document.querySelectorAll(`path[id^="${country}"]`);
+    
+    console.log(`Found country group:`, countryGroup);
+    console.log(`Found ${paths.length} paths for country ${country}`);
+    
+    // Toggle visibility of the country group if it exists
+    if (countryGroup) {
+        countryGroup.style.display = isVisible ? 'block' : 'none';
+    }
+    
+    // Toggle visibility of individual paths
+    paths.forEach(path => {
+        console.log(`Setting display: ${isVisible ? 'block' : 'none'} for path:`, path);
+        path.style.display = isVisible ? 'block' : 'none';
+    });
+
+    // Update toggle all checkbox state
+    const toggleAllCheckbox = document.getElementById('toggle-all-countries');
+    const allToggles = Array.from(document.querySelectorAll('.country-item input[type="checkbox"]'));
+    const allChecked = allToggles.every(toggle => toggle.checked);
+    toggleAllCheckbox.checked = allChecked;
+
+    // Save toggle states after each change
+    saveToggleStates();
+}
+
+function setupToggleAll() {
+    const toggleAllCheckbox = document.getElementById('toggle-all-countries');
+    toggleAllCheckbox.addEventListener('change', (e) => {
+        const isVisible = e.target.checked;
+        const countryToggles = document.querySelectorAll('.country-item input[type="checkbox"]');
+        
+        countryToggles.forEach(toggle => {
+            if (toggle.checked !== isVisible) {
+                toggle.checked = isVisible;
+                const countryItem = toggle.closest('.country-item');
+                const countryName = countryItem.querySelector('span').textContent;
+                toggleCountryVisibility(countryName, isVisible);
+            }
+        });
+    });
+}
+
+function saveToggleStates() {
+    const toggleStates = {};
+    document.querySelectorAll('.country-item input[type="checkbox"]').forEach(toggle => {
+        const countryName = toggle.closest('.country-item').querySelector('span').textContent;
+        toggleStates[countryName] = toggle.checked;
+    });
+    document.cookie = `${TOGGLE_STATES_COOKIE}=${JSON.stringify(toggleStates)}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
+}
+
+function loadToggleStates() {
+    const cookieValue = document.cookie
+        .split('; ')
+        .find(row => row.startsWith(`${TOGGLE_STATES_COOKIE}=`));
+    
+    if (cookieValue) {
+        const toggleStates = JSON.parse(cookieValue.split('=')[1]);
+        Object.entries(toggleStates).forEach(([country, isVisible]) => {
+            // Use a more reliable selector
+            const countryItem = Array.from(document.querySelectorAll('.country-item'))
+                .find(item => item.querySelector('span').textContent === country);
+            const toggle = countryItem?.querySelector('input[type="checkbox"]');
+            
+            if (toggle) {
+                toggle.checked = isVisible;
+                toggleCountryVisibility(country, isVisible);
+            }
+        });
+    }
+}
+
 export async function loadSVG(textZoom = 1) {
     try {
+        const loadedCountries = []; // Initialize the array here
+
         // Parse the URL to get the map filename
         const urlParams = new URLSearchParams(window.location.search);
         const mapFilename = urlParams.get('map') || 'GEBA_MAP_BENELUX.svg';
@@ -45,7 +127,17 @@ export async function loadSVG(textZoom = 1) {
             text.setAttribute("font-size", `${10 * textZoom}`); // Set font size based on text zoom
             text.setAttribute("fill", "black"); // Set text color
             text.setAttribute("pointer-events", "none"); // Prevent text from being selectable
-            svgElement.appendChild(text); // Append the text to the SVG
+    // Find the parent group or create one if it doesn't exist
+    let parentGroup = path.parentElement;
+    if (parentGroup.tagName !== 'g') {
+        // If path isn't in a group, wrap it in one
+        parentGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        path.parentElement.insertBefore(parentGroup, path);
+        parentGroup.appendChild(path);
+    }
+    
+    // Add the text to the same group as the path
+    parentGroup.appendChild(text);
 
             // Set the fill color based on the path's ID or group's ID
             const countryId = path.id.includes('-') ? path.parentElement.id : path.id; // Check if ID contains '-' and look at parent if true
@@ -78,7 +170,58 @@ export async function loadSVG(textZoom = 1) {
             path.addEventListener('mouseout', () => {
                 text.setAttribute("font-size", `${10 * textZoom}`); // Reset font size when not hovering
             });
+
+            loadedCountries.push(countryId);
         });
+
+        // Create country list with toggles
+        console.log('Loaded countries:', [...new Set(loadedCountries)]);
+        const countryListElement = document.getElementById('countries');
+        countryListElement.innerHTML = '';
+
+        // Sort the unique countries alphabetically
+        const sortedCountries = [...new Set(loadedCountries)].sort((a, b) => 
+            a.localeCompare(b, undefined, {sensitivity: 'base'})
+        );
+
+        sortedCountries.forEach(country => {
+            const listItem = document.createElement('li');
+            listItem.className = 'country-item';
+            
+            const container = document.createElement('div');
+            container.className = 'country-container';
+            
+            const countryName = document.createElement('span');
+            countryName.textContent = country;
+            
+            const toggleLabel = document.createElement('label');
+            toggleLabel.className = 'switch';
+            
+            const toggleInput = document.createElement('input');
+            toggleInput.type = 'checkbox';
+            toggleInput.checked = true;
+            
+            const toggleSpan = document.createElement('span');
+            toggleSpan.className = 'slider';
+            
+            toggleInput.addEventListener('change', (e) => {
+                console.log(`Toggle changed for country ${country}:`, e.target.checked);
+                toggleCountryVisibility(country, e.target.checked);
+            });
+            
+            toggleLabel.appendChild(toggleInput);
+            toggleLabel.appendChild(toggleSpan);
+            
+            container.appendChild(countryName);
+            container.appendChild(toggleLabel);
+            
+            listItem.appendChild(container);
+            countryListElement.appendChild(listItem);
+        });
+
+        setupToggleAll();
+        // Move loadToggleStates() after the country list is created
+        setTimeout(() => loadToggleStates(), 0); // Use setTimeout to ensure DOM is ready
 
         const viewBox = svgElement.viewBox.baseVal;
         const originalViewBox = {

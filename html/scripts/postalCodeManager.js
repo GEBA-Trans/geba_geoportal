@@ -355,6 +355,9 @@ function addAllPostalCodes(country, mode) {
             targetSet.add(postalCode);
             path.classList.remove('selected', 'loading', 'delivery');
             path.classList.add('selected', mode);
+            // Update the fill color for the added postal code
+            const selectedColor = mode === 'loading' ? document.getElementById('loading-color').value : document.getElementById('delivery-color').value;
+            path.style.fill = selectedColor; // Set the fill color for the postal code
             // sendToWebSocket('select', postalCode);
         }
     });
@@ -364,14 +367,21 @@ function addAllPostalCodes(country, mode) {
 }
 
 function removeAllPostalCodes(country, mode) {
-    const allPaths = document.querySelectorAll(`#map-container svg g#${country} path`);
+    console.log(`Removing all postal codes for country: ${country}, mode: ${mode}`);
     const targetSet = mode === LOADING_MODE ? loadingPostalCodes : deliveryPostalCodes;
+    
+    // First, remove all postal codes that start with the country code
+    const postalCodesToRemove = Array.from(targetSet).filter(code => {
+        const pathElement = document.getElementById(code);
+        return pathElement && pathElement.closest(`g#${country}`);
+    });
 
-    allPaths.forEach(path => {
-        const postalCode = path.id;
-        if (postalCode && targetSet.has(postalCode)) {
+    postalCodesToRemove.forEach(postalCode => {
+        const pathElement = document.getElementById(postalCode);
+        if (pathElement) {
             targetSet.delete(postalCode);
-            path.classList.remove('selected', mode);
+            pathElement.classList.remove('selected', mode);
+            pathElement.style.fill = '';
             // sendToWebSocket('deselect', postalCode);
         }
     });
