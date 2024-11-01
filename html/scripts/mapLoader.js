@@ -33,7 +33,29 @@ function toggleCountryVisibility(country, isVisible) {
         console.log(`Setting display: ${isVisible ? 'block' : 'none'} for path:`, path);
         path.style.display = isVisible ? 'block' : 'none';
     });
-    
+
+    // Update toggle all checkbox state
+    const toggleAllCheckbox = document.getElementById('toggle-all-countries');
+    const allToggles = Array.from(document.querySelectorAll('.country-item input[type="checkbox"]'));
+    const allChecked = allToggles.every(toggle => toggle.checked);
+    toggleAllCheckbox.checked = allChecked;
+}
+
+function setupToggleAll() {
+    const toggleAllCheckbox = document.getElementById('toggle-all-countries');
+    toggleAllCheckbox.addEventListener('change', (e) => {
+        const isVisible = e.target.checked;
+        const countryToggles = document.querySelectorAll('.country-item input[type="checkbox"]');
+        
+        countryToggles.forEach(toggle => {
+            if (toggle.checked !== isVisible) {
+                toggle.checked = isVisible;
+                const countryItem = toggle.closest('.country-item');
+                const countryName = countryItem.querySelector('span').textContent;
+                toggleCountryVisibility(countryName, isVisible);
+            }
+        });
+    });
 }
 
 export async function loadSVG(textZoom = 1) {
@@ -145,6 +167,8 @@ export async function loadSVG(textZoom = 1) {
             listItem.appendChild(container);
             countryListElement.appendChild(listItem);
         });
+
+        setupToggleAll();
 
         const viewBox = svgElement.viewBox.baseVal;
         const originalViewBox = {
