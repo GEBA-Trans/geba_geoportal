@@ -99,7 +99,7 @@ export async function loadSVG(textZoom = 1) {
 
         // Parse the URL to get the map filename
         const urlParams = new URLSearchParams(window.location.search);
-        const mapFilename = urlParams.get('map') || 'GEBA_MAP_BENELUX.svg';
+        const mapFilename = urlParams.get('map') || 'GEBA_MAP_EU.svg';
 
         // Update the path to include the 'maps' subfolder
         const mapPath = `maps/${mapFilename}`;
