@@ -16,27 +16,24 @@ function getColorVariation(color, factor) {
 function toggleCountryVisibility(country, isVisible) {
     console.log(`Toggling visibility for country: ${country}, isVisible: ${isVisible}`);
     
+    // Get both the country group and any paths that start with the country code
+    const countryGroup = document.querySelector(`g[id="${country}"]`);
     const paths = document.querySelectorAll(`path[id^="${country}"]`);
-    console.log(`Found ${paths.length} paths for country ${country}:`, paths);
     
-    const texts = document.querySelectorAll(`text`);
-    console.log(`Found ${texts.length} text elements`);
+    console.log(`Found country group:`, countryGroup);
+    console.log(`Found ${paths.length} paths for country ${country}`);
     
+    // Toggle visibility of the country group if it exists
+    if (countryGroup) {
+        countryGroup.style.display = isVisible ? 'block' : 'none';
+    }
+    
+    // Toggle visibility of individual paths
     paths.forEach(path => {
         console.log(`Setting display: ${isVisible ? 'block' : 'none'} for path:`, path);
         path.style.display = isVisible ? 'block' : 'none';
-        
-        // Find and toggle the corresponding text element
-        const pathId = path.id.substring(3); // Remove the first three characters
-        console.log(`Looking for text elements matching pathId: ${pathId}`);
-        
-        texts.forEach(text => {
-            if (text.textContent === pathId) {
-                console.log(`Found matching text element:`, text);
-                text.style.display = isVisible ? 'block' : 'none';
-            }
-        });
     });
+    
 }
 
 export async function loadSVG(textZoom = 1) {
