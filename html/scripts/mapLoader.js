@@ -36,6 +36,7 @@ export async function loadSVG(textZoom = 1) {
         
         // Add labels for each path
         const paths = svgElement.querySelectorAll('path');
+        const loadedCountries = []; // Array to hold loaded country names
         paths.forEach(path => {
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
             text.textContent = path.id.substring(3); // Remove the first three characters from the path's ID
@@ -56,6 +57,7 @@ export async function loadSVG(textZoom = 1) {
                 const variationColor = getColorVariation(colors[countryId], 0.8 + (Math.random() * 0.2)); // Lighter shade with slight randomness
                 path.setAttribute("fill", variationColor); // Set variation color
                 console.log(`Setting fill color for ${countryId}: ${variationColor}`); // Debug info
+                loadedCountries.push(countryId); // Add country to the loadedCountries array
             } 
             
             // Check for offset color only if path ID contains '-'
@@ -79,6 +81,8 @@ export async function loadSVG(textZoom = 1) {
                 text.setAttribute("font-size", `${10 * textZoom}`); // Reset font size when not hovering
             });
         });
+
+        console.log('Loaded countries:', [...new Set(loadedCountries)]); // Log unique loaded countries
 
         const viewBox = svgElement.viewBox.baseVal;
         const originalViewBox = {
