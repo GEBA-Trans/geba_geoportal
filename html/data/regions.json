@@ -4,15 +4,6 @@
     "text": "Toggle region"
   },
   {
-    "optgroup": "Countries",
-    "options": [
-      {
-        "value": "/?map=GEBA_MAP_EU_COUNTRIES.svg",
-        "text": "Europe Countries"
-      }
-    ]
-  },
-  {
     "optgroup": "Regions",
     "options": [
       {
@@ -46,5 +37,14 @@
         "countries": ["DENEMARKEN", "NOORWEGEN", "ZWEDEN"]
       }
     ]
+  },  {
+    "optgroup": "Countries",
+    "options": [
+      {
+        "value": "/?map=GEBA_MAP_EU_COUNTRIES.svg",
+        "text": "Europe Countries"
+      }
+    ]
   }
+
 ]
