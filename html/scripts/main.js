@@ -87,6 +87,20 @@ async function populateRegionDropdown() {
 function handleRegionChange(selectedOption) {
     if (!selectedOption) return;
 
+    // Get the current map from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentMap = urlParams.get('map');
+    
+    // Get the selected map value (strip the "/?map=" prefix)
+    const selectedMap = selectedOption.value.replace('/?map=', '');
+
+    // Only redirect if the map is different
+    if (selectedMap && selectedMap !== currentMap) {
+        window.location.href = selectedOption.value;
+        return;
+    }
+
+    // Otherwise, just toggle the countries
     const countries = selectedOption.dataset.countries ? 
         JSON.parse(selectedOption.dataset.countries) : [];
 
