@@ -115,6 +115,7 @@ function simplifyPaths() {
             points.push(`${point.x},${point.y}`);
         }
         path.setAttribute('d', `M${points.join(' L')} Z`);
+        console.log(`Simplified path for ${path.id}:`, path.getAttribute('d')); // Add this line
     });
 }
 

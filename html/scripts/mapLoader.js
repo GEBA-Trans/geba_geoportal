@@ -180,7 +180,7 @@ export async function loadSVG(textZoom = 1) {
 
             // Simplify paths and hide them
             simplifyPath(path);
-            path.style.display = 'none';
+            // path.style.display = 'none';
         });
 
         // Create country list with toggles
@@ -243,6 +243,9 @@ export async function loadSVG(textZoom = 1) {
         // Hide loader
         document.getElementById('loader').style.display = 'none';
 
+        // Restore original paths after loading
+        restorePaths();
+
         return { svgElement, originalViewBox };
     } catch (error) {
         console.error('Error loading SVG:', error);
@@ -255,13 +258,28 @@ export async function loadSVG(textZoom = 1) {
 }
 
 function simplifyPath(path) {
+    console.log(`Simplifying path with ID: ${path.id}`); // Debug info for path ID
     const length = path.getTotalLength();
+    console.log(`Total length of path: ${length}`); // Debug info for path length
     const points = [];
     const step = length / 20; // Increase step size to reduce number of points checked
     for (let i = 0; i <= length; i += step) {
         const point = path.getPointAtLength(i);
         points.push(`${point.x},${point.y}`);
+        console.log(`Point at length ${i}: (${point.x}, ${point.y})`); // Debug info for each point
     }
     path.setAttribute('d', `M${points.join(' L')} Z`);
+    console.log(`Simplified path data: ${path.getAttribute('d')}`); // Debug info for simplified path data
+}
+
+function restorePaths() {
+    const paths = document.querySelectorAll('path');
+    paths.forEach(path => {
+        const originalD = path.getAttribute('data-original-d');
+        if (originalD) {
+            path.setAttribute('d', originalD);
+            path.style.display = 'block'; // Ensure the path is visible
+        }
+    });
 }
 
