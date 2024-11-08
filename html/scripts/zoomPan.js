@@ -15,6 +15,12 @@ export function initializeZoomPan(svg, origViewBox) {
     svgElement = svg;
     originalViewBox = origViewBox;
     viewBox = { ...originalViewBox };
+
+    // Store the original 'd' attribute for each path
+    const paths = svgElement.querySelectorAll('path');
+    paths.forEach(path => {
+        path.setAttribute('data-original-d', path.getAttribute('d'));
+    });
 }
 
 export function setupZoomControls() {
@@ -87,8 +93,39 @@ function zoom(step) {
         updateSvgViewBox();
 
         // Update the zoom factor display
-        zoomFactorDisplay.textContent = `Zoom: ${currentZoom.toFixed(1)}x`; // Add this line
+        zoomFactorDisplay.textContent = `Zoom: ${currentZoom.toFixed(1)}x`;
+
+        // Reduce path complexity when zooming out
+        if (step < 0) {
+            simplifyPaths();
+        } else {
+            restorePaths();
+        }
     }
+}
+
+function simplifyPaths() {
+    const paths = svgElement.querySelectorAll('path');
+    paths.forEach(path => {
+        const length = path.getTotalLength();
+        const points = [];
+        const step = length / 20; // Increase step size to reduce number of points checked
+        for (let i = 0; i <= length; i += step) {
+            const point = path.getPointAtLength(i);
+            points.push(`${point.x},${point.y}`);
+        }
+        path.setAttribute('d', `M${points.join(' L')} Z`);
+    });
+}
+
+function restorePaths() {
+    const paths = svgElement.querySelectorAll('path');
+    paths.forEach(path => {
+        const originalD = path.getAttribute('data-original-d');
+        if (originalD) {
+            path.setAttribute('d', originalD);
+        }
+    });
 }
 
 function resetView() {
