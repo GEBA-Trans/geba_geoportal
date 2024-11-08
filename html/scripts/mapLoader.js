@@ -119,8 +119,13 @@ export async function loadSVG(textZoom = 1) {
         document.getElementById('map-container').innerHTML += svgContent;
         const svgElement = document.querySelector('#map-container svg');
         
-        // Add labels for each path
+        // Store the original 'd' attribute for each path
         const paths = svgElement.querySelectorAll('path');
+        paths.forEach(path => {
+            path.setAttribute('data-original-d', path.getAttribute('d'));
+        });
+
+        // Add labels for each path
         paths.forEach(path => {
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
             text.textContent = path.id.substring(3); // Remove the first three characters from the path's ID
@@ -144,25 +149,25 @@ export async function loadSVG(textZoom = 1) {
 
             // Set the fill color based on the path's ID or group's ID
             const countryId = path.id.includes('-') ? path.parentElement.id : path.id; // Check if ID contains '-' and look at parent if true
-            console.log(`Processing path ID: ${path.id}, countryId: ${countryId}`); // Debug info for path ID
+            // console.log(`Processing path ID: ${path.id}, countryId: ${countryId}`); // Debug info for path ID
             
             // Check for countryId first
             if (colors[countryId]) {
                 const variationColor = getColorVariation(colors[countryId], 0.8 + (Math.random() * 0.2)); // Lighter shade with slight randomness
                 path.setAttribute("fill", variationColor); // Set variation color
-                console.log(`Setting fill color for ${countryId}: ${variationColor}`); // Debug info
+                // console.log(`Setting fill color for ${countryId}: ${variationColor}`); // Debug info
             } 
             
             // Check for offset color only if path ID contains '-'
             if (path.id.includes('-')) { // Check if ID contains '-' for offset color
                 const parentCountryId = path.parentElement.id; // Get parent country ID
-                console.log(`Parent country ID: ${parentCountryId}`); // Debug info for parent country ID
+                // console.log(`Parent country ID: ${parentCountryId}`); // Debug info for parent country ID
                 if (colors[parentCountryId]) {
                     const offsetVariationColor = getColorVariation(colors[parentCountryId], 0.8 + (Math.random() * 0.2)); // Offset variation with slight randomness
                     path.setAttribute("fill", offsetVariationColor); // Set offset variation color
-                    console.log(`Setting offset fill color for ${parentCountryId}: ${offsetVariationColor}`); // Debug info
+                    // console.log(`Setting offset fill color for ${parentCountryId}: ${offsetVariationColor}`); // Debug info
                 } else {
-                    console.log(`No color found for parent country ID: ${parentCountryId}`); // Debug info if no color found
+                    // console.log(`No color found for parent country ID: ${parentCountryId}`); // Debug info if no color found
                 }
             }
 
@@ -180,11 +185,11 @@ export async function loadSVG(textZoom = 1) {
 
             // Simplify paths and hide them
             simplifyPath(path);
-            // path.style.display = 'none';
+            path.style.display = 'none';
         });
 
         // Create country list with toggles
-        console.log('Loaded countries:', [...new Set(loadedCountries)]);
+        // console.log('Loaded countries:', [...new Set(loadedCountries)]);
         const countryListElement = document.getElementById('countries');
         countryListElement.innerHTML = '';
 
@@ -258,27 +263,32 @@ export async function loadSVG(textZoom = 1) {
 }
 
 function simplifyPath(path) {
-    console.log(`Simplifying path with ID: ${path.id}`); // Debug info for path ID
+    // console.log(`Simplifying path with ID: ${path.id}`); // Debug info for path ID
     const length = path.getTotalLength();
-    console.log(`Total length of path: ${length}`); // Debug info for path length
+    // console.log(`Total length of path: ${length}`); // Debug info for path length
     const points = [];
     const step = length / 20; // Increase step size to reduce number of points checked
     for (let i = 0; i <= length; i += step) {
         const point = path.getPointAtLength(i);
         points.push(`${point.x},${point.y}`);
-        console.log(`Point at length ${i}: (${point.x}, ${point.y})`); // Debug info for each point
+        // console.log(`Point at length ${i}: (${point.x}, ${point.y})`); // Debug info for each point
     }
     path.setAttribute('d', `M${points.join(' L')} Z`);
-    console.log(`Simplified path data: ${path.getAttribute('d')}`); // Debug info for simplified path data
+    // console.log(`Simplified path data: ${path.getAttribute('d')}`); // Debug info for simplified path data
 }
 
 function restorePaths() {
     const paths = document.querySelectorAll('path');
+    console.log(`Restoring ${paths.length} paths`); // Debug info for number of paths
     paths.forEach(path => {
         const originalD = path.getAttribute('data-original-d');
+        console.log(`Restoring path ID: ${path.id}, originalD: ${originalD}`); // Debug info for each path
         if (originalD) {
             path.setAttribute('d', originalD);
             path.style.display = 'block'; // Ensure the path is visible
+            console.log(`Path ID: ${path.id} restored`); // Confirm restoration
+        } else {
+            console.log(`No original data found for path ID: ${path.id}`); // Debug info if no original data
         }
     });
 }
