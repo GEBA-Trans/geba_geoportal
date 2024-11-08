@@ -108,18 +108,31 @@ function selectPathsInLasso() {
         if (path.style.display === 'none') return;
         const parentGroup = path.closest('g');
         if (parentGroup && parentGroup.style.display === 'none') return;
-        
+
         debugCounters.pathsChecked++;
-        const isInLasso = isPathInLasso(path);
-        if (isInLasso) {
-            debugCounters.pathsSelected++;
-            const postalCode = path.id || 'Unknown';
-            addToSelection(path, postalCode);
-            path.classList.add('selected');
-            path.style.filter = '';
+        const bbox = path.getBBox();
+        if (isBBoxInLasso(bbox)) {
+            const isInLasso = isPathInLasso(path);
+            if (isInLasso) {
+                debugCounters.pathsSelected++;
+                const postalCode = path.id || 'Unknown';
+                addToSelection(path, postalCode);
+                path.classList.add('selected');
+                path.style.filter = '';
+            }
         }
         updateDebugCounters();
     });
+}
+
+function isBBoxInLasso(bbox) {
+    const bboxPoints = [
+        { x: bbox.x, y: bbox.y },
+        { x: bbox.x + bbox.width, y: bbox.y },
+        { x: bbox.x, y: bbox.y + bbox.height },
+        { x: bbox.x + bbox.width, y: bbox.y + bbox.height }
+    ];
+    return bboxPoints.some(point => isPointInPolygon(point, lassoPoints));
 }
 
 function isPathInLasso(path) {
@@ -130,7 +143,7 @@ function isPathInLasso(path) {
 function getPathPoints(path) {
     const points = [];
     const pathLength = path.getTotalLength();
-    const step = pathLength / 8; // Adjust this number to balance accuracy and performance
+    const step = pathLength / 20; // Increase step size to reduce number of points checked
     console.log('Path Length:', pathLength);
     console.log('Step Size:', step);
 
