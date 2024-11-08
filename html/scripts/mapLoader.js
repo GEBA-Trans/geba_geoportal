@@ -95,6 +95,9 @@ function loadToggleStates() {
 
 export async function loadSVG(textZoom = 1) {
     try {
+        // Show loader
+        document.getElementById('loader').style.display = 'flex';
+
         const loadedCountries = []; // Initialize the array here
 
         // Parse the URL to get the map filename
@@ -127,17 +130,17 @@ export async function loadSVG(textZoom = 1) {
             text.setAttribute("font-size", `${10 * textZoom}`); // Set font size based on text zoom
             text.setAttribute("fill", "black"); // Set text color
             text.setAttribute("pointer-events", "none"); // Prevent text from being selectable
-    // Find the parent group or create one if it doesn't exist
-    let parentGroup = path.parentElement;
-    if (parentGroup.tagName !== 'g') {
-        // If path isn't in a group, wrap it in one
-        parentGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        path.parentElement.insertBefore(parentGroup, path);
-        parentGroup.appendChild(path);
-    }
+            // Find the parent group or create one if it doesn't exist
+            let parentGroup = path.parentElement;
+            if (parentGroup.tagName !== 'g') {
+                // If path isn't in a group, wrap it in one
+                parentGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                path.parentElement.insertBefore(parentGroup, path);
+                parentGroup.appendChild(path);
+            }
     
-    // Add the text to the same group as the path
-    parentGroup.appendChild(text);
+            // Add the text to the same group as the path
+            parentGroup.appendChild(text);
 
             // Set the fill color based on the path's ID or group's ID
             const countryId = path.id.includes('-') ? path.parentElement.id : path.id; // Check if ID contains '-' and look at parent if true
@@ -175,6 +178,9 @@ export async function loadSVG(textZoom = 1) {
 
             loadedCountries.push(countryId);
 
+            // Simplify paths and hide them
+            simplifyPath(path);
+            path.style.display = 'none';
         });
 
         // Create country list with toggles
@@ -233,10 +239,29 @@ export async function loadSVG(textZoom = 1) {
             width: viewBox.width,
             height: viewBox.height
         };
+
+        // Hide loader
+        document.getElementById('loader').style.display = 'none';
+
         return { svgElement, originalViewBox };
     } catch (error) {
         console.error('Error loading SVG:', error);
+
+        // Hide loader in case of error
+        document.getElementById('loader').style.display = 'none';
+
         throw error;
     }
+}
+
+function simplifyPath(path) {
+    const length = path.getTotalLength();
+    const points = [];
+    const step = length / 20; // Increase step size to reduce number of points checked
+    for (let i = 0; i <= length; i += step) {
+        const point = path.getPointAtLength(i);
+        points.push(`${point.x},${point.y}`);
+    }
+    path.setAttribute('d', `M${points.join(' L')} Z`);
 }
 
