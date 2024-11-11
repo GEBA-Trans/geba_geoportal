@@ -15,6 +15,12 @@ export function initializeZoomPan(svg, origViewBox) {
     svgElement = svg;
     originalViewBox = origViewBox;
     viewBox = { ...originalViewBox };
+
+    // Store the original 'd' attribute for each path
+    const paths = svgElement.querySelectorAll('path');
+    paths.forEach(path => {
+        path.setAttribute('data-original-d', path.getAttribute('d'));
+    });
 }
 
 export function setupZoomControls() {
@@ -87,7 +93,8 @@ function zoom(step) {
         updateSvgViewBox();
 
         // Update the zoom factor display
-        zoomFactorDisplay.textContent = `Zoom: ${currentZoom.toFixed(1)}x`; // Add this line
+        zoomFactorDisplay.textContent = `Zoom: ${currentZoom.toFixed(1)}x`;
+
     }
 }
 

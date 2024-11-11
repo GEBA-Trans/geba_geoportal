@@ -108,18 +108,31 @@ function selectPathsInLasso() {
         if (path.style.display === 'none') return;
         const parentGroup = path.closest('g');
         if (parentGroup && parentGroup.style.display === 'none') return;
-        
+
         debugCounters.pathsChecked++;
-        const isInLasso = isPathInLasso(path);
-        if (isInLasso) {
-            debugCounters.pathsSelected++;
-            const postalCode = path.id || 'Unknown';
-            addToSelection(path, postalCode);
-            path.classList.add('selected');
-            path.style.filter = '';
+        const bbox = path.getBBox();
+        if (isBBoxInLasso(bbox)) {
+            const isInLasso = isPathInLasso(path);
+            if (isInLasso) {
+                debugCounters.pathsSelected++;
+                const postalCode = path.id || 'Unknown';
+                addToSelection(path, postalCode);
+                path.classList.add('selected');
+                path.style.filter = '';
+            }
         }
         updateDebugCounters();
     });
+}
+
+function isBBoxInLasso(bbox) {
+    const bboxPoints = [
+        { x: bbox.x, y: bbox.y },
+        { x: bbox.x + bbox.width, y: bbox.y },
+        { x: bbox.x, y: bbox.y + bbox.height },
+        { x: bbox.x + bbox.width, y: bbox.y + bbox.height }
+    ];
+    return bboxPoints.some(point => isPointInPolygon(point, lassoPoints));
 }
 
 function isPathInLasso(path) {
@@ -129,33 +142,45 @@ function isPathInLasso(path) {
 
 function getPathPoints(path) {
     const points = [];
+    const zoomFactor = getZoomFactor(); // Assume this function returns the current zoom factor
+    const useSimplified = zoomFactor < 5;
+    const dAttribute = useSimplified ? 'data-simplified-d' : 'd';
+    const pathData = path.getAttribute(dAttribute);
+    
+    if (!pathData) {
+        console.warn(`Path ${path.id} does not have a ${dAttribute} attribute.`);
+        return { points, svg: path.ownerSVGElement };
+    }
+
     const pathLength = path.getTotalLength();
-    const step = pathLength / 8; // Adjust this number to balance accuracy and performance
+    const step = pathLength / 20; // Increase step size to reduce number of points checked
     console.log('Path Length:', pathLength);
     console.log('Step Size:', step);
-
     const svg = path.ownerSVGElement;
     const debugGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
     debugGroup.setAttribute("id", "debug-points");
     svg.appendChild(debugGroup);
-
     for (let i = 0; i <= pathLength; i += step) {
         const point = path.getPointAtLength(i);
         if (!points.some(p => p.x === point.x && p.y === point.y)) {
             points.push(point);
-            // console.log(`Point ${i}:`, point);
-
-            // Create a visible point on the SVG for debug purposes
-            // const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            // circle.setAttribute("cx", point.x);
-            // circle.setAttribute("cy", point.y);
-            // circle.setAttribute("r", "2");
-            // circle.setAttribute("fill", "red");
-            // debugGroup.appendChild(circle);
         }
     }
     console.log('Total Points Collected:', points.length);
     return { points, svg };
+}
+
+// Add this function to get the current zoom factor
+function getZoomFactor() {
+    const zoomFactorElement = document.getElementById('zoom-factor');
+    if (zoomFactorElement) {
+        const zoomText = zoomFactorElement.textContent;
+        const zoomMatch = zoomText.match(/Zoom:\s*([\d.]+)x/);
+        if (zoomMatch) {
+            return parseFloat(zoomMatch[1]);
+        }
+    }
+    return 1; // Default zoom factor
 }
 
 export function isPointInPolygon(point, polygon) {

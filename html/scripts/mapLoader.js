@@ -95,6 +95,9 @@ function loadToggleStates() {
 
 export async function loadSVG(textZoom = 1) {
     try {
+        // Show loader
+        document.getElementById('loader').style.display = 'flex';
+
         const loadedCountries = []; // Initialize the array here
 
         // Parse the URL to get the map filename
@@ -116,8 +119,13 @@ export async function loadSVG(textZoom = 1) {
         document.getElementById('map-container').innerHTML += svgContent;
         const svgElement = document.querySelector('#map-container svg');
         
-        // Add labels for each path
+        // Store the original 'd' attribute for each path
         const paths = svgElement.querySelectorAll('path');
+        paths.forEach(path => {
+            path.setAttribute('data-original-d', path.getAttribute('d'));
+        });
+
+        // Add labels for each path
         paths.forEach(path => {
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
             text.textContent = path.id.substring(3); // Remove the first three characters from the path's ID
@@ -127,39 +135,39 @@ export async function loadSVG(textZoom = 1) {
             text.setAttribute("font-size", `${10 * textZoom}`); // Set font size based on text zoom
             text.setAttribute("fill", "black"); // Set text color
             text.setAttribute("pointer-events", "none"); // Prevent text from being selectable
-    // Find the parent group or create one if it doesn't exist
-    let parentGroup = path.parentElement;
-    if (parentGroup.tagName !== 'g') {
-        // If path isn't in a group, wrap it in one
-        parentGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        path.parentElement.insertBefore(parentGroup, path);
-        parentGroup.appendChild(path);
-    }
+            // Find the parent group or create one if it doesn't exist
+            let parentGroup = path.parentElement;
+            if (parentGroup.tagName !== 'g') {
+                // If path isn't in a group, wrap it in one
+                parentGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                path.parentElement.insertBefore(parentGroup, path);
+                parentGroup.appendChild(path);
+            }
     
-    // Add the text to the same group as the path
-    parentGroup.appendChild(text);
+            // Add the text to the same group as the path
+            parentGroup.appendChild(text);
 
             // Set the fill color based on the path's ID or group's ID
             const countryId = path.id.includes('-') ? path.parentElement.id : path.id; // Check if ID contains '-' and look at parent if true
-            console.log(`Processing path ID: ${path.id}, countryId: ${countryId}`); // Debug info for path ID
+            // console.log(`Processing path ID: ${path.id}, countryId: ${countryId}`); // Debug info for path ID
             
             // Check for countryId first
             if (colors[countryId]) {
                 const variationColor = getColorVariation(colors[countryId], 0.8 + (Math.random() * 0.2)); // Lighter shade with slight randomness
                 path.setAttribute("fill", variationColor); // Set variation color
-                console.log(`Setting fill color for ${countryId}: ${variationColor}`); // Debug info
+                // console.log(`Setting fill color for ${countryId}: ${variationColor}`); // Debug info
             } 
             
             // Check for offset color only if path ID contains '-'
             if (path.id.includes('-')) { // Check if ID contains '-' for offset color
                 const parentCountryId = path.parentElement.id; // Get parent country ID
-                console.log(`Parent country ID: ${parentCountryId}`); // Debug info for parent country ID
+                // console.log(`Parent country ID: ${parentCountryId}`); // Debug info for parent country ID
                 if (colors[parentCountryId]) {
                     const offsetVariationColor = getColorVariation(colors[parentCountryId], 0.8 + (Math.random() * 0.2)); // Offset variation with slight randomness
                     path.setAttribute("fill", offsetVariationColor); // Set offset variation color
-                    console.log(`Setting offset fill color for ${parentCountryId}: ${offsetVariationColor}`); // Debug info
+                    // console.log(`Setting offset fill color for ${parentCountryId}: ${offsetVariationColor}`); // Debug info
                 } else {
-                    console.log(`No color found for parent country ID: ${parentCountryId}`); // Debug info if no color found
+                    // console.log(`No color found for parent country ID: ${parentCountryId}`); // Debug info if no color found
                 }
             }
 
@@ -175,10 +183,12 @@ export async function loadSVG(textZoom = 1) {
 
             loadedCountries.push(countryId);
 
+            // Simplify paths
+            simplifyPath(path);
         });
 
         // Create country list with toggles
-        console.log('Loaded countries:', [...new Set(loadedCountries)]);
+        // console.log('Loaded countries:', [...new Set(loadedCountries)]);
         const countryListElement = document.getElementById('countries');
         countryListElement.innerHTML = '';
 
@@ -233,10 +243,30 @@ export async function loadSVG(textZoom = 1) {
             width: viewBox.width,
             height: viewBox.height
         };
+
+        // Hide loader
+        document.getElementById('loader').style.display = 'none';
+
         return { svgElement, originalViewBox };
     } catch (error) {
         console.error('Error loading SVG:', error);
+
+        // Hide loader in case of error
+        document.getElementById('loader').style.display = 'none';
+
         throw error;
     }
+}
+
+function simplifyPath(path) {
+    const length = path.getTotalLength();
+    const points = [];
+    const step = length / 8; // Increase step size to reduce number of points checked
+    for (let i = 0; i <= length; i += step) {
+        const point = path.getPointAtLength(i);
+        points.push(`${point.x},${point.y}`);
+    }
+    const simplifiedD = `M${points.join(' L')} Z`;
+    path.setAttribute('data-simplified-d', simplifiedD);
 }
 
