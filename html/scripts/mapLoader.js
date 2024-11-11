@@ -183,9 +183,8 @@ export async function loadSVG(textZoom = 1) {
 
             loadedCountries.push(countryId);
 
-            // Simplify paths and hide them
+            // Simplify paths
             simplifyPath(path);
-            path.style.display = 'none';
         });
 
         // Create country list with toggles
@@ -248,9 +247,6 @@ export async function loadSVG(textZoom = 1) {
         // Hide loader
         document.getElementById('loader').style.display = 'none';
 
-        // Restore original paths after loading
-        restorePaths();
-
         return { svgElement, originalViewBox };
     } catch (error) {
         console.error('Error loading SVG:', error);
@@ -263,33 +259,14 @@ export async function loadSVG(textZoom = 1) {
 }
 
 function simplifyPath(path) {
-    // console.log(`Simplifying path with ID: ${path.id}`); // Debug info for path ID
     const length = path.getTotalLength();
-    // console.log(`Total length of path: ${length}`); // Debug info for path length
     const points = [];
-    const step = length / 20; // Increase step size to reduce number of points checked
+    const step = length / 50; // Increase step size to reduce number of points checked
     for (let i = 0; i <= length; i += step) {
         const point = path.getPointAtLength(i);
         points.push(`${point.x},${point.y}`);
-        // console.log(`Point at length ${i}: (${point.x}, ${point.y})`); // Debug info for each point
     }
-    path.setAttribute('d', `M${points.join(' L')} Z`);
-    // console.log(`Simplified path data: ${path.getAttribute('d')}`); // Debug info for simplified path data
-}
-
-function restorePaths() {
-    const paths = document.querySelectorAll('path');
-    console.log(`Restoring ${paths.length} paths`); // Debug info for number of paths
-    paths.forEach(path => {
-        const originalD = path.getAttribute('data-original-d');
-        console.log(`Restoring path ID: ${path.id}, originalD: ${originalD}`); // Debug info for each path
-        if (originalD) {
-            path.setAttribute('d', originalD);
-            path.style.display = 'block'; // Ensure the path is visible
-            console.log(`Path ID: ${path.id} restored`); // Confirm restoration
-        } else {
-            console.log(`No original data found for path ID: ${path.id}`); // Debug info if no original data
-        }
-    });
+    const simplifiedD = `M${points.join(' L')} Z`;
+    path.setAttribute('data-simplified-d', simplifiedD);
 }
 

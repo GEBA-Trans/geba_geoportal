@@ -95,38 +95,7 @@ function zoom(step) {
         // Update the zoom factor display
         zoomFactorDisplay.textContent = `Zoom: ${currentZoom.toFixed(1)}x`;
 
-        // Reduce path complexity when zooming out
-        if (step < 0) {
-            simplifyPaths();
-        } else {
-            restorePaths();
-        }
     }
-}
-
-function simplifyPaths() {
-    const paths = svgElement.querySelectorAll('path');
-    paths.forEach(path => {
-        const length = path.getTotalLength();
-        const points = [];
-        const step = length / 20; // Increase step size to reduce number of points checked
-        for (let i = 0; i <= length; i += step) {
-            const point = path.getPointAtLength(i);
-            points.push(`${point.x},${point.y}`);
-        }
-        path.setAttribute('d', `M${points.join(' L')} Z`);
-        console.log(`Simplified path for ${path.id}:`, path.getAttribute('d')); // Add this line
-    });
-}
-
-function restorePaths() {
-    const paths = svgElement.querySelectorAll('path');
-    paths.forEach(path => {
-        const originalD = path.getAttribute('data-original-d');
-        if (originalD) {
-            path.setAttribute('d', originalD);
-        }
-    });
 }
 
 function resetView() {
