@@ -142,22 +142,25 @@ function isPathInLasso(path) {
 
 function getPathPoints(path) {
     const points = [];
+    const simplifiedD = path.getAttribute('data-simplified-d');
+    if (!simplifiedD) {
+        console.warn(`Path ${path.id} does not have a data-simplified-d attribute.`);
+        return { points, svg: path.ownerSVGElement };
+    }
+
     const pathLength = path.getTotalLength();
     const step = pathLength / 20; // Increase step size to reduce number of points checked
     console.log('Path Length:', pathLength);
     console.log('Step Size:', step);
-
     const svg = path.ownerSVGElement;
     const debugGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
     debugGroup.setAttribute("id", "debug-points");
     svg.appendChild(debugGroup);
-
     for (let i = 0; i <= pathLength; i += step) {
         const point = path.getPointAtLength(i);
         if (!points.some(p => p.x === point.x && p.y === point.y)) {
             points.push(point);
             // console.log(`Point ${i}:`, point);
-
             // Create a visible point on the SVG for debug purposes
             // const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             // circle.setAttribute("cx", point.x);
@@ -170,7 +173,6 @@ function getPathPoints(path) {
     console.log('Total Points Collected:', points.length);
     return { points, svg };
 }
-
 export function isPointInPolygon(point, polygon) {
     let inside = false;
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {

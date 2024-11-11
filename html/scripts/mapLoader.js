@@ -261,7 +261,7 @@ export async function loadSVG(textZoom = 1) {
 function simplifyPath(path) {
     const length = path.getTotalLength();
     const points = [];
-    const step = length / 50; // Increase step size to reduce number of points checked
+    const step = length / 8; // Increase step size to reduce number of points checked
     for (let i = 0; i <= length; i += step) {
         const point = path.getPointAtLength(i);
         points.push(`${point.x},${point.y}`);
