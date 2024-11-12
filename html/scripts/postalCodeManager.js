@@ -1,5 +1,4 @@
-// import { sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts } from './websocket.js';
-import { isPointInPolygon, setLassoMode } from './lasso.js';
+import { isPointInPolygon, setLassoMode, isLassoActive } from './lasso.js';
 
 const LOADING_MODE = 'loading';
 const DELIVERY_MODE = 'delivery';
@@ -239,6 +238,9 @@ function clearAllPostalCodes(postalCodes) {
         if (pathElement) {
             pathElement.classList.remove('selected', 'loading', 'delivery');
             pathElement.style.fill = '';
+            if (isLassoActive) {
+                pathElement.style.filter = 'grayscale(75%)'; // Reapply the grayscale filter only if lasso is active
+            }
         }
         // sendToWebSocket('deselect', postalCode);
     });
@@ -401,6 +403,9 @@ function removeAllPostalCodes(country, mode) {
             targetSet.delete(postalCode);
             pathElement.classList.remove('selected', mode);
             pathElement.style.fill = '';
+            if (isLassoActive) {
+                pathElement.style.filter = 'grayscale(75%)'; // Reapply the grayscale filter only if lasso is active
+            }
             // sendToWebSocket('deselect', postalCode);
         }
     });
