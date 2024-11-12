@@ -1,5 +1,4 @@
-import { disablePostalCodeClicks } from './postalCodeManager.js';
-import { enablePostalCodeClicks } from './postalCodeManager.js';
+import { disablePostalCodeClicks, enablePostalCodeClicks, addAllPostalCodes } from './postalCodeManager.js';
 
 export let isLassoActive = false;
 let currentMode; // Add this line to keep track of the current mode
@@ -115,6 +114,8 @@ function selectPathsInLasso() {
     const paths = document.querySelectorAll('#map-container svg path');
     debugCounters.pathsChecked = 0;
     debugCounters.pathsSelected = 0;
+    const selectCountries = document.getElementById('select-countries').checked;
+    console.log('Select Countries:', selectCountries);
     paths.forEach(path => {
         // Skip paths that are not visible or have a hidden parent
         if (path.style.display === 'none') return;
@@ -131,6 +132,13 @@ function selectPathsInLasso() {
                 addToSelection(path, postalCode);
                 path.classList.add('selected');
                 path.style.filter = '';
+
+                // If "select countries" toggle is on, select the whole country
+                if (selectCountries && parentGroup) {
+                    const country = parentGroup.id;
+                    addAllPostalCodes(country, currentMode);
+                    console.log('Select Country:', country);
+                }
             }
         }
         updateDebugCounters();
@@ -166,8 +174,8 @@ function getPathPoints(path) {
 
     const pathLength = path.getTotalLength();
     const step = pathLength / 20; // Increase step size to reduce number of points checked
-    console.log('Path Length:', pathLength);
-    console.log('Step Size:', step);
+    // console.log('Path Length:', pathLength);
+    // console.log('Step Size:', step);
     const svg = path.ownerSVGElement;
     const debugGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
     debugGroup.setAttribute("id", "debug-points");
@@ -178,7 +186,7 @@ function getPathPoints(path) {
             points.push(point);
         }
     }
-    console.log('Total Points Collected:', points.length);
+    // console.log('Total Points Collected:', points.length);
     return { points, svg };
 }
 

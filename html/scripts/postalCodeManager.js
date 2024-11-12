@@ -361,7 +361,7 @@ function loadExpandedCountries() {
     }
 }
 
-function addAllPostalCodes(country, mode) {
+export function addAllPostalCodes(country, mode) {
     const allPaths = document.querySelectorAll(`#map-container svg g#${country} path`);
     const targetSet = mode === LOADING_MODE ? loadingPostalCodes : deliveryPostalCodes;
     const hiddenSet = mode === LOADING_MODE ? deliveryPostalCodes : loadingPostalCodes;
