@@ -1,4 +1,4 @@
-import { disablePostalCodeClicks, enablePostalCodeClicks, addAllPostalCodes } from './postalCodeManager.js';
+import { disablePostalCodeClicks, enablePostalCodeClicks, addAllPostalCodes, reloadSelectedPostalCodes } from './postalCodeManager.js';
 
 export let isLassoActive = false;
 let currentMode; // Add this line to keep track of the current mode
@@ -236,6 +236,7 @@ function endLasso(e) {
     selectPathsInLasso();
     updateDebugCounters(); // Update counters one last time
     clearLasso();
+    reloadSelectedPostalCodes(); // Add this line to reload selected postal codes after lasso selection
     // Remove debug points after a short delay
     setTimeout(() => {
         const debugGroup = svgElement.querySelector('#debug-points');

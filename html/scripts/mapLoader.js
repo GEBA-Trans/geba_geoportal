@@ -1,6 +1,6 @@
 const TOGGLE_STATES_COOKIE = 'countryToggleStates';
 
-function getColorVariation(color, factor) {
+export function getColorVariation(color, factor) {
     // Convert hex color to RGB
     const r = parseInt(color.slice(1, 3), 16);
     const g = parseInt(color.slice(3, 5), 16);

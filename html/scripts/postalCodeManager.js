@@ -1,4 +1,5 @@
 import { isPointInPolygon, setLassoMode, isLassoActive } from './lasso.js';
+import { getColorVariation } from './mapLoader.js'; // Add this import
 
 const LOADING_MODE = 'loading';
 const DELIVERY_MODE = 'delivery';
@@ -443,10 +444,25 @@ document.getElementById('delivery-color').addEventListener('input', (e) => {
 // Function to update postal code selection color
 function updatePostalCodeSelectionColor(mode, color) {
     const postalCodes = mode === 'loading' ? loadingPostalCodes : deliveryPostalCodes;
+    const countryColors = new Map();
+
     postalCodes.forEach(postalCode => {
         const pathElement = document.getElementById(postalCode);
         if (pathElement) {
-            pathElement.style.fill = color; // Update the fill color of the postal code
+            const parentGroup = pathElement.closest('g');
+            const country = parentGroup ? parentGroup.id : 'Unknown';
+            if (!countryColors.has(country)) {
+                countryColors.set(country, getColorVariation(color, 0.7 + (Math.random() * 0.3)));
+            }
+            pathElement.style.fill = countryColors.get(country); // Update the fill color of the postal code
         }
+    });
+}
+
+export function reloadSelectedPostalCodes() {
+    loadSelectedPostalCodes().then(() => {
+        console.log('Selected postal codes reloaded.');
+    }).catch(error => {
+        console.error('Error reloading selected postal codes:', error);
     });
 }
