@@ -104,5 +104,15 @@
     
     <!-- Update the script import to use the new main.js -->
     <script type="module" src="scripts/main.js"></script>
+    <script>
+        document.getElementById('select-countries').addEventListener('change', function() {
+            const selectModeText = document.getElementById('select-mode-text');
+            if (this.checked) {
+                selectModeText.innerHTML = '<i class="fas fa-globe"></i> Selecting Countries';
+            } else {
+                selectModeText.innerHTML = '<i class="fas fa-map-marker-alt"></i> Selecting Postal Codes';
+            }
+        });
+    </script>
 </body>
 </html>
