@@ -1,3 +1,6 @@
+import { disablePostalCodeClicks } from './postalCodeManager.js';
+import { enablePostalCodeClicks } from './postalCodeManager.js';
+
 export let isLassoActive = false;
 let currentMode; // Add this line to keep track of the current mode
 
@@ -22,14 +25,21 @@ export function setLassoMode(mode) {
 }
 
 function toggleLasso() {
+    console.log('Toggle Lasso');
     isLassoActive = !isLassoActive;
+
+
+    
+    console.log('Lasso Active:', isLassoActive);
     const mapContainer = document.getElementById('map-container');
     mapContainer.classList.toggle('lasso-active', isLassoActive);
 
     // Change cursor based on lasso state
     if (isLassoActive) {
+        disablePostalCodeClicks();
         mapContainer.style.cursor = 'crosshair'; // Cursor for lasso active
     } else {
+        enablePostalCodeClicks();
         mapContainer.style.cursor = 'grab'; // Cursor for pan hand when lasso is not active
     }
 
@@ -59,6 +69,7 @@ function toggleLasso() {
 }
 
 function startLasso(e) {
+    console.log('Start Lasso');
     if (!isLassoActive) return;
     e.preventDefault();
     const point = getSVGPoint(e.clientX, e.clientY);
@@ -86,6 +97,7 @@ function getSVGPoint(x, y) {
 }
 
 function drawLasso() {
+    
     let existingLasso = svgElement.querySelector('#lasso');
     if (existingLasso) existingLasso.remove();
 
@@ -137,7 +149,7 @@ function isBBoxInLasso(bbox) {
 
 function isPathInLasso(path) {
     const { points } = getPathPoints(path);
-    return points.some(point => isPointInPolygon(point, lassoPoints));
+    return points.some(point => isPointInPolygon(point, lassoPoints)) || isPointInPolygon(points[0], lassoPoints);
 }
 
 function getPathPoints(path) {
@@ -216,7 +228,6 @@ function endLasso(e) {
     selectPathsInLasso();
     updateDebugCounters(); // Update counters one last time
     clearLasso();
-    
     // Remove debug points after a short delay
     setTimeout(() => {
         const debugGroup = svgElement.querySelector('#debug-points');
@@ -224,8 +235,8 @@ function endLasso(e) {
             svgElement.removeChild(debugGroup);
         }
     }, 2000);
-
     // Don't reset the timeTaken here
+
 }
 
 function debugLasso() {
