@@ -376,6 +376,7 @@ export function addAllPostalCodes(country, mode) {
             // Update the fill color for the added postal code
             const selectedColor = mode === 'loading' ? document.getElementById('loading-color').value : document.getElementById('delivery-color').value;
             path.style.fill = selectedColor; // Set the fill color for the postal code
+            path.style.filter = ''; // Remove the grayscale filter
             // sendToWebSocket('select', postalCode);
         }
     });
