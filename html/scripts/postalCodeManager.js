@@ -391,10 +391,12 @@ function removeAllPostalCodes(country, mode) {
 }
 
 export function disablePostalCodeClicks() {
+    console.log("Postal code clicks have been disabled.");
     isPostalCodeClicksEnabled = false;
 }
 
 export function enablePostalCodeClicks() {
+    console.log("Postal code clicks have been enabled.");
     isPostalCodeClicksEnabled = true;
 }
 

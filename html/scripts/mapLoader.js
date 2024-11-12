@@ -16,14 +16,14 @@ function getColorVariation(color, factor) {
 }
 
 export function toggleCountryVisibility(country, isVisible) {
-    console.log(`Toggling visibility for country: ${country}, isVisible: ${isVisible}`);
+    // console.log(`Toggling visibility for country: ${country}, isVisible: ${isVisible}`);
     
     // Get both the country group and any paths that start with the country code
     const countryGroup = document.querySelector(`g[id="${country}"]`);
     const paths = document.querySelectorAll(`path[id^="${country}"]`);
     
-    console.log(`Found country group:`, countryGroup);
-    console.log(`Found ${paths.length} paths for country ${country}`);
+    // console.log(`Found country group:`, countryGroup);
+    // console.log(`Found ${paths.length} paths for country ${country}`);
     
     // Toggle visibility of the country group if it exists
     if (countryGroup) {
