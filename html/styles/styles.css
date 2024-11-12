@@ -1,4 +1,5 @@
-body, html {
+body,
+html {
     margin: 0;
     padding: 0;
     font-family: 'Roboto', sans-serif;
@@ -366,40 +367,59 @@ path.selected.delivery {
 .remove-country-btn:hover {
     color: #c82333;
 }
+
 .color-picker {
     /* display: none; Hide the default color input */
 }
 
 #mode-toggle button {
     position: relative;
-    padding-right: 30px; /* Add padding to the right for the color picker */
+    padding-right: 30px;
+    /* Add padding to the right for the color picker */
 }
 
 #mode-toggle button .color-picker {
     position: absolute;
     top: 50%;
-    right: 10px; /* Position it on the right */
-    transform: translateY(-50%); /* Center vertically */
-    width: 20px; /* Adjust size as needed */
-    height: 20px; /* Adjust size as needed */
+    right: 10px;
+    /* Position it on the right */
+    transform: translateY(-50%);
+    /* Center vertically */
+    width: 20px;
+    /* Adjust size as needed */
+    height: 20px;
+    /* Adjust size as needed */
     /* border-radius: 50%; Make it a circle */
-    border: none; /* Remove border */
-    background-color: currentColor; /* Fill with the button's text color */
+    border: none;
+    /* Remove border */
+    background-color: currentColor;
+    /* Fill with the button's text color */
 }
+
 #zoom-factor {
-    display: flex; /* Use flexbox for centering */
-    align-items: center; /* Center vertically */
-    justify-content: center; /* Center horizontally */
-    padding: 0 1rem; /* Add some padding for better spacing */
-    font-weight: 500; /* Optional: make the text bolder */
+    display: flex;
+    /* Use flexbox for centering */
+    align-items: center;
+    /* Center vertically */
+    justify-content: center;
+    /* Center horizontally */
+    padding: 0 1rem;
+    /* Add some padding for better spacing */
+    font-weight: 500;
+    /* Optional: make the text bolder */
 }
 
 #lasso-status {
-    display: flex; /* Use flexbox for centering */
-    align-items: center; /* Center vertically */
-    justify-content: center; /* Center horizontally */
-    padding: 0 1rem; /* Add some padding for better spacing */
-    font-weight: 500; /* Optional: make the text bolder */
+    display: flex;
+    /* Use flexbox for centering */
+    align-items: center;
+    /* Center vertically */
+    justify-content: center;
+    /* Center horizontally */
+    padding: 0 1rem;
+    /* Add some padding for better spacing */
+    font-weight: 500;
+    /* Optional: make the text bolder */
 }
 
 
@@ -407,35 +427,52 @@ path.selected.delivery {
 #region-select {
     display: flex;
     align-items: center;
-    background-color: white; /* Match the background of zoom-controls */
-    border-radius: 25px; /* Match the border radius */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Match the shadow */
-    padding: 0.5rem; /* Add padding for spacing */
-    margin-left: 1rem; /* Add margin to separate from zoom controls */
+    background-color: white;
+    /* Match the background of zoom-controls */
+    border-radius: 25px;
+    /* Match the border radius */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    /* Match the shadow */
+    padding: 0.5rem;
+    /* Add padding for spacing */
+    margin-left: 1rem;
+    /* Add margin to separate from zoom controls */
 }
 
 #region-select label {
-    margin-right: 0.5rem; /* Space between label and select */
+    margin-right: 0.5rem;
+    /* Space between label and select */
 }
 
 #region-select select {
-    border: none; /* Remove default border */
-    padding: 0.5rem; /* Add padding for better appearance */
-    font-size: 1rem; /* Match font size */
-    color: #2980b9; /* Match text color */
-    background-color: transparent; /* Make background transparent */
-    cursor: pointer; /* Change cursor to pointer */
+    border: none;
+    /* Remove default border */
+    padding: 0.5rem;
+    /* Add padding for better appearance */
+    font-size: 1rem;
+    /* Match font size */
+    color: #2980b9;
+    /* Match text color */
+    background-color: transparent;
+    /* Make background transparent */
+    cursor: pointer;
+    /* Change cursor to pointer */
 }
 
 .no-select {
-    user-select: none; /* For modern browsers */
-    -webkit-user-select: none; /* For Safari */
-    -moz-user-select: none; /* For Firefox */
-    -ms-user-select: none; /* For Internet Explorer/Edge */
+    user-select: none;
+    /* For modern browsers */
+    -webkit-user-select: none;
+    /* For Safari */
+    -moz-user-select: none;
+    /* For Firefox */
+    -ms-user-select: none;
+    /* For Internet Explorer/Edge */
 }
 
 #region-select select:hover {
-    background-color: #ecf0f1; /* Change background on hover */
+    background-color: #ecf0f1;
+    /* Change background on hover */
 }
 
 /* .lasso-active {
@@ -452,7 +489,8 @@ path.selected.delivery {
 }
 
 .greyed-out {
-    color: #b0b0b0; /* Light grey color */
+    color: #b0b0b0;
+    /* Light grey color */
 }
 
 /* Country list styles */
@@ -512,11 +550,11 @@ path.selected.delivery {
     border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
     background-color: #2196F3;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
     transform: translateX(20px);
 }
 
@@ -549,18 +587,23 @@ input:checked + .slider:before {
 }
 
 #map-container {
-    cursor: grab; /* Default cursor when not using lasso */
+    cursor: grab;
+    /* Default cursor when not using lasso */
 }
 
 #map-container:active {
-    cursor: grabbing; /* Cursor when the mouse is pressed down */
+    cursor: grabbing;
+    /* Cursor when the mouse is pressed down */
 }
+
 #map-container.lasso-active {
-    cursor: crosshair; /* Change to your desired cursor style */
+    cursor: crosshair;
+    /* Change to your desired cursor style */
 }
 
 path.postal-code {
-    cursor: pointer; /* Change cursor to pointer for postal codes */
+    cursor: pointer;
+    /* Change cursor to pointer for postal codes */
 }
 
 /* Add styles for the loader element */
@@ -590,6 +633,21 @@ path.postal-code {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes highlight {
+    0% {
+        filter: brightness(150%);
+    }
+
+    50% {
+        filter: brightness(300%);
+    }
 }
