@@ -51,6 +51,15 @@ export function togglePostalCode(pathElement, postalCode, mode, isFromLasso = fa
             targetSet.delete(postalCode);
             pathElement.classList.remove('selected', mode);
             // sendToWebSocket('deselect', postalCode);
+
+            // Check if "select countries" toggle is on
+            if (document.getElementById('select-countries').checked) {
+                const parentGroup = pathElement.closest('g');
+                const country = parentGroup ? parentGroup.id : null;
+                if (country) {
+                    removeAllPostalCodes(country, mode);
+                }
+            }
         } else {
             hiddenSet.delete(postalCode);
             targetSet.add(postalCode);
