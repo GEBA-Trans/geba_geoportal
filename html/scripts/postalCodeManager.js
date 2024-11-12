@@ -257,10 +257,13 @@ function highlightPostalCode(postalCode, highlight) {
             pathElement.style.stroke = '#ff0000';
             pathElement.style.strokeWidth = '2px';
             pathElement.style.fillOpacity = '0.7';
+            pathElement.style.animation = 'highlight 1s infinite';
         } else {
             pathElement.style.stroke = '';
             pathElement.style.strokeWidth = '';
             pathElement.style.fillOpacity = '';
+            pathElement.style.animation = '';
+
         }
     }
 }
