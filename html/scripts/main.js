@@ -147,6 +147,15 @@ function initializeApp() {
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
-
     populateRegionDropdown();
+
+    // Move the select-countries event listener here
+    document.getElementById('select-countries').addEventListener('change', function() {
+        const selectModeText = document.getElementById('select-mode-text');
+        if (this.checked) {
+            selectModeText.innerHTML = '<i class="fas fa-globe"></i> Selecting Countries';
+        } else {
+            selectModeText.innerHTML = '<i class="fas fa-map-marker-alt"></i> Selecting Postal Codes';
+        }
+    });
 });
