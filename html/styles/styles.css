@@ -535,6 +535,19 @@ input:checked + .slider:before {
     color: #333;
 }
 
+#select-countries-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+#select-countries-container span {
+    font-size: 14px;
+    color: #333;
+}
+
 #map-container {
     cursor: grab; /* Default cursor when not using lasso */
 }

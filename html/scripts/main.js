@@ -5,6 +5,7 @@ import { setupModeToggle, setupLookupButton } from './uiSetup.js';
 import { connectWebSocket } from './websocket.js';
 import { setupLassoSelect } from './lasso.js';
 
+
 async function loadRegionOptions() {
     try {
         const response = await fetch('data/regions.json');

@@ -1,5 +1,4 @@
-// import { sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts } from './websocket.js';
-import { isPointInPolygon, setLassoMode } from './lasso.js';
+import { isPointInPolygon, setLassoMode, isLassoActive } from './lasso.js';
 
 const LOADING_MODE = 'loading';
 const DELIVERY_MODE = 'delivery';
@@ -51,12 +50,30 @@ export function togglePostalCode(pathElement, postalCode, mode, isFromLasso = fa
             targetSet.delete(postalCode);
             pathElement.classList.remove('selected', mode);
             // sendToWebSocket('deselect', postalCode);
+
+            // Check if "select countries" toggle is on
+            if (document.getElementById('select-countries').checked) {
+                const parentGroup = pathElement.closest('g');
+                const country = parentGroup ? parentGroup.id : null;
+                if (country) {
+                    removeAllPostalCodes(country, mode);
+                }
+            }
         } else {
             hiddenSet.delete(postalCode);
             targetSet.add(postalCode);
             pathElement.classList.remove('selected', 'loading', 'delivery');
             pathElement.classList.add('selected', mode);
             // sendToWebSocket('select', postalCode);
+
+            // Check if "select countries" toggle is on
+            if (document.getElementById('select-countries').checked) {
+                const parentGroup = pathElement.closest('g');
+                const country = parentGroup ? parentGroup.id : null;
+                if (country) {
+                    addAllPostalCodes(country, mode);
+                }
+            }
         }
     }
 
@@ -221,6 +238,9 @@ function clearAllPostalCodes(postalCodes) {
         if (pathElement) {
             pathElement.classList.remove('selected', 'loading', 'delivery');
             pathElement.style.fill = '';
+            if (isLassoActive) {
+                pathElement.style.filter = 'grayscale(75%)'; // Reapply the grayscale filter only if lasso is active
+            }
         }
         // sendToWebSocket('deselect', postalCode);
     });
@@ -343,7 +363,7 @@ function loadExpandedCountries() {
     }
 }
 
-function addAllPostalCodes(country, mode) {
+export function addAllPostalCodes(country, mode) {
     const allPaths = document.querySelectorAll(`#map-container svg g#${country} path`);
     const targetSet = mode === LOADING_MODE ? loadingPostalCodes : deliveryPostalCodes;
     const hiddenSet = mode === LOADING_MODE ? deliveryPostalCodes : loadingPostalCodes;
@@ -358,6 +378,7 @@ function addAllPostalCodes(country, mode) {
             // Update the fill color for the added postal code
             const selectedColor = mode === 'loading' ? document.getElementById('loading-color').value : document.getElementById('delivery-color').value;
             path.style.fill = selectedColor; // Set the fill color for the postal code
+            path.style.filter = ''; // Remove the grayscale filter
             // sendToWebSocket('select', postalCode);
         }
     });
@@ -382,6 +403,9 @@ function removeAllPostalCodes(country, mode) {
             targetSet.delete(postalCode);
             pathElement.classList.remove('selected', mode);
             pathElement.style.fill = '';
+            if (isLassoActive) {
+                pathElement.style.filter = 'grayscale(75%)'; // Reapply the grayscale filter only if lasso is active
+            }
             // sendToWebSocket('deselect', postalCode);
         }
     });
