@@ -4,13 +4,17 @@
     "text": "Toggle region"
   },
   {
-    "optgroup": "Regions",
+    "optgroup": "Maps",
     "options": [
       {
         "value": "/?map=GEBA_MAP_EU.svg",
         "text": "Europe",
         "countries": ["ALBANIE","BELGIE","BOSNIE--HER","BULGARIJE","DENEMARKEN","DUITSLAND","ENGELAND","ESTLAND","FINLAND","FRANKRIJK","HONGARIJE","IERLAND","ITALIE","KROATIE","LETLAND","LITHOUWE","LUXEMBURG","MACEDONIE","MOLDAVIE","MONTENEGRO","NEDERLAND","NOORWEGEN","OEKRAINE","OOSTENRIJK","POLEN","PORTUGAL","ROEMENIE","SERVIE","SLOVENIE","SLOWAKIJE","SPANJE","TSJECHIE","ZWEDEN","ZWITSERLAND"]
-      },
+      }
+    ]
+  },  {
+    "optgroup": "Regions",
+    "options": [
       {
         "value": "/?map=GEBA_MAP_EU.svg",
         "text": "GEBA Europe",
@@ -22,6 +26,11 @@
         "countries": ["NEDERLAND", "BELGIE", "LUXEMBURG"]
       },
       {
+        "value": "/?map=GEBA_MAP_EU.svg",
+        "text": "Benelux and Germany",
+        "countries": ["NEDERLAND", "BELGIE", "LUXEMBURG", "DUITSLAND"]
+      },
+    {
         "value": "/?map=GEBA_MAP_EU.svg",
         "text": "Alpenlanden",
         "countries": ["OOSTENRIJK", "ZWITSERLAND", "DUITSLAND", "ITALIE", "FRANKRIJK", "SLOVENIE"]
@@ -35,14 +44,6 @@
         "value": "/?map=GEBA_MAP_EU.svg",
         "text": "Scandinavia",
         "countries": ["DENEMARKEN", "NOORWEGEN", "ZWEDEN"]
-      }
-    ]
-  },  {
-    "optgroup": "Countries",
-    "options": [
-      {
-        "value": "/?map=GEBA_MAP_EU_COUNTRIES.svg",
-        "text": "Europe Countries"
       }
     ]
   }
