@@ -35,14 +35,6 @@
                 <select id="regions">
                     <!-- Options will be populated dynamically -->
                 </select>
-                <!-- Add the new toggle switch here -->
-                <div id="select-countries-container">
-                    <label class="switch">
-                        <input type="checkbox" id="select-countries">
-                        <span class="slider"></span>
-                    </label>
-                    <span>Select whole Countries</span>
-                </div>
             </div>
         </div>
         <main>
@@ -68,6 +60,14 @@
                     <button id="delivery-mode">Delivery
                         <input type="color" id="delivery-color" value="#3498db" class="color-picker">
                     </button>
+                </div>
+                <!-- Add the new toggle switch here -->
+                <div id="select-countries-container">
+                    <label class="switch">
+                        <input type="checkbox" id="select-countries">
+                        <span class="slider"></span>
+                    </label>
+                    <span id="select-mode-text"><i class="fas fa-map-marker-alt"></i> Selecting Postal Codes</span>
                 </div>
                 <div id="loading-postalcodes">
                     <h2>Loading PostalCodes</h2>
