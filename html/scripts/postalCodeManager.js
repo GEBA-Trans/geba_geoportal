@@ -285,21 +285,24 @@ export function loadSelectedPostalCodes() {
     return new Promise((resolve, reject) => {
         try {
             loadExpandedCountries();
-            const cookieValue = document.cookie
-                .split('; ')
-                .find(row => row.startsWith(`${COOKIE_NAME}=`));
-            if (cookieValue) {
-                const data = JSON.parse(cookieValue.split('=')[1]);
-                loadPostalCodesFromData(data[LOADING_MODE], loadingPostalCodes, LOADING_MODE);
-                loadPostalCodesFromData(data[DELIVERY_MODE], deliveryPostalCodes, DELIVERY_MODE);
-                updatePostalCodeLists();
-                // Update the colors for the loaded postal codes
-                updatePostalCodeSelectionColor('loading', document.getElementById('loading-color').value);
-                updatePostalCodeSelectionColor('delivery', document.getElementById('delivery-color').value);
-                // if (isWebSocketConnected) {
-                //     requestPendingCounts();
-                // }
-            }
+
+            // Clear existing sets
+            loadingPostalCodes.clear();
+            deliveryPostalCodes.clear();
+
+            // Load postal codes from local storage
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith(COOKIE_NAME)) {
+                    const [_, mode, country] = key.split('_');
+                    const postalCodes = JSON.parse(localStorage.getItem(key));
+                    const targetSet = mode === LOADING_MODE ? loadingPostalCodes : deliveryPostalCodes;
+                    loadPostalCodesFromData(postalCodes, targetSet, mode, country);
+                }
+            });
+
+            updatePostalCodeLists();
+            updatePostalCodeSelectionColor('loading', document.getElementById('loading-color').value);
+            updatePostalCodeSelectionColor('delivery', document.getElementById('delivery-color').value);
             resolve();
         } catch (error) {
             console.error('Error loading postal codes:', error);
@@ -308,27 +311,61 @@ export function loadSelectedPostalCodes() {
     });
 }
 
-function loadPostalCodesFromData(data, targetSet, mode) {
+function loadPostalCodesFromData(data, targetSet, mode, country) {
+    if (!Array.isArray(data)) {
+        console.error('Invalid data format for postal codes:', data);
+        return;
+    }
+
     data.forEach(postalCode => {
-        const pathElement = document.getElementById(postalCode);
-        targetSet.add(postalCode);
+        const fullPostalCode = country + postalCode; // Add the country code back
+        const pathElement = document.getElementById(fullPostalCode);
+        targetSet.add(fullPostalCode);
         if (pathElement) {
-            
-            // pendingPostalCodes.add(postalCode);
+            // pendingPostalCodes.add(fullPostalCode);
         } else {
-            console.warn(`Postal code not found: ${postalCode}`);
+            console.warn(`Postal code not found: ${fullPostalCode}`);
         }
     });
 }
 
 function saveSelectedPostalCodes() {
-
-    // this should also save "hidden" postal codes
     const data = {
         [LOADING_MODE]: Array.from(loadingPostalCodes),
         [DELIVERY_MODE]: Array.from(deliveryPostalCodes)
     };
-    document.cookie = `${COOKIE_NAME}=${JSON.stringify(data)}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
+
+    // Save postal codes in local storage based on country code
+    Object.keys(data).forEach(mode => {
+        const postalCodes = data[mode];
+        const groupedByCountry = postalCodes.reduce((acc, code) => {
+            const country = code.slice(0, 2);
+            if (!acc[country]) acc[country] = [];
+            acc[country].push(code.slice(2)); // Remove the first two characters (country code)
+            return acc;
+        }, {});
+
+        Object.keys(groupedByCountry).forEach(country => {
+            const storageKey = `${COOKIE_NAME}_${mode}_${country}`;
+            localStorage.setItem(storageKey, JSON.stringify(groupedByCountry[country]));
+        });
+    });
+}
+
+function saveExpandedCountries() {
+    const data = {
+        [LOADING_MODE]: Array.from(expandedCountries[LOADING_MODE]),
+        [DELIVERY_MODE]: Array.from(expandedCountries[DELIVERY_MODE])
+    };
+    localStorage.setItem(EXPANDED_COUNTRIES_COOKIE, JSON.stringify(data));
+}
+
+function loadExpandedCountries() {
+    const data = JSON.parse(localStorage.getItem(EXPANDED_COUNTRIES_COOKIE));
+    if (data) {
+        expandedCountries[LOADING_MODE] = new Set(data[LOADING_MODE] || []);
+        expandedCountries[DELIVERY_MODE] = new Set(data[DELIVERY_MODE] || []);
+    }
 }
 
 export function getSelectedPostalCodes() {
@@ -346,25 +383,6 @@ export function toggleCountryExpansion(country, mode) {
     }
     saveExpandedCountries();
     updatePostalCodeLists();
-}
-
-function saveExpandedCountries() {
-    const data = {
-        [LOADING_MODE]: Array.from(expandedCountries[LOADING_MODE]),
-        [DELIVERY_MODE]: Array.from(expandedCountries[DELIVERY_MODE])
-    };
-    document.cookie = `${EXPANDED_COUNTRIES_COOKIE}=${JSON.stringify(data)}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
-}
-
-function loadExpandedCountries() {
-    const cookieValue = document.cookie
-        .split('; ')
-        .find(row => row.startsWith(`${EXPANDED_COUNTRIES_COOKIE}=`));
-    if (cookieValue) {
-        const data = JSON.parse(cookieValue.split('=')[1]);
-        expandedCountries[LOADING_MODE] = new Set(data[LOADING_MODE] || []);
-        expandedCountries[DELIVERY_MODE] = new Set(data[DELIVERY_MODE] || []);
-    }
 }
 
 export function addAllPostalCodes(country, mode) {
