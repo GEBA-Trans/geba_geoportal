@@ -10,7 +10,13 @@ let pendingPostalCodes = new Set();
 
 function connectWebSocket() {
     console.log('Attempting to connect to WebSocket at wss://' + window.location.hostname + '/ws/map');
-    socket = new WebSocket(`ws://${window.location.hostname}:1880/ws/map`);
+    let protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    let port = window.location.protocol === 'https:' ? '' : ':1880';
+    // 'lx-dev:8080' remove any port number
+    let cleanHost = window.location.host.split(':')[0];
+    let wsUrl = protocol + '//' + cleanHost + port;
+
+    socket = new WebSocket(wsUrl + `/ws/map`);
 
     socket.onopen = function(event) {
         console.log('WebSocket connection established');
@@ -36,7 +42,7 @@ function connectWebSocket() {
     };
 
     // Connect to the lookup WebSocket
-    lookupSocket = new WebSocket(`ws://${window.location.hostname}:1880/ws/lookup`); // This line should be corrected
+    lookupSocket = new WebSocket(wsUrl + `/ws/lookup`); // This line should be corrected
 
     lookupSocket.onopen = function(event) {
         console.log('Lookup WebSocket connection established');
