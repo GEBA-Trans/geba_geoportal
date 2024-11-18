@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.appendChild(countryTooltip);
 
     Popper.createPopper(countryCount, countryTooltip, {
-        placement: 'top',
+        placement: 'bottom',
     });
 
     countryCount.addEventListener('mouseenter', () => {
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.appendChild(regionTooltip);
 
     Popper.createPopper(regionLabel, regionTooltip, {
-        placement: 'top',
+        placement: 'bottom',
     });
 
     regionLabel.addEventListener('mouseenter', () => {
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.appendChild(tooltip);
 
         Popper.createPopper(button, tooltip, {
-            placement: 'top', // Change to 'bottom' for better alignment
+            placement: 'bottom', // Change to 'bottom' for better alignment
         });
 
         button.addEventListener('mouseenter', () => {
