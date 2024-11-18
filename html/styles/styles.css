@@ -651,3 +651,22 @@ path.postal-code {
         filter: brightness(300%);
     }
 }
+
+/* ...existing code... */
+#country-list h2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.4rem;
+    color: #2c3e50;
+}
+
+#country-count {
+    background-color: #3498db;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+}
+/* ...existing code... */

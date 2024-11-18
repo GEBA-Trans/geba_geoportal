@@ -44,11 +44,21 @@ export function toggleCountryVisibility(country, isVisible) {
     const allChecked = allToggles.every(toggle => toggle.checked);
     toggleAllCheckbox.checked = allChecked;
 
+    // Update the counter
+    updateCountryCount();
+
     // Save toggle states after each change
     saveToggleStates();
 
     // Trigger zoom to visible after toggling the country visibility
     triggerZoomVisible();
+}
+
+function updateCountryCount() {
+    const allToggles = Array.from(document.querySelectorAll('.country-item input[type="checkbox"]'));
+    const selectedCount = allToggles.filter(toggle => toggle.checked).length;
+    const totalCount = allToggles.length;
+    document.getElementById('country-count').textContent = `${selectedCount} / ${totalCount}`;
 }
 
 function setupToggleAll() {
@@ -66,6 +76,7 @@ function setupToggleAll() {
             }
         });
     });
+    updateCountryCount(); // Initial count update
 }
 
 function saveToggleStates() {
@@ -225,6 +236,7 @@ export async function loadSVG(textZoom = 1) {
             toggleInput.addEventListener('change', (e) => {
                 console.log(`Toggle changed for country ${country}:`, e.target.checked);
                 toggleCountryVisibility(country, e.target.checked);
+                updateCountryCount(); // Update count on change
             });
             
             toggleLabel.appendChild(toggleInput);
