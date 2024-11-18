@@ -335,6 +335,13 @@ function saveSelectedPostalCodes() {
         [DELIVERY_MODE]: Array.from(deliveryPostalCodes)
     };
 
+    // Clear existing postal codes in local storage
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(COOKIE_NAME)) {
+            localStorage.removeItem(key);
+        }
+    });
+
     // Save postal codes in local storage based on country code
     Object.keys(data).forEach(mode => {
         const postalCodes = data[mode];
