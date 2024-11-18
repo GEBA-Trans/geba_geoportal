@@ -51,7 +51,8 @@ function connectWebSocket() {
     lookupSocket.onmessage = function(event) {
         try {
             const data = JSON.parse(event.data);
-            updateCompanyTable(data);
+            updateResultsTable(data);
+            showLookupResults(); // Show the lookup results
         } catch (error) {
             console.error('Error parsing lookup WebSocket message:', error);
         }
@@ -143,7 +144,7 @@ function getSavedPostalCodes() {
     return { loading: [], delivery: [] };
 }
 
-function updateCompanyTable(data) {
+function updateResultsTable(data) {
     const tableBody = document.getElementById('company-table').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = ''; // Clear existing rows
 
@@ -170,6 +171,10 @@ function updateCompanyTable(data) {
             console.warn('Invalid company data:', company);
         }
     });
+}
+
+function showLookupResults() {
+    document.getElementById('lookup-results').style.display = 'block';
 }
 
 export { connectWebSocket, sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts, lookupCompanies };

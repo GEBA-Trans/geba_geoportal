@@ -206,7 +206,8 @@ path.selected.delivery {
 }
 
 /* Transport companies table styles */
-#transport-companies {
+#lookup-results {
+    display: none;
     padding: 1.5rem;
     background-color: white;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -214,7 +215,7 @@ path.selected.delivery {
     border-radius: 5px;
 }
 
-#transport-companies h2 {
+#lookup-results h2 {
     font-size: 1.4rem;
     margin-bottom: 1rem;
     color: #2c3e50;
