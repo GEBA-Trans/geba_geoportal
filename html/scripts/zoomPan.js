@@ -116,6 +116,7 @@ function updateSvgViewBox() {
 }
 
 function zoomVisible() {
+    resetView();
     const paths = svgElement.querySelectorAll('path');
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 
@@ -139,7 +140,7 @@ function zoomVisible() {
 
         const zoomX = viewBox.width / visibleWidth;
         const zoomY = viewBox.height / visibleHeight;
-        currentZoom = Math.max(zoomX, zoomY);
+        currentZoom = Math.min(zoomX, zoomY);
 
         viewBox = {
             x: minX,
