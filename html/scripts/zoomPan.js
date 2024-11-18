@@ -170,3 +170,7 @@ function zoomVisible() {
 
     }
 }
+
+export function triggerZoomVisible() {
+    zoomVisible();
+}

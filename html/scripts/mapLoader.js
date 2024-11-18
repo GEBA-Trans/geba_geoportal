@@ -1,3 +1,5 @@
+import { triggerZoomVisible } from './zoomPan.js';
+
 const TOGGLE_STATES_COOKIE = 'countryToggleStates';
 
 export function getColorVariation(color, factor) {
@@ -44,6 +46,9 @@ export function toggleCountryVisibility(country, isVisible) {
 
     // Save toggle states after each change
     saveToggleStates();
+
+    // Trigger zoom to visible after toggling the country visibility
+    triggerZoomVisible();
 }
 
 function setupToggleAll() {
