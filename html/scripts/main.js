@@ -1,5 +1,5 @@
 import { loadSVG, toggleCountryVisibility } from './mapLoader.js';
-import { initializeZoomPan, setupZoomControls, setupPanning } from './zoomPan.js';
+import { initializeZoomPan, setupZoomControls, setupPanning, triggerZoomVisible } from './zoomPan.js';
 import { setupPostalCodeClicks, loadSelectedPostalCodes, setMode, togglePostalCode } from './postalCodeManager.js';
 import { setupModeToggle, setupLookupButton } from './uiSetup.js';
 import { connectWebSocket } from './websocket.js';
@@ -122,6 +122,9 @@ function handleRegionChange(selectedOption) {
             toggleCountryVisibility(countryName, shouldBeVisible);
         }
     });
+
+    // Trigger zoom to visible after toggling the region
+    triggerZoomVisible();
 }
 
 function initializeApp() {
