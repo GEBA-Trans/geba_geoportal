@@ -5,7 +5,6 @@ import { setupModeToggle, setupLookupButton } from './uiSetup.js';
 import { connectWebSocket } from './websocket.js';
 import { setupLassoSelect } from './lasso.js';
 
-
 async function loadRegionOptions() {
     try {
         const response = await fetch('data/regions.json');
@@ -166,5 +165,26 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('country-count').addEventListener('click', function() {
         const countryList = document.getElementById('country-list');
         countryList.classList.toggle('visible');
+    });
+
+    // Initialize Popper.js for the tooltip
+    const countryCount = document.getElementById('country-count');
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip';
+    tooltip.textContent = countryCount.getAttribute('data-tooltip');
+    document.body.appendChild(tooltip);
+
+    Popper.createPopper(countryCount, tooltip, {
+        placement: 'top',
+    });
+
+    countryCount.addEventListener('mouseenter', () => {
+        tooltip.style.visibility = 'visible';
+        tooltip.style.opacity = '1';
+    });
+
+    countryCount.addEventListener('mouseleave', () => {
+        tooltip.style.visibility = 'hidden';
+        tooltip.style.opacity = '0';
     });
 });

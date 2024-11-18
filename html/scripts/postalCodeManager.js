@@ -117,7 +117,7 @@ function updateList(listId, postalCodes) {
                 <i class="fas fa-chevron-${isExpanded ? 'down' : 'right'}"></i>
             </button>
             <h3>${country} (${codes.length})</h3>
-            <button class="add-all-btn" title="Add all postal codes">
+            <button class="add-all-btn" title="Add all postal codes" >
                 <i class="fas fa-plus-circle"></i>
             </button>
             <button class="remove-country-btn" title="Remove all postal codes for this country">

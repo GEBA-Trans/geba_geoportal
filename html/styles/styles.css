@@ -692,6 +692,47 @@ path.postal-code {
     font-weight: 500;
     margin-left: 1rem; /* Add margin to separate from select */
     cursor: pointer; /* Make it look clickable */
+    transition: background-color 0.3s, box-shadow 0.3s;
+    position: relative; /* For tooltip positioning */
+}
+
+#country-count:hover {
+    background-color: #2980b9;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+#country-count:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip {
+    visibility: hidden;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Position above the counter */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    width: max-content;
+    max-width: 200px;
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%; /* At the bottom of the tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
 }
 
 #countries {
@@ -715,5 +756,11 @@ path.postal-code {
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer; /* Make it look clickable */
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+#country-count:hover {
+    background-color: #2980b9;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 /* ...existing code... */

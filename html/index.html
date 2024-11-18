@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Add Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@popperjs/core@2"></script> <!-- Include Popper.js -->
 </head>
 <body>
     <div id="app-container">
@@ -32,11 +33,12 @@
             </div>
             <!-- Add dropdown menu here -->
             <div id="region-select">
-                <label for="regions">Toggle Region:</label>
+                <span id="region-label" data-tooltip="Select a region to view">
                 <select id="regions">
                     <!-- Options will be populated dynamically -->
                 </select>
-                <span id="country-count">0 / 0</span> <!-- Move the counter here -->
+                </span>
+                <span id="country-count" data-tooltip="Click to add individual countries">0 / 0</span> <!-- Move the counter here -->
             </div>
         </div>
         <main>
