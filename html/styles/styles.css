@@ -13,13 +13,6 @@ html {
     height: 100vh;
 }
 
-header {
-    background-color: #3498db;
-    color: white;
-    padding: 1rem;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
 
 h1 {
     margin: 0;
@@ -505,7 +498,8 @@ path.selected.delivery {
 }
 
 .country-item {
-    margin: 8px 0;
+/* set font size to 80% */
+    font-size: 80%;
 }
 
 .country-container {
@@ -665,7 +659,7 @@ path.postal-code {
     background-color: white;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
-    padding: 1rem;
+    padding: 0.1rem;
     z-index: 1000;
     max-height: 80vh;
     overflow-y: auto;
