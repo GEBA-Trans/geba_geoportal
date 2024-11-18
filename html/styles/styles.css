@@ -730,6 +730,20 @@ path.postal-code {
     border-color: #333 transparent transparent transparent;
 }
 
+#tooltip {
+    background: #333;
+    color: white;
+    font-weight: bold;
+    padding: 4px 8px;
+    font-size: 13px;
+    border-radius: 4px;
+    display: none;
+  }
+
+  #tooltip[data-show] {
+    display: block;
+  }
+
 #countries {
     list-style: none;
     padding: 0;

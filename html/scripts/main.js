@@ -147,6 +147,29 @@ function initializeApp() {
         .catch(error => console.error('Error initializing app:', error));
 }
 
+function initializeTooltip(element, tooltipText) {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip';
+    tooltip.textContent = tooltipText;
+    document.body.appendChild(tooltip);
+
+    const popperInstance = Popper.createPopper(element, tooltip, {
+        placement: 'top'
+        
+    });
+
+    element.addEventListener('mouseenter', () => {
+        tooltip.style.visibility = 'visible';
+        tooltip.style.opacity = '1';
+        popperInstance.update(); // Ensure the tooltip position is updated
+    });
+
+    element.addEventListener('mouseleave', () => {
+        tooltip.style.visibility = 'hidden';
+        tooltip.style.opacity = '0';
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
     populateRegionDropdown();
@@ -167,69 +190,13 @@ document.addEventListener('DOMContentLoaded', function() {
         countryList.classList.toggle('visible');
     });
 
-    // Initialize Popper.js for the country count tooltip
-    const countryCount = document.getElementById('country-count');
-    const countryTooltip = document.createElement('div');
-    countryTooltip.className = 'tooltip';
-    countryTooltip.textContent = countryCount.getAttribute('data-tooltip');
-    document.body.appendChild(countryTooltip);
+    // Initialize tooltips
+    initializeTooltip(document.getElementById('country-count'), document.getElementById('country-count').getAttribute('data-tooltip'));
+    initializeTooltip(document.getElementById('region-label'), document.getElementById('region-label').getAttribute('data-tooltip'));
 
-    Popper.createPopper(countryCount, countryTooltip, {
-        placement: 'bottom',
-    });
-
-    countryCount.addEventListener('mouseenter', () => {
-        countryTooltip.style.visibility = 'visible';
-        countryTooltip.style.opacity = '1';
-    });
-
-    countryCount.addEventListener('mouseleave', () => {
-        countryTooltip.style.visibility = 'hidden';
-        countryTooltip.style.opacity = '0';
-    });
-
-    // Initialize Popper.js for the region label tooltip
-    const regionLabel = document.getElementById('region-label');
-    const regionTooltip = document.createElement('div');
-    regionTooltip.className = 'tooltip';
-    regionTooltip.textContent = regionLabel.getAttribute('data-tooltip');
-    document.body.appendChild(regionTooltip);
-
-    Popper.createPopper(regionLabel, regionTooltip, {
-        placement: 'bottom',
-    });
-
-    regionLabel.addEventListener('mouseenter', () => {
-        regionTooltip.style.visibility = 'visible';
-        regionTooltip.style.opacity = '1';
-    });
-
-    regionLabel.addEventListener('mouseleave', () => {
-        regionTooltip.style.visibility = 'hidden';
-        regionTooltip.style.opacity = '0';
-    });
-
-    // Initialize Popper.js for the zoom buttons tooltips
     const zoomButtons = document.querySelectorAll('#zoom-controls button');
     zoomButtons.forEach(button => {
-        const tooltip = document.createElement('div');
-        tooltip.className = 'tooltip';
-        tooltip.textContent = button.getAttribute('data-tooltip');
-        document.body.appendChild(tooltip);
-
-        Popper.createPopper(button, tooltip, {
-            placement: 'bottom', // Change to 'bottom' for better alignment
-        });
-
-        button.addEventListener('mouseenter', () => {
-            tooltip.style.visibility = 'visible';
-            tooltip.style.opacity = '1';
-        });
-
-        button.addEventListener('mouseleave', () => {
-            tooltip.style.visibility = 'hidden';
-            tooltip.style.opacity = '0';
-        });
+        initializeTooltip(button, button.getAttribute('data-tooltip'));
     });
 
 });
