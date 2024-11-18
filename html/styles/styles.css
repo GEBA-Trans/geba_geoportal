@@ -68,7 +68,7 @@ main {
 }
 
 #sidebar {
-
+    /* width: 320px; */
     background-color: white;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
@@ -169,7 +169,7 @@ main {
     background-color: #219d54;
 }
 
-
+/* SVG styles */
 svg {
     width: 100%;
     height: 100%;
@@ -197,7 +197,7 @@ path.selected.delivery {
     fill: #3498db;
 }
 
-
+/* Transport companies table styles */
 #lookup-results {
     display: none;
     padding: 1.5rem;
@@ -269,7 +269,7 @@ path.selected.delivery {
 .country-header {
     display: flex;
     align-items: center;
-    padding: 1px;
+    padding: 10px;
     background-color: #f5f5f5;
     cursor: pointer;
     border-radius: 4px;
@@ -361,116 +361,119 @@ path.selected.delivery {
     color: #c82333;
 }
 
-.color-picker {}
+.color-picker {
+    /* display: none; Hide the default color input */
+}
 
 #mode-toggle button {
     position: relative;
     padding-right: 30px;
-
+    /* Add padding to the right for the color picker */
 }
 
 #mode-toggle button .color-picker {
     position: absolute;
     top: 50%;
     right: 10px;
-
+    /* Position it on the right */
     transform: translateY(-50%);
-
+    /* Center vertically */
     width: 20px;
-
+    /* Adjust size as needed */
     height: 20px;
-
-
+    /* Adjust size as needed */
+    /* border-radius: 50%; Make it a circle */
     border: none;
-
+    /* Remove border */
     background-color: currentColor;
-
+    /* Fill with the button's text color */
 }
 
 #zoom-factor {
     display: flex;
-
+    /* Use flexbox for centering */
     align-items: center;
-
+    /* Center vertically */
     justify-content: center;
-
+    /* Center horizontally */
     padding: 0 1rem;
-
+    /* Add some padding for better spacing */
     font-weight: 500;
-
+    /* Optional: make the text bolder */
 }
 
 #lasso-status {
     display: flex;
-
+    /* Use flexbox for centering */
     align-items: center;
-
+    /* Center vertically */
     justify-content: center;
-
+    /* Center horizontally */
     padding: 0 1rem;
-
+    /* Add some padding for better spacing */
     font-weight: 500;
-
+    /* Optional: make the text bolder */
 }
 
 
-
+/* Add styles for the region-select to match zoom-controls */
 #region-select {
     display: flex;
     align-items: center;
     background-color: white;
-
+    /* Match the background of zoom-controls */
     border-radius: 25px;
-
+    /* Match the border radius */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-
+    /* Match the shadow */
     padding: 0.5rem;
-
+    /* Add padding for spacing */
     margin-left: 1rem;
-
+    /* Add margin to separate from zoom controls */
 }
 
 #region-select label {
     margin-right: 0.5rem;
-
+    /* Space between label and select */
 }
 
 #region-select select {
     border: none;
-
+    /* Remove default border */
     padding: 0.5rem;
-
+    /* Add padding for better appearance */
     font-size: 1rem;
-
+    /* Match font size */
     color: #2980b9;
-
+    /* Match text color */
     background-color: transparent;
-
+    /* Make background transparent */
     cursor: pointer;
-
+    /* Change cursor to pointer */
 }
 
 .no-select {
     user-select: none;
-
+    /* For modern browsers */
     -webkit-user-select: none;
-
+    /* For Safari */
     -moz-user-select: none;
-
+    /* For Firefox */
     -ms-user-select: none;
-
+    /* For Internet Explorer/Edge */
 }
 
 #region-select select:hover {
     background-color: #ecf0f1;
-
+    /* Change background on hover */
 }
 
+/* .lasso-active {
+    filter: grayscale(50%);
+} */
 
-filter: grayscale(50%);
-}
-
-*/ #regions optgroup {
+/* Add this to your existing CSS */
+#regions optgroup {
     font-weight: bold;
 }
 
@@ -480,21 +483,21 @@ filter: grayscale(50%);
 
 .greyed-out {
     color: #b0b0b0;
-
+    /* Light grey color */
 }
 
-
+/* Country list styles */
 #countries {
     list-style: none;
     padding: 0;
 }
 
 #countries.visible {
-    display: block;
+    display: block; /* Show when visible class is added */
 }
 
 .country-item {
-
+/* set font size to 80% */
     font-size: 80%;
 }
 
@@ -507,7 +510,7 @@ filter: grayscale(50%);
     border-radius: 4px;
 }
 
-
+/* Toggle switch styles */
 .switch {
     position: relative;
     display: inline-block;
@@ -583,25 +586,25 @@ input:checked+.slider:before {
 
 #map-container {
     cursor: grab;
-
+    /* Default cursor when not using lasso */
 }
 
 #map-container:active {
     cursor: grabbing;
-
+    /* Cursor when the mouse is pressed down */
 }
 
 #map-container.lasso-active {
     cursor: crosshair;
-
+    /* Change to your desired cursor style */
 }
 
 path.postal-code {
     cursor: pointer;
-
+    /* Change cursor to pointer for postal codes */
 }
 
-
+/* Add styles for the loader element */
 .loader {
     position: fixed;
     top: 50%;
@@ -647,7 +650,7 @@ path.postal-code {
     }
 }
 
-
+/* ...existing code... */
 #country-list {
     position: absolute;
     top: 10px;
@@ -659,11 +662,11 @@ path.postal-code {
     z-index: 1000;
     max-height: 80vh;
     overflow-y: auto;
-    display: none;
+    display: none; /* Hide by default */
 }
 
 #country-list.visible {
-    display: block;
+    display: block; /* Show when visible class is added */
 }
 
 #country-list h2 {
@@ -681,10 +684,10 @@ path.postal-code {
     border-radius: 5px;
     font-size: 1rem;
     font-weight: 500;
-    margin-left: 1rem;
-    cursor: pointer;
+    margin-left: 1rem; /* Add margin to separate from select */
+    cursor: pointer; /* Make it look clickable */
     transition: background-color 0.3s, box-shadow 0.3s;
-    position: relative;
+    position: relative; /* For tooltip positioning */
 }
 
 #country-count:hover {
@@ -706,7 +709,7 @@ path.postal-code {
     padding: 5px;
     position: absolute;
     z-index: 1;
-    bottom: 125%;
+    bottom: 125%; /* Position above the counter */
     left: 50%;
     transform: translateX(-50%);
     opacity: 0;
@@ -718,7 +721,7 @@ path.postal-code {
 .tooltip::after {
     content: '';
     position: absolute;
-    top: 100%;
+    top: 100%; /* At the bottom of the tooltip */
     left: 50%;
     margin-left: -5px;
     border-width: 5px;
@@ -726,11 +729,25 @@ path.postal-code {
     border-color: #333 transparent transparent transparent;
 }
 
+#tooltip {
+    background: #333;
+    color: white;
+    font-weight: bold;
+    padding: 4px 8px;
+    font-size: 13px;
+    border-radius: 4px;
+    display: none;
+  }
+
+  #tooltip[data-show] {
+    display: block;
+  }
+
 #countries {
     list-style: none;
     padding: 0;
 }
-
+/* ...existing code... */
 #country-list h2 {
     display: flex;
     justify-content: space-between;
@@ -746,7 +763,7 @@ path.postal-code {
     border-radius: 5px;
     font-size: 1rem;
     font-weight: 500;
-    cursor: pointer;
+    cursor: pointer; /* Make it look clickable */
     transition: background-color 0.3s, box-shadow 0.3s;
 }
 
@@ -754,3 +771,4 @@ path.postal-code {
     background-color: #2980b9;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
+/* ...existing code... */
