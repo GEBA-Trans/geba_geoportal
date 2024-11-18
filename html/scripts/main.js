@@ -161,4 +161,10 @@ document.addEventListener('DOMContentLoaded', function() {
             selectModeText.innerHTML = '<i class="fas fa-map-marker-alt"></i> Selecting Postal Codes';
         }
     });
+
+    // Add event listener to toggle the visibility of the country list
+    document.getElementById('country-count').addEventListener('click', function() {
+        const countryList = document.getElementById('country-list');
+        countryList.classList.toggle('visible');
+    });
 });

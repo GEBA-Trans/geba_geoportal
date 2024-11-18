@@ -36,22 +36,23 @@
                 <select id="regions">
                     <!-- Options will be populated dynamically -->
                 </select>
+                <span id="country-count">0 / 0</span> <!-- Move the counter here -->
             </div>
         </div>
         <main>
-            <div id="country-list">
-                <h2>Loaded Countries <span id="country-count">0 / 0</span></h2>
-                <div class="toggle-all-container">
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-all-countries" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <span>Toggle All Countries</span>
-                </div>
-                <ul id="countries"></ul>
-            </div>
             <div id="map-container" class="no-select">
                 <!-- SVG map will be inserted here -->
+                <div id="country-list">
+                    <h2>Loaded Countries</h2> <!-- Remove the counter from here -->
+                    <div class="toggle-all-container">
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-all-countries" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <span>Toggle All Countries</span>
+                    </div>
+                    <ul id="countries"></ul>
+                </div>
             </div>
             <div id="sidebar">
                 <div id="mode-toggle">

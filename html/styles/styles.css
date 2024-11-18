@@ -499,6 +499,10 @@ path.selected.delivery {
     padding: 0;
 }
 
+#countries.visible {
+    display: block; /* Show when visible class is added */
+}
+
 .country-item {
     margin: 8px 0;
 }
@@ -653,6 +657,24 @@ path.postal-code {
 }
 
 /* ...existing code... */
+#country-list {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    padding: 1rem;
+    z-index: 1000;
+    max-height: 80vh;
+    overflow-y: auto;
+    display: none; /* Hide by default */
+}
+
+#country-list.visible {
+    display: block; /* Show when visible class is added */
+}
+
 #country-list h2 {
     display: flex;
     justify-content: space-between;
@@ -668,5 +690,30 @@ path.postal-code {
     border-radius: 5px;
     font-size: 1rem;
     font-weight: 500;
+    margin-left: 1rem; /* Add margin to separate from select */
+    cursor: pointer; /* Make it look clickable */
+}
+
+#countries {
+    list-style: none;
+    padding: 0;
+}
+/* ...existing code... */
+#country-list h2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.4rem;
+    color: #2c3e50;
+}
+
+#country-count {
+    background-color: #3498db;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer; /* Make it look clickable */
 }
 /* ...existing code... */
