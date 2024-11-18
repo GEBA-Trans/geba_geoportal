@@ -3,7 +3,7 @@ import { getColorVariation } from './mapLoader.js'; // Add this import
 
 const LOADING_MODE = 'loading';
 const DELIVERY_MODE = 'delivery';
-const COOKIE_NAME = 'selectedPostalCodes';
+const STORAGE_NAME = 'selectedPostalCodes';
 const EXPANDED_COUNTRIES_COOKIE = 'expandedCountries';
 
 let currentMode = 'loading';
@@ -292,7 +292,7 @@ export function loadSelectedPostalCodes() {
 
             // Load postal codes from local storage
             Object.keys(localStorage).forEach(key => {
-                if (key.startsWith(COOKIE_NAME)) {
+                if (key.startsWith(STORAGE_NAME)) {
                     const [_, mode, country] = key.split('_');
                     const postalCodes = JSON.parse(localStorage.getItem(key));
                     const targetSet = mode === LOADING_MODE ? loadingPostalCodes : deliveryPostalCodes;
@@ -337,7 +337,7 @@ function saveSelectedPostalCodes() {
 
     // Clear existing postal codes in local storage
     Object.keys(localStorage).forEach(key => {
-        if (key.startsWith(COOKIE_NAME)) {
+        if (key.startsWith(STORAGE_NAME)) {
             localStorage.removeItem(key);
         }
     });
@@ -353,7 +353,7 @@ function saveSelectedPostalCodes() {
         }, {});
 
         Object.keys(groupedByCountry).forEach(country => {
-            const storageKey = `${COOKIE_NAME}_${mode}_${country}`;
+            const storageKey = `${STORAGE_NAME}_${mode}_${country}`;
             localStorage.setItem(storageKey, JSON.stringify(groupedByCountry[country]));
         });
     });
