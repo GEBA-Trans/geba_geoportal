@@ -28,15 +28,6 @@
                 <span id="lasso-status" style="display: none;">Lassoing... Click and drag to select.</span> <!-- Add this line -->
                 <button id="lasso-button" title="Lasso Select" data-tooltip="Lasso Select"><i class="fas fa-draw-polygon"></i></button>
             </div>
-            <!-- Add dropdown menu here -->
-            <div id="region-select">
-                <span id="region-label" data-tooltip="Select a region to view">
-                <select id="regions">
-                    <!-- Options will be populated dynamically -->
-                </select>
-                </span>
-                <span id="country-count" data-tooltip="Click to add individual countries">0 / 0</span> <!-- Move the counter here -->
-            </div>
         </div>
         <main>
             <div id="map-container" class="no-select">
@@ -54,6 +45,15 @@
                 </div>
             </div>
             <div id="sidebar">
+                <!-- Add dropdown menu here -->
+                <div id="region-select">
+                    <span id="region-label" data-tooltip="Select a region to view">
+                    <select id="regions">
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                    </span>
+                    <span id="country-count" data-tooltip="Click to add individual countries">0 / 0</span> <!-- Move the counter here -->
+                </div>
                 <div id="mode-toggle">
                     <button id="loading-mode" class="active">Loading
                         <input type="color" id="loading-color" value="#f1c40f" class="color-picker">
