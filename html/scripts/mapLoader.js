@@ -109,7 +109,7 @@ function loadToggleStates() {
     }
 }
 
-export async function loadSVG(textZoom = 1) {
+export async function loadSVG(textZoom = 2) {
     try {
         // Show loader
         document.getElementById('loader').style.display = 'flex';
@@ -187,14 +187,24 @@ export async function loadSVG(textZoom = 1) {
                 }
             }
 
-            // Add hover effect with debug info
+            // Add hover effect with enhanced visibility
             path.addEventListener('mouseover', () => {
                 text.setAttribute("font-size", `${14 * textZoom}`); // Increase font size on hover
+                text.setAttribute("font-weight", "bold"); // Make text bold
+                text.setAttribute("fill", "white"); // Change text color to white
+                text.setAttribute("background-color", "rgba(0, 0, 0, 0.7)"); // Add background color
                 document.getElementById('map-container').style.cursor = 'pointer'; // Change cursor for postal codes
+                const countryName = path.parentElement.id; // Get the country name from the parent group ID
+                const postalCode = path.id; // Get the postal code from the path ID
+                text.textContent = `${countryName} - ${postalCode}`; // Show country and postal code
             });
             path.addEventListener('mouseout', () => {
                 text.setAttribute("font-size", `${10 * textZoom}`); // Reset font size when not hovering
+                text.setAttribute("font-weight", "normal"); // Reset text weight
+                text.setAttribute("fill", "black"); // Reset text color
+                text.removeAttribute("background-color"); // Remove background color
                 document.getElementById('map-container').style.cursor = ''; // Reset cursor
+                text.textContent = path.id.substring(3); // Reset text to postal code only
             });
 
             loadedCountries.push(countryId);
