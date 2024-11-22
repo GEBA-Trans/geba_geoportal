@@ -206,6 +206,24 @@ path.selected.delivery {
     color: #2c3e50;
 }
 
+#lookup-results .lookup-close-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+    margin-left: 1rem; /* Add margin to separate from the title */
+}
+
+#lookup-results .lookup-close-btn:hover {
+    background-color: #ff1229;
+
+
+}
+
 #company-table {
     width: 100%;
     border-collapse: collapse;

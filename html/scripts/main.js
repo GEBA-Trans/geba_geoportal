@@ -199,4 +199,8 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeTooltip(button, button.getAttribute('data-tooltip'));
     });
 
+    // Add event listener to close the lookup results
+    document.querySelector('#lookup-results .lookup-close-btn').addEventListener('click', function() {
+        document.getElementById('lookup-results').style.display = 'none';
+    });
 });
