@@ -147,15 +147,23 @@ function initializeApp() {
         .catch(error => console.error('Error initializing app:', error));
 }
 
-function initializeTooltip(element, tooltipText) {
+function initializeTooltip(element, tooltipText, placement) {
+    console.log('Initializing tooltip:', element, tooltipText, placement);
     const tooltip = document.createElement('div');
     tooltip.className = 'tooltip';
     tooltip.textContent = tooltipText;
     document.body.appendChild(tooltip);
 
     const popperInstance = Popper.createPopper(element, tooltip, {
-        placement: 'top'
-        
+        placement: placement, // Use the placement value
+        modifiers: [
+            {
+                name: 'offset',
+                options: {
+                    offset: [0, 8],
+                },
+            },
+        ],
     });
 
     element.addEventListener('mouseenter', () => {
@@ -191,12 +199,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Initialize tooltips
-    initializeTooltip(document.getElementById('country-count'), document.getElementById('country-count').getAttribute('data-tooltip'));
-    initializeTooltip(document.getElementById('region-label'), document.getElementById('region-label').getAttribute('data-tooltip'));
+    const tooltipElements = [
+        { element: document.getElementById('country-count'), tooltipText: 'Click to add individual countries', placement: 'top' },
+        { element: document.getElementById('region-label'), tooltipText: 'Region Label Tooltip', placement: 'bottom' },
+        { element: document.getElementById('zoom-in'), tooltipText: 'zoom up', placement: 'bottom' },
+        { element: document.getElementById('zoom-factor'), tooltipText: 'Increase zoom', placement: 'top' }
+    ];
 
-    const zoomButtons = document.querySelectorAll('#zoom-controls button');
-    zoomButtons.forEach(button => {
-        initializeTooltip(button, button.getAttribute('data-tooltip'));
+    tooltipElements.forEach(({ element, tooltipText, placement }) => {
+        initializeTooltip(element, tooltipText, placement);
     });
 
     // Add event listener to close the lookup results

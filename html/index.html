@@ -38,26 +38,26 @@
                 </div>
                 <!-- Move controls here, inside the map container -->
                 <div id="zoom-controls">
-                    <button id="zoom-in" title="Zoom In" data-tooltip="Zoom In"><i class="fas fa-search-plus"></i></button>
-                    <button id="zoom-out" title="Zoom Out" data-tooltip="Zoom Out"><i class="fas fa-search-minus"></i></button>
+                    <button id="zoom-in" title="Zoom In"><i class="fas fa-search-plus"></i></button>
+                    <button id="zoom-out" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
                     <span id="zoom-factor">Zoom: 1.0x</span> <!-- Add this line -->
                     <div class="divider"></div> <!-- Add this line for the divider -->
                     <button id="reset-zoom" title="Reset Zoom" data-tooltip="Reset Zoom"><i class="fas fa-sync-alt"></i></button>
                     <button id="zoom-visible" title="Zoom to Visible" data-tooltip="Zoom to Visible"><i class="fas fa-eye"></i></button> <!-- Add this line -->
                     <div class="divider"></div> <!-- Add this line for the divider -->
                     <span id="lasso-status" style="display: none;">Lassoing... Click and drag to select.</span> <!-- Add this line -->
-                    <button class="lasso-button" title="Lasso Select" data-tooltip="Lasso Select"><i class="fas fa-highlighter"></i></button> <!-- Update icon class to a free lasso-like icon -->
+                    <button class="lasso-button" title="Lasso Select" data-tooltip="Lasso Select"><i class="fas fa-highlighter"></i></button> <!-- Update icon class to lasso -->
                 </div>
             </div>
             <div id="sidebar">
                 <!-- Add dropdown menu here -->
                 <div id="region-select">
-                    <span id="region-label" data-tooltip="Select a region to view">
+                    <span id="region-label" >
                     <select id="regions">
                         <!-- Options will be populated dynamically -->
                     </select>
                     </span>
-                    <span id="country-count" data-tooltip="Click to add individual countries">0 / 0</span> <!-- Move the counter here -->
+                    <span id="country-count">0 / 0</span> <!-- Move the counter here -->
                 </div>
                 <div id="mode-toggle">
                     <button id="loading-mode" class="active">Loading
