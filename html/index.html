@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Add Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@popperjs/core@2"></script> <!-- Include Popper.js -->
 </head>
 <body>
     <div id="app-container">
@@ -16,44 +17,41 @@
             <div class="spinner"></div>
             <span>Loading...</span>
         </div>
-        <header>
-            <h1>Interactive World Map</h1>
-        </header>
-        <!-- Move controls here, outside of the map container -->
-        <div id="controls">
-            <div id="zoom-controls">
-                <button id="zoom-in" title="Zoom In"><i class="fas fa-search-plus"></i></button>
-                <button id="zoom-out" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
-                <span id="zoom-factor">Zoom: 1.0x</span> <!-- Add this line -->
-                <button id="reset-zoom" title="Reset Zoom"><i class="fas fa-sync-alt"></i></button>
-                <button id="zoom-visible" title="Zoom to Visible"><i class="fas fa-eye"></i></button> <!-- Add this line -->
-                <span id="lasso-status" style="display: none;">Lassoing... Click and drag to select.</span> <!-- Add this line -->
-                <button id="lasso-button" title="Lasso Select"><i class="fas fa-draw-polygon"></i></button>
-            </div>
-            <!-- Add dropdown menu here -->
-            <div id="region-select">
-                <label for="regions">Toggle Region:</label>
-                <select id="regions">
-                    <!-- Options will be populated dynamically -->
-                </select>
-            </div>
-        </div>
         <main>
-            <div id="country-list">
-                <h2>Loaded Countries</h2>
-                <div class="toggle-all-container">
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-all-countries" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <span>Toggle All Countries</span>
-                </div>
-                <ul id="countries"></ul>
-            </div>
             <div id="map-container" class="no-select">
                 <!-- SVG map will be inserted here -->
+                <div id="country-list">
+                    <h2>Loaded Countries</h2> <!-- Remove the counter from here -->
+                    <div class="toggle-all-container">
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-all-countries" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <span>Toggle All Countries</span>
+                    </div>
+                    <ul id="countries"></ul>
+                </div>
+                <!-- Move controls here, inside the map container -->
+                <div id="zoom-controls">
+                    <button id="zoom-in" title="Zoom In" data-tooltip="Zoom In"><i class="fas fa-search-plus"></i></button>
+                    <button id="zoom-out" title="Zoom Out" data-tooltip="Zoom Out"><i class="fas fa-search-minus"></i></button>
+                    <span id="zoom-factor">Zoom: 1.0x</span> <!-- Add this line -->
+                    <button id="reset-zoom" title="Reset Zoom" data-tooltip="Reset Zoom"><i class="fas fa-sync-alt"></i></button>
+                    <button id="zoom-visible" title="Zoom to Visible" data-tooltip="Zoom to Visible"><i class="fas fa-eye"></i></button> <!-- Add this line -->
+                    <span id="lasso-status" style="display: none;">Lassoing... Click and drag to select.</span> <!-- Add this line -->
+                    <button id="lasso-button" title="Lasso Select" data-tooltip="Lasso Select"><i class="fas fa-draw-polygon"></i></button>
+                </div>
             </div>
             <div id="sidebar">
+                <!-- Add dropdown menu here -->
+                <div id="region-select">
+                    <span id="region-label" data-tooltip="Select a region to view">
+                    <select id="regions">
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                    </span>
+                    <span id="country-count" data-tooltip="Click to add individual countries">0 / 0</span> <!-- Move the counter here -->
+                </div>
                 <div id="mode-toggle">
                     <button id="loading-mode" class="active">Loading
                         <input type="color" id="loading-color" value="#f1c40f" class="color-picker">
@@ -82,9 +80,11 @@
             </div>
         </main>
         
-        <!-- Transport companies table now comes after the main content -->
-        <div id="transport-companies">
-            <h2>Transport Companies</h2>
+        <!-- Add the lookup results section here, default it is hidden-->
+        <div id="lookup-results"> 
+            <h2>Lookup Results
+                <button class="lookup-close-btn" title="Close">&times;</button> <!-- Move this line inside the h2 tag -->
+            </h2>
             <table id="company-table">
                 <thead>
                     <tr>

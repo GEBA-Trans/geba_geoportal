@@ -5,7 +5,6 @@ import { setupModeToggle, setupLookupButton } from './uiSetup.js';
 import { connectWebSocket } from './websocket.js';
 import { setupLassoSelect } from './lasso.js';
 
-
 async function loadRegionOptions() {
     try {
         const response = await fetch('data/regions.json');
@@ -148,6 +147,29 @@ function initializeApp() {
         .catch(error => console.error('Error initializing app:', error));
 }
 
+function initializeTooltip(element, tooltipText) {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip';
+    tooltip.textContent = tooltipText;
+    document.body.appendChild(tooltip);
+
+    const popperInstance = Popper.createPopper(element, tooltip, {
+        placement: 'top'
+        
+    });
+
+    element.addEventListener('mouseenter', () => {
+        tooltip.style.visibility = 'visible';
+        tooltip.style.opacity = '1';
+        popperInstance.update(); // Ensure the tooltip position is updated
+    });
+
+    element.addEventListener('mouseleave', () => {
+        tooltip.style.visibility = 'hidden';
+        tooltip.style.opacity = '0';
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
     populateRegionDropdown();
@@ -160,5 +182,25 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             selectModeText.innerHTML = '<i class="fas fa-map-marker-alt"></i> Selecting Postal Codes';
         }
+    });
+
+    // Add event listener to toggle the visibility of the country list
+    document.getElementById('country-count').addEventListener('click', function() {
+        const countryList = document.getElementById('country-list');
+        countryList.classList.toggle('visible');
+    });
+
+    // Initialize tooltips
+    initializeTooltip(document.getElementById('country-count'), document.getElementById('country-count').getAttribute('data-tooltip'));
+    initializeTooltip(document.getElementById('region-label'), document.getElementById('region-label').getAttribute('data-tooltip'));
+
+    const zoomButtons = document.querySelectorAll('#zoom-controls button');
+    zoomButtons.forEach(button => {
+        initializeTooltip(button, button.getAttribute('data-tooltip'));
+    });
+
+    // Add event listener to close the lookup results
+    document.querySelector('#lookup-results .lookup-close-btn').addEventListener('click', function() {
+        document.getElementById('lookup-results').style.display = 'none';
     });
 });
