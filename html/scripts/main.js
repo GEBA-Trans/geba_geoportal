@@ -208,12 +208,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips
     const tooltipElements = [
         { element: document.getElementById('country-count'), tooltipText: 'Click to add individual countries', placement: 'top' },
-        { element: document.getElementById('region-label'), tooltipText: 'Region Label Tooltip', placement: 'bottom' },
+        { element: document.getElementById('region-label'), tooltipText: 'Select Regions of countries', placement: 'bottom' },
         { element: document.getElementById('lookup-button'), tooltipText: 'Lookup in Mitoz', placement: 'top' },
-        { element: document.getElementById('zoom-controls'), tooltipText: 'zoom-controls', placement: 'top' },
-        { element: document.getElementById('lasso-active-indicator'), tooltipText: 'lasso-active-indicator', placement: 'bottom' },
-        { element: document.getElementById('zoom-in'), tooltipText: 'zoom up', placement: 'top' },
-        { element: document.getElementById('zoom-factor'), tooltipText: 'Increase zoom', placement: 'top' }
+        { element: document.getElementById('zoom-in'), tooltipText: 'Zoom in', placement: 'top' },
+        { element: document.getElementById('zoom-out'), tooltipText: 'Zoom out', placement: 'top' },
+        { element: document.getElementById('zoom-factor'), tooltipText: 'Currend zoom', placement: 'top' },
+        { element: document.getElementById('reset-zoom'), tooltipText: 'Reset zoom to 1', placement: 'top' },
+        { element: document.getElementById('zoom-visible'), tooltipText: 'Zoom to visible area', placement: 'top' },
+        { element: document.getElementById('lasso-button'), tooltipText: 'Activate lasso tool', placement: 'top' }
     ];
 
     tooltipElements.forEach(({ element, tooltipText, placement }) => {
