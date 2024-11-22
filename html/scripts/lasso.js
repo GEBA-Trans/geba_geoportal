@@ -49,7 +49,7 @@ function toggleLasso() {
 
     const lassoButton = document.querySelector('.lasso-button');
     const lassoStatus = document.getElementById('lasso-status');
-    lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times" style="color: red;"></i>' : '<i class="fas fa-draw-polygon"></i>';
+    lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times" style="color: red;"></i>' : '<i class="fas fa-highlighter"></i>';
     lassoButton.title = isLassoActive ? 'Cancel Lasso' : 'Lasso Select';
 
     lassoStatus.style.display = isLassoActive ? 'flex' : 'none';
