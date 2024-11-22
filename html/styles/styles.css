@@ -590,14 +590,14 @@ path.postal-code {
 
 #country-list {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    top: 0;
+    left: 0;
     background-color: white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    padding: 0.1rem;
-    z-index: 1000;
-    max-height: 80vh;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    border-radius: 0 5px 5px 0;
+    padding: 0.5rem;
+    z-index: 1001;
+    height: 100%;
     overflow-y: auto;
     display: none;
 }
