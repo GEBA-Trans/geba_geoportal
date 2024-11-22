@@ -26,10 +26,10 @@ export function setLassoMode(mode) {
 }
 
 function toggleLasso() {
-    console.log('Toggle Lasso');
+    // console.log('Toggle Lasso');
     isLassoActive = !isLassoActive;
 
-    console.log('Lasso Active:', isLassoActive);
+    // console.log('Lasso Active:', isLassoActive);
     const mapContainer = document.getElementById('map-container');
     mapContainer.classList.toggle('lasso-active', isLassoActive);
 
@@ -80,7 +80,7 @@ function toggleLasso() {
 }
 
 function startLasso(e) {
-    console.log('Start Lasso');
+    // console.log('Start Lasso');
     if (!isLassoActive) return;
     e.preventDefault();
     const point = getSVGPoint(e.clientX, e.clientY);
@@ -127,7 +127,7 @@ function selectPathsInLasso() {
     debugCounters.pathsChecked = 0;
     debugCounters.pathsSelected = 0;
     const selectCountries = document.getElementById('select-countries').checked;
-    console.log('Select Countries:', selectCountries);
+    // console.log('Select Countries:', selectCountries);
     paths.forEach(path => {
         // Skip paths that are not visible or have a hidden parent
         if (path.style.display === 'none') return;
@@ -149,7 +149,7 @@ function selectPathsInLasso() {
                 if (selectCountries && parentGroup) {
                     const country = parentGroup.id;
                     addAllPostalCodes(country, currentMode);
-                    console.log('Select Country:', country);
+                    // console.log('Select Country:', country);
                 }
             }
         }

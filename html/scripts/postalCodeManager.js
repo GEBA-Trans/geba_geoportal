@@ -28,7 +28,7 @@ function handlePostalCodeClick(e) {
         const postalCode = e.target.id || 'Unknown';
         const parentGroup = e.target.closest('g');
         const parentId = parentGroup ? parentGroup.id : 'No parent';
-        console.log(`Clicked path: ${postalCode}, Parent group: ${parentId}`);
+        // console.log(`Clicked path: ${postalCode}, Parent group: ${parentId}`);
         const mode = currentMode;
         togglePostalCode(e.target, postalCode, mode);
     }
@@ -417,7 +417,7 @@ export function addAllPostalCodes(country, mode) {
 }
 
 function removeAllPostalCodes(country, mode) {
-    console.log(`Removing all postal codes for country: ${country}, mode: ${mode}`);
+    // console.log(`Removing all postal codes for country: ${country}, mode: ${mode}`);
     const targetSet = mode === LOADING_MODE ? loadingPostalCodes : deliveryPostalCodes;
     
     // First, remove all postal codes that start with the country code
@@ -444,12 +444,12 @@ function removeAllPostalCodes(country, mode) {
 }
 
 export function disablePostalCodeClicks() {
-    console.log("Postal code clicks have been disabled.");
+    // console.log("Postal code clicks have been disabled.");
     isPostalCodeClicksEnabled = false;
 }
 
 export function enablePostalCodeClicks() {
-    console.log("Postal code clicks have been enabled.");
+    // console.log("Postal code clicks have been enabled.");
     isPostalCodeClicksEnabled = true;
 }
 
@@ -486,7 +486,7 @@ function updatePostalCodeSelectionColor(mode, color) {
 
 export function reloadSelectedPostalCodes() {
     loadSelectedPostalCodes().then(() => {
-        console.log('Selected postal codes reloaded.');
+        // console.log('Selected postal codes reloaded.');
     }).catch(error => {
         console.error('Error reloading selected postal codes:', error);
     });

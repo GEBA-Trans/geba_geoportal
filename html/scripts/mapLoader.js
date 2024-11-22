@@ -34,7 +34,7 @@ export function toggleCountryVisibility(country, isVisible) {
     
     // Toggle visibility of individual paths
     paths.forEach(path => {
-        console.log(`Setting display: ${isVisible ? 'block' : 'none'} for path:`, path);
+        // console.log(`Setting display: ${isVisible ? 'block' : 'none'} for path:`, path);
         path.style.display = isVisible ? 'block' : 'none';
     });
 
