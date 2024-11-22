@@ -17,6 +17,10 @@
             <div class="spinner"></div>
             <span>Loading...</span>
         </div>
+        <!-- Add lasso active indicator -->
+        <div id="lasso-active-indicator" class="lasso-indicator-button">
+            Lasso Active
+        </div>
         <main>
             <div id="map-container" class="no-select">
                 <!-- SVG map will be inserted here -->
@@ -39,7 +43,7 @@
                     <button id="reset-zoom" title="Reset Zoom" data-tooltip="Reset Zoom"><i class="fas fa-sync-alt"></i></button>
                     <button id="zoom-visible" title="Zoom to Visible" data-tooltip="Zoom to Visible"><i class="fas fa-eye"></i></button> <!-- Add this line -->
                     <span id="lasso-status" style="display: none;">Lassoing... Click and drag to select.</span> <!-- Add this line -->
-                    <button id="lasso-button" title="Lasso Select" data-tooltip="Lasso Select"><i class="fas fa-draw-polygon"></i></button>
+                    <button class="lasso-button" title="Lasso Select" data-tooltip="Lasso Select"><i class="fas fa-draw-polygon"></i></button>
                 </div>
             </div>
             <div id="sidebar">
