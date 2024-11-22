@@ -27,8 +27,6 @@ function toggleLasso() {
     console.log('Toggle Lasso');
     isLassoActive = !isLassoActive;
 
-
-    
     console.log('Lasso Active:', isLassoActive);
     const mapContainer = document.getElementById('map-container');
     mapContainer.classList.toggle('lasso-active', isLassoActive);
@@ -55,6 +53,12 @@ function toggleLasso() {
             if (!path.classList.contains('selected')) {
                 path.style.filter = 'grayscale(75%)';
             }
+            path.style.cursor = 'crosshair'; // Ensure cursor remains crosshair
+            path.addEventListener('mouseover', () => {
+                if (isLassoActive) {
+                    path.style.cursor = 'crosshair'; // Ensure cursor remains crosshair on hover
+                }
+            });
         });
         debugCounters.timeTaken = 0; // Reset timeTaken when activating lasso
         showDebugCounters();
@@ -62,6 +66,7 @@ function toggleLasso() {
         const paths = document.querySelectorAll('#map-container svg path');
         paths.forEach(path => {
             path.style.filter = '';
+            path.style.cursor = ''; // Reset cursor
         });
         hideDebugCounters();
     }
