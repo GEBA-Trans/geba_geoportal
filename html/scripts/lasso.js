@@ -10,8 +10,10 @@ let addPostalCodeCallback;
 export function setupLassoSelect(svg, addPostalCodeFunc) {
     svgElement = svg;
     addPostalCodeCallback = addPostalCodeFunc;
-    const lassoButton = document.getElementById('lasso-button');
+    const lassoButton = document.querySelector('.lasso-button');
+    const lassoIndicatorButton = document.querySelector('.lasso-indicator-button');
     lassoButton.addEventListener('click', toggleLasso);
+    lassoIndicatorButton.addEventListener('click', toggleLasso);
 
     svgElement.addEventListener('mousedown', startLasso);
     svgElement.addEventListener('mousemove', updateLasso);
@@ -24,27 +26,30 @@ export function setLassoMode(mode) {
 }
 
 function toggleLasso() {
-    console.log('Toggle Lasso');
+    // console.log('Toggle Lasso');
     isLassoActive = !isLassoActive;
 
-
-    
-    console.log('Lasso Active:', isLassoActive);
+    // console.log('Lasso Active:', isLassoActive);
     const mapContainer = document.getElementById('map-container');
     mapContainer.classList.toggle('lasso-active', isLassoActive);
 
-    // Change cursor based on lasso state
+    const lassoActiveIndicator = document.getElementById('lasso-active-indicator');
+    lassoActiveIndicator.style.display = isLassoActive ? 'block' : 'none';
+
+    // Change cursor and background color based on lasso state
     if (isLassoActive) {
         disablePostalCodeClicks();
         mapContainer.style.cursor = 'crosshair'; // Cursor for lasso active
+        mapContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'; // Change background color
     } else {
         enablePostalCodeClicks();
         mapContainer.style.cursor = 'grab'; // Cursor for pan hand when lasso is not active
+        mapContainer.style.backgroundColor = ''; // Reset background color
     }
 
-    const lassoButton = document.getElementById('lasso-button');
+    const lassoButton = document.querySelector('.lasso-button');
     const lassoStatus = document.getElementById('lasso-status');
-    lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times" style="color: red;"></i>' : '<i class="fas fa-draw-polygon"></i>';
+    lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times" style="color: red;"></i>' : '<i class="fas fa-highlighter"></i>';
     lassoButton.title = isLassoActive ? 'Cancel Lasso' : 'Lasso Select';
 
     lassoStatus.style.display = isLassoActive ? 'flex' : 'none';
@@ -55,6 +60,12 @@ function toggleLasso() {
             if (!path.classList.contains('selected')) {
                 path.style.filter = 'grayscale(75%)';
             }
+            path.style.cursor = 'crosshair'; // Ensure cursor remains crosshair
+            path.addEventListener('mouseover', () => {
+                if (isLassoActive) {
+                    path.style.cursor = 'crosshair'; // Ensure cursor remains crosshair on hover
+                }
+            });
         });
         debugCounters.timeTaken = 0; // Reset timeTaken when activating lasso
         showDebugCounters();
@@ -62,13 +73,14 @@ function toggleLasso() {
         const paths = document.querySelectorAll('#map-container svg path');
         paths.forEach(path => {
             path.style.filter = '';
+            path.style.cursor = ''; // Reset cursor
         });
         hideDebugCounters();
     }
 }
 
 function startLasso(e) {
-    console.log('Start Lasso');
+    // console.log('Start Lasso');
     if (!isLassoActive) return;
     e.preventDefault();
     const point = getSVGPoint(e.clientX, e.clientY);
@@ -115,7 +127,7 @@ function selectPathsInLasso() {
     debugCounters.pathsChecked = 0;
     debugCounters.pathsSelected = 0;
     const selectCountries = document.getElementById('select-countries').checked;
-    console.log('Select Countries:', selectCountries);
+    // console.log('Select Countries:', selectCountries);
     paths.forEach(path => {
         // Skip paths that are not visible or have a hidden parent
         if (path.style.display === 'none') return;
@@ -137,7 +149,7 @@ function selectPathsInLasso() {
                 if (selectCountries && parentGroup) {
                     const country = parentGroup.id;
                     addAllPostalCodes(country, currentMode);
-                    console.log('Select Country:', country);
+                    // console.log('Select Country:', country);
                 }
             }
         }
@@ -227,6 +239,13 @@ function endLasso(e) {
     e.preventDefault();
     const point = getSVGPoint(e.clientX, e.clientY);
     lassoPoints.push(point);
+
+    // If the user clicks without dragging, end the lasso
+    if (lassoPoints.length === 2 && lassoPoints[0].x === lassoPoints[1].x && lassoPoints[0].y === lassoPoints[1].y) {
+        clearLasso();
+        return;
+    }
+
     drawLasso();
     
     const endTime = performance.now();

@@ -50,6 +50,12 @@ h1 {
     background-color: #bdc3c7;
 }
 
+#zoom-controls .divider {
+    width: 1px;
+    background-color: #ccc;
+    margin: 0 10px;
+}
+
 main {
     display: flex;
     flex: 1;
@@ -412,8 +418,8 @@ path.selected.delivery {
     background-color: lightgray;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    padding: 0.5rem;
-    /* margin-left: 1rem; */
+    padding: 0.1rem;
+    margin-bottom: 0.5rem;
 }
 
 #region-select label {
@@ -656,30 +662,54 @@ path.postal-code {
 }
 
 .tooltip {
-    visibility: hidden;
+    position: absolute;
     background-color: #333;
     color: #fff;
-    text-align: center;
-    border-radius: 5px;
-    padding: 5px;
-    position: absolute;
-    z-index: 1;
-    bottom: 125%;
-    left: 50%;
-    transform: translateX(-50%);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    z-index: 1000;
+    white-space: nowrap;
+    pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s;
-    width: max-content;
-    max-width: 200px;
 }
 
 .tooltip::after {
     content: '';
     position: absolute;
-    top: 100%;
+    bottom: -5px;
     left: 50%;
-    margin-left: -5px;
+    transform: translateX(-50%);
     border-width: 5px;
     border-style: solid;
     border-color: #333 transparent transparent transparent;
+}
+
+#lasso-active-indicator {
+    display: none;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    background-color: red;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    cursor: pointer;
+    text-align: center;
+}
+
+#lasso-active-indicator .lasso-indicator-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
 }
