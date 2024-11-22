@@ -50,6 +50,12 @@ h1 {
     background-color: #bdc3c7;
 }
 
+#zoom-controls .divider {
+    width: 1px;
+    background-color: #ccc;
+    margin: 0 10px;
+}
+
 main {
     display: flex;
     flex: 1;
