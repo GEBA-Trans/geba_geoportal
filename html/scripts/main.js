@@ -167,15 +167,22 @@ function initializeTooltip(element, tooltipText, placement) {
     });
 
     element.addEventListener('mouseenter', () => {
+        console.log('Mouse entered:', element);
         tooltip.style.visibility = 'visible';
         tooltip.style.opacity = '1';
-        popperInstance.update(); // Ensure the tooltip position is updated
+        popperInstance.update().then(() => {
+            console.log('Popper updated:', tooltip);
+        });
     });
 
     element.addEventListener('mouseleave', () => {
+        console.log('Mouse left:', element);
         tooltip.style.visibility = 'hidden';
         tooltip.style.opacity = '0';
     });
+
+    // Log to confirm event listeners are attached
+    console.log('Event listeners attached for:', element);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -202,11 +209,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const tooltipElements = [
         { element: document.getElementById('country-count'), tooltipText: 'Click to add individual countries', placement: 'top' },
         { element: document.getElementById('region-label'), tooltipText: 'Region Label Tooltip', placement: 'bottom' },
-        { element: document.getElementById('zoom-in'), tooltipText: 'zoom up', placement: 'bottom' },
+        { element: document.getElementById('lookup-button'), tooltipText: 'Lookup in Mitoz', placement: 'top' },
+        { element: document.getElementById('zoom-controls'), tooltipText: 'zoom-controls', placement: 'top' },
+        { element: document.getElementById('lasso-active-indicator'), tooltipText: 'lasso-active-indicator', placement: 'bottom' },
+        { element: document.getElementById('zoom-in'), tooltipText: 'zoom up', placement: 'top' },
         { element: document.getElementById('zoom-factor'), tooltipText: 'Increase zoom', placement: 'top' }
     ];
 
     tooltipElements.forEach(({ element, tooltipText, placement }) => {
+        console.log('Initializing tooltip for element:', element);
         initializeTooltip(element, tooltipText, placement);
     });
 
