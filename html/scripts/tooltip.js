@@ -43,14 +43,16 @@ export function initializeTooltips() {
         { element: document.getElementById('lookup-button'), tooltipText: 'Lookup in Mitoz', placement: 'top' },
         { element: document.getElementById('zoom-in'), tooltipText: 'Zoom in', placement: 'top' },
         { element: document.getElementById('zoom-out'), tooltipText: 'Zoom out', placement: 'top' },
-        { element: document.getElementById('zoom-factor'), tooltipText: 'Currend zoom', placement: 'top' },
+        { element: document.getElementById('zoom-factor'), tooltipText: 'Current zoom', placement: 'top' },
         { element: document.getElementById('reset-zoom'), tooltipText: 'Reset zoom to 1', placement: 'top' },
         { element: document.getElementById('zoom-visible'), tooltipText: 'Zoom to visible area', placement: 'top' },
-        { element: document.getElementById('lasso-group'), tooltipText: 'Toggle lasso tool', placement: 'top' }
+        { element: document.getElementById('lasso-group'), tooltipText: 'Toggle lasso tool', placement: 'top' },
+        { element: document.querySelector('.grow-selection-button'), tooltipText: 'Expand selection area', placement: 'top' }
     ];
 
     tooltipElements.forEach(({ element, tooltipText, placement }) => {
-        // console.log('Initializing tooltip for element:', element);
-        initializeTooltip(element, tooltipText, placement);
+        if (element) {
+            initializeTooltip(element, tooltipText, placement);
+        }
     });
 }

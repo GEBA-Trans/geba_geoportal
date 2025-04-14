@@ -19,7 +19,19 @@ h1 {
     font-weight: 700;
 }
 
+.grow-selection-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 1em;
+    color: #007bff;
+    transition: color 0.2s ease;
+}
 
+.grow-selection-button:hover {
+    color: #0056b3;
+}
 #zoom-controls {
     display: flex;
     background-color: white;
