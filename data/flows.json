@@ -72,9 +72,9 @@
         "wholemsg": "false"
     },
     {
-        "id": "d7d9a838be4d75a2",
+        "id": "a1a7f6782877d9dc",
         "type": "websocket-listener",
-        "path": "/ws/point",
+        "path": "/ws/points",
         "wholemsg": "false"
     },
     {
@@ -231,10 +231,10 @@
         "type": "websocket in",
         "z": "58c7f7e83196ef44",
         "g": "24768e2fe67b6e66",
-        "name": "Map",
+        "name": "",
         "server": "aae82fba46156eb6",
         "client": "",
-        "x": 450,
+        "x": 470,
         "y": 240,
         "wires": [
             [
@@ -356,9 +356,9 @@
         "type": "websocket in",
         "z": "58c7f7e83196ef44",
         "name": "",
-        "server": "d7d9a838be4d75a2",
+        "server": "a1a7f6782877d9dc",
         "client": "",
-        "x": 430,
+        "x": 440,
         "y": 680,
         "wires": [
             [
@@ -375,8 +375,8 @@
         "tosidebar": true,
         "console": false,
         "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
+        "complete": "payload",
+        "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
         "x": 760,
