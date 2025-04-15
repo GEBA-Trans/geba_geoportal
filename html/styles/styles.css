@@ -725,3 +725,18 @@ path.postal-code {
     padding: 0;
     margin: 0;
 }
+
+.export-neighbors-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    margin: 10px;
+}
+
+.export-neighbors-button:hover {
+    background-color: #0056b3;
+}

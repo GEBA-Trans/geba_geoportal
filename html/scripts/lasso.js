@@ -413,7 +413,7 @@ function drawPolygon(polygon, color, id) {
 }
 
 // Replace calls to getSelectionBoundingBox with getSelectionBoundingPolygon in growSelection
-function growSelection() {
+export function growSelection() {
     console.time('growSelection'); // Start timer for the entire function
 
     console.time('getSelectionBoundingPolygon');
@@ -447,9 +447,9 @@ function growSelection() {
             const parentGroup = path.closest('g');
             if (parentGroup && parentGroup.style.display === 'none') return;
 
-            console.time('getPathPoints');
+            // console.time('getPathPoints');
             const { points } = getPathPoints(path, true); // Use simplified paths for targets
-            console.timeEnd('getPathPoints');
+            // console.timeEnd('getPathPoints');
 
             pathsChecked++;
             const isInExpandedPolygon = points.some(point => isPointInPolygon(point, expandedPolygon));
