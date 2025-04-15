@@ -72,6 +72,12 @@
         "wholemsg": "false"
     },
     {
+        "id": "d7d9a838be4d75a2",
+        "type": "websocket-listener",
+        "path": "/ws/point",
+        "wholemsg": "false"
+    },
+    {
         "id": "e2ce18803eb9b981",
         "type": "inject",
         "z": "58c7f7e83196ef44",
@@ -343,6 +349,38 @@
         "statusType": "auto",
         "x": 860,
         "y": 280,
+        "wires": []
+    },
+    {
+        "id": "f7c237741ebc9209",
+        "type": "websocket in",
+        "z": "58c7f7e83196ef44",
+        "name": "",
+        "server": "d7d9a838be4d75a2",
+        "client": "",
+        "x": 430,
+        "y": 680,
+        "wires": [
+            [
+                "8c0635a23c5f755b"
+            ]
+        ]
+    },
+    {
+        "id": "8c0635a23c5f755b",
+        "type": "debug",
+        "z": "58c7f7e83196ef44",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 760,
+        "y": 680,
         "wires": []
     },
     {
