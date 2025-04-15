@@ -25,11 +25,11 @@ export function exportPostalCodeNeighbors() {
         const payload = { id: path.id, neighbors };
         sendToNeighborSocket(payload);
 
-        processedCount++;
-        if (processedCount >= 50) {
-            console.log('Debug limit reached. Stopping after 5 Path_IDs.');
-            break; // Stop the loop after processing 5 Path_IDs
-        }
+        // processedCount++;
+        // if (processedCount >= 50) {
+        //     console.log('Debug limit reached. Stopping after 5 Path_IDs.');
+        //     break; // Stop the loop after processing 5 Path_IDs
+        // }
     }
 
     // const csvContent = generateCSV(neighborsMap);
@@ -40,25 +40,26 @@ export function exportPostalCodeNeighbors() {
 
 function findNeighbors(targetPath, paths) {
     console.log(`Finding neighbors for Path_ID: ${targetPath.id}`);
-    
+
     // Temporarily mark the target path as selected
     targetPath.classList.add('selected');
-    
-    // Use growSelection to expand the selection and find neighbors
+
+    // Use growSelection to expand the selection
     growSelection();
 
-    // Collect neighbors based on the newly selected paths
-    const neighbors = Array.from(document.querySelectorAll('#map-container svg path.selected'))
+    // Cache selected paths in a Set for faster filtering
+    const selectedPaths = new Set(
+        Array.from(document.querySelectorAll('#map-container svg path.selected'))
+    );
+
+    // Collect neighbors by filtering the Set
+    const neighbors = Array.from(selectedPaths)
         .filter(path => path !== targetPath && path.id) // Exclude the target path and ensure the path has an ID
         .map(path => path.id);
 
     // Reset the selection state
     targetPath.classList.remove('selected');
-    document.querySelectorAll('#map-container svg path.selected').forEach(path => {
-        if (path !== targetPath) {
-            path.classList.remove('selected');
-        }
-    });
+    selectedPaths.forEach(path => path.classList.remove('selected'));
 
     console.log(`Neighbors found for Path_ID ${targetPath.id}:`, neighbors);
     return neighbors;
