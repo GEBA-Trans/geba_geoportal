@@ -441,17 +441,36 @@ export function growSelection() {
     let pathsChecked = 0;
     let pathsSelected = 0;
 
+    // Precompute bounding box for the expanded polygon to quickly exclude paths
+    const expandedPolygonBBox = {
+        minX: Math.min(...expandedPolygon.map(p => p.x)),
+        maxX: Math.max(...expandedPolygon.map(p => p.x)),
+        minY: Math.min(...expandedPolygon.map(p => p.y)),
+        maxY: Math.max(...expandedPolygon.map(p => p.y))
+    };
+
     paths.forEach(path => {
         if (!path.classList.contains('selected')) {
             if (path.style.display === 'none') return;
             const parentGroup = path.closest('g');
             if (parentGroup && parentGroup.style.display === 'none') return;
 
-            // console.time('getPathPoints');
-            const { points } = getPathPoints(path, true); // Use simplified paths for targets
-            // console.timeEnd('getPathPoints');
+            const bbox = path.getBBox();
+
+            // Quickly exclude paths outside the expanded polygon's bounding box
+            if (
+                bbox.x + bbox.width < expandedPolygonBBox.minX ||
+                bbox.x > expandedPolygonBBox.maxX ||
+                bbox.y + bbox.height < expandedPolygonBBox.minY ||
+                bbox.y > expandedPolygonBBox.maxY
+            ) {
+                return;
+            }
 
             pathsChecked++;
+            const { points } = getPathPoints(path, true); // Use simplified paths for targets
+
+            // Check if any point of the path is inside the expanded polygon
             const isInExpandedPolygon = points.some(point => isPointInPolygon(point, expandedPolygon));
 
             if (isInExpandedPolygon) {
