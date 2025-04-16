@@ -196,7 +196,14 @@ function getPathPoints(path, useSimplified = false) {
     }
 
     const pathLength = path.getTotalLength();
-    const step = pathLength / 200; // Increase step size to reduce number of points checked
+
+
+
+    const step = pathLength / 100; // Increase step size to reduce number of points checked
+
+
+
+
     const svg = path.ownerSVGElement;
     for (let i = 0; i <= pathLength; i += step) {
         const point = path.getPointAtLength(i);
@@ -543,5 +550,12 @@ function drawDebugCircle(center, radius, id) {
     svgElement.appendChild(circle);
 }
 
-// Hook up the grow selection button
+// Hook up the grow selection and clear debug polygons buttons
 document.querySelector('.grow-selection-button').addEventListener('click', growSelection);
+document.querySelector('.clear-all-button').addEventListener('click', clearAllDebugPolygons);
+
+function clearAllDebugPolygons() {
+    // Clear debug polygons and circles
+    const debugElements = svgElement.querySelectorAll('[id^="debug-circle-"], #original-polygon, #expanded-polygon');
+    debugElements.forEach(element => element.remove());
+}
