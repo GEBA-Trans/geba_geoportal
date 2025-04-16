@@ -363,7 +363,7 @@
         "wires": [
             [
                 "8c0635a23c5f755b",
-                "6ca7a77d52ab9258"
+                "8ce7f30a27a52502"
             ]
         ]
     },
@@ -419,33 +419,6 @@
         "payload": "{\"id\":\"CH-08\",\"neighbors\":[\"CH-09\",\"CH-07\",\"CH-06\",\"CH-05\",\"DE-88\",\"DE-79\",\"DE-78\"]}",
         "payloadType": "json",
         "x": 390,
-        "y": 880,
-        "wires": [
-            [
-                "6ca7a77d52ab9258"
-            ]
-        ]
-    },
-    {
-        "id": "6ca7a77d52ab9258",
-        "type": "change",
-        "z": "58c7f7e83196ef44",
-        "name": "",
-        "rules": [
-            {
-                "t": "set",
-                "p": "payload.timestamp",
-                "pt": "msg",
-                "to": "",
-                "tot": "date"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 640,
         "y": 880,
         "wires": [
             [
