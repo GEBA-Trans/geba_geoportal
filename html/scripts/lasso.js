@@ -505,21 +505,42 @@ function isBBoxInPolygon(bbox, polygon) {
     return bboxPoints.some(point => isPointInPolygon(point, polygon));
 }
 
-function createExpandedPolygonFromPolygon(polygon, expansionFactor = 0.4) {
-    // Calculate the centroid of the polygon
-    const centroid = polygon.reduce((acc, point) => ({
-        x: acc.x + point.x,
-        y: acc.y + point.y
-    }), { x: 0, y: 0 });
+function createExpandedPolygonFromPolygon(polygon, expansionRadius = 20) {
+    // Create a set of points representing the expanded polygon
+    const expandedPoints = [];
 
-    centroid.x /= polygon.length;
-    centroid.y /= polygon.length;
+    polygon.forEach((point, index) => {
+        // Generate points around the current point in a circular pattern
+        for (let angle = 0; angle < 360; angle += 10) { // Adjust step size for smoother circles
+            const radians = (Math.PI / 180) * angle;
+            const x = point.x + expansionRadius * Math.cos(radians);
+            const y = point.y + expansionRadius * Math.sin(radians);
+            expandedPoints.push({ x, y });
+        }
 
-    // Expand each point outward from the centroid
-    return polygon.map(point => ({
-        x: point.x + (point.x - centroid.x) * expansionFactor,
-        y: point.y + (point.y - centroid.y) * expansionFactor
-    }));
+        // Draw the debugging circle for this point
+        drawDebugCircle(point, expansionRadius, `debug-circle-${index}`);
+    });
+
+    // Merge all the circular points into a single convex hull
+    return computeConvexHull(expandedPoints);
+}
+
+function drawDebugCircle(center, radius, id) {
+    // Remove existing circle with the same ID
+    let existingCircle = svgElement.querySelector(`#${id}`);
+    if (existingCircle) existingCircle.remove();
+
+    // Create a new circle element
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('id', id);
+    circle.setAttribute('cx', center.x);
+    circle.setAttribute('cy', center.y);
+    circle.setAttribute('r', radius);
+    circle.setAttribute('fill', 'rgba(0, 0, 255, 0.2)'); // Semi-transparent blue
+    circle.setAttribute('stroke', '#0000ff'); // Blue stroke
+    circle.setAttribute('stroke-width', '1');
+    svgElement.appendChild(circle);
 }
 
 // Hook up the grow selection button
