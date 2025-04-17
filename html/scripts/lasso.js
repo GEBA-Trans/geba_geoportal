@@ -378,31 +378,55 @@ function mergePolygons(polygon1, polygon2) {
 }
 
 function computeConvexHull(points) {
-    // Implementing Graham's scan algorithm for convex hull
+    console.log('Starting computeConvexHull with points:', points);
+
+    // Sort points by x-coordinate (and y-coordinate as a tiebreaker)
     points.sort((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x);
+    console.log('Points sorted:', points);
 
     const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
 
-    const lower = [];
-    for (const point of points) {
-        while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], point) <= 0) {
-            lower.pop();
+    const mergeHulls = (hull1, hull2) => {
+        console.log('Merging hulls:', hull1, hull2);
+        const allPoints = [...hull1, ...hull2];
+        allPoints.sort((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x);
+
+        const lower = [];
+        for (const point of allPoints) {
+            while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], point) <= 0) {
+                lower.pop();
+            }
+            lower.push(point);
         }
-        lower.push(point);
+
+        const upper = [];
+        for (let i = allPoints.length - 1; i >= 0; i--) {
+            const point = allPoints[i];
+            while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], point) <= 0) {
+                upper.pop();
+            }
+            upper.push(point);
+        }
+
+        upper.pop();
+        lower.pop();
+        const merged = lower.concat(upper);
+        console.log('Merged hull:', merged);
+        return merged;
+    };
+
+    let mergedHull = [];
+    for (let i = 0; i < points.length - 1; i++) {
+        const pair = [points[i], points[i + 1]];
+        console.log(`Processing pair: ${i}`, pair);
+        const pairHull = mergeHulls(pair, []); // Compute hull for the pair
+        console.log(`Hull for pair ${i}:`, pairHull);
+        mergedHull = mergeHulls(mergedHull, pairHull); // Merge with the existing hull
+        console.log(`Merged hull after pair ${i}:`, mergedHull);
     }
 
-    const upper = [];
-    for (let i = points.length - 1; i >= 0; i--) {
-        const point = points[i];
-        while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], point) <= 0) {
-            upper.pop();
-        }
-        upper.push(point);
-    }
-
-    upper.pop();
-    lower.pop();
-    return lower.concat(upper);
+    console.log('Final merged hull:', mergedHull);
+    return mergedHull;
 }
 
 function drawPolygon(polygon, color, id) {
