@@ -199,10 +199,28 @@ function getPathPoints(path, useSimplified = false) {
 
 
 
+
+
+
+
+
+
+
+
     const step = pathLength / 100; // Increase step size to reduce number of points checked
 
 
 
+
+
+
+
+
+
+
+
+
+    
 
     const svg = path.ownerSVGElement;
     for (let i = 0; i <= pathLength; i += step) {
@@ -374,10 +392,16 @@ function mergePolygons(polygon1, polygon2) {
 
     // Simple merging logic (convex hull)
     const allPoints = [...polygon1, ...polygon2];
+
+    
     return computeConvexHull(allPoints);
 }
 
 function computeConvexHull(points) {
+
+    return points; // Placeholder for the actual convex hull algorithm
+
+
     console.log('Starting computeConvexHull with points:', points);
 
     // Sort points by x-coordinate (and y-coordinate as a tiebreaker)
@@ -536,9 +560,49 @@ function isBBoxInPolygon(bbox, polygon) {
     return bboxPoints.some(point => isPointInPolygon(point, polygon));
 }
 
-function createExpandedPolygonFromPolygon(polygon, expansionRadius = 5) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function createExpandedPolygonFromPolygon(polygon, expansionRadius = 15) {
     // Create a set of points representing the expanded polygon
     const expandedPoints = [];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     polygon.forEach((point, index) => {
         // Generate points around the current point in a circular pattern
