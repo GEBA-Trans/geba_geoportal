@@ -207,7 +207,7 @@ function getPathPoints(path, useSimplified = false) {
 
 
 
-    const step = pathLength / 100; // Increase step size to reduce number of points checked
+    const step = pathLength / 250; // Increase step size to reduce number of points checked
 
 
 
@@ -220,7 +220,7 @@ function getPathPoints(path, useSimplified = false) {
 
 
 
-    
+
 
     const svg = path.ownerSVGElement;
     for (let i = 0; i <= pathLength; i += step) {
@@ -581,7 +581,7 @@ function isBBoxInPolygon(bbox, polygon) {
 
 
 
-function createExpandedPolygonFromPolygon(polygon, expansionRadius = 15) {
+function createExpandedPolygonFromPolygon(polygon, expansionRadius = 17) {
     // Create a set of points representing the expanded polygon
     const expandedPoints = [];
 
