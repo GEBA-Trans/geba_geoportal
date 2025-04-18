@@ -1,11 +1,26 @@
 import { disablePostalCodeClicks, enablePostalCodeClicks, addAllPostalCodes, reloadSelectedPostalCodes } from './postalCodeManager.js';
 
 export let isLassoActive = false;
-let currentMode; // Add this line to keep track of the current mode
 
+// Add these variables at the top of the file
+let debugCounters = {
+    lassoPoints: 0,
+    pathsChecked: 0,
+    pathsSelected: 0,
+    timeTaken: 0
+};
+
+
+let currentMode; // Add this line to keep track of the current mode
 let lassoPoints = [];
 let svgElement;
 let addPostalCodeCallback;
+const stepLength = 50; // Adjust this value to control the number of points 
+const selectionCircleRadius = 17;
+
+
+
+
 
 export function setupLassoSelect(svg, addPostalCodeFunc) {
     svgElement = svg;
@@ -108,7 +123,7 @@ function getSVGPoint(x, y) {
 }
 
 function drawLasso() {
-    
+
     let existingLasso = svgElement.querySelector('#lasso');
     if (existingLasso) existingLasso.remove();
 
@@ -197,7 +212,7 @@ function getPathPoints(path, useSimplified = false) {
 
     const pathLength = path.getTotalLength();
 
-    const step = pathLength / 250; // Increase step size to reduce number of points checked
+    const step = pathLength / stepLength;
 
     const svg = path.ownerSVGElement;
     for (let i = 0; i <= pathLength; i += step) {
@@ -227,7 +242,7 @@ export function isPointInPolygon(point, polygon) {
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
         const xi = polygon[i].x, yi = polygon[i].y;
         const xj = polygon[j].x, yj = polygon[j].y;
-        
+
         const intersect = ((yi > point.y) !== (yj > point.y))
             && (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
         if (intersect) inside = !inside;
@@ -254,11 +269,11 @@ function endLasso(e) {
     }
 
     drawLasso();
-    
+
     const endTime = performance.now();
     const timeTaken = endTime - lassoStartTime;
     debugCounters.timeTaken = timeTaken.toFixed(2); // Round to 2 decimal places
-    
+
     selectPathsInLasso();
     updateDebugCounters(); // Update counters one last time
     clearLasso();
@@ -273,24 +288,6 @@ function endLasso(e) {
     // Don't reset the timeTaken here
 
 }
-
-function debugLasso() {
-    // console.log('Lasso Points:', lassoPoints);
-    // console.log('SVG Element:', svgElement);
-    const lasso = svgElement.querySelector('#lasso');
-    // console.log('Lasso Element:', lasso);
-    if (lasso) {
-        // console.log('Lasso Attributes:', lasso.attributes);
-    }
-}
-
-// Add these variables at the top of the file
-let debugCounters = {
-    lassoPoints: 0,
-    pathsChecked: 0,
-    pathsSelected: 0,
-    timeTaken: 0
-};
 
 // Add this function to update the debug counters on screen
 function updateDebugCounters() {
@@ -309,7 +306,7 @@ function updateDebugCounters() {
         debugElement.style.zIndex = '1000';
         debugElement.style.cursor = 'pointer';
         document.body.appendChild(debugElement);
-        
+
         // Add click event listener to hide debug counters
         debugElement.addEventListener('click', hideDebugCounters);
     }
@@ -370,13 +367,13 @@ function mergePolygons(polygon1, polygon2) {
     // Simple merging logic (convex hull)
     const allPoints = [...polygon1, ...polygon2];
 
-    
+
     return computeConvexHull(allPoints);
 }
 
 function computeConvexHull(points) {
 
-    return points; // Placeholder for the actual convex hull algorithm
+    // return points; // Placeholder for the actual convex hull algorithm
 
 
     console.log('Starting computeConvexHull with points:', points);
@@ -475,14 +472,10 @@ export function growSelection() {
 
     // Precompute bounding box for the expanded polygon to quickly exclude paths
     const expandedPolygonBBox = {
-        // minX: Math.min(...expandedPolygon.map(p => p.x)) , // Expand by 5 units`
-        // maxX: Math.max(...expandedPolygon.map(p => p.x)) , // Expand by 5 units
-        // minY: Math.min(...expandedPolygon.map(p => p.y)) , // Expand by 5 units
-        // maxY: Math.max(...expandedPolygon.map(p => p.y))   // Expand by 5 units
-        minX: Math.min(...expandedPolygon.map(p => p.x)) - 15, // Expand by 5 units
-        maxX: Math.max(...expandedPolygon.map(p => p.x)) + 15, // Expand by 5 units
-        minY: Math.min(...expandedPolygon.map(p => p.y)) - 15, // Expand by 5 units
-        maxY: Math.max(...expandedPolygon.map(p => p.y)) + 15  // Expand by 5 units
+        minX: Math.min(...expandedPolygon.map(p => p.x)) - selectionCircleRadius,
+        maxX: Math.max(...expandedPolygon.map(p => p.x)) + selectionCircleRadius,
+        minY: Math.min(...expandedPolygon.map(p => p.y)) - selectionCircleRadius,
+        maxY: Math.max(...expandedPolygon.map(p => p.y)) + selectionCircleRadius
     };
 
     console.time('drawExpandedPolygonBBox');
@@ -535,17 +528,7 @@ export function growSelection() {
     console.timeEnd('growSelection'); // End timer for the entire function
 }
 
-function isBBoxInPolygon(bbox, polygon) {
-    const bboxPoints = [
-        { x: bbox.x, y: bbox.y },
-        { x: bbox.x + bbox.width, y: bbox.y },
-        { x: bbox.x, y: bbox.y + bbox.height },
-        { x: bbox.x + bbox.width, y: bbox.y + bbox.height }
-    ];
-    return bboxPoints.some(point => isPointInPolygon(point, polygon));
-}
-
-function createExpandedPolygonFromPolygon(polygon, expansionRadius = 17) {
+function createExpandedPolygonFromPolygon(polygon, expansionRadius = selectionCircleRadius) {
     // Create a set of points representing the expanded polygon
     const expandedPoints = [];
 
