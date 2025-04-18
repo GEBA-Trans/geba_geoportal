@@ -123,21 +123,32 @@ function drawLasso() {
 }
 
 function selectPathsInLasso() {
+    console.time('selectPathsInLasso'); // Start timer for the entire function
+
     const paths = document.querySelectorAll('#map-container svg path');
     debugCounters.pathsChecked = 0;
     debugCounters.pathsSelected = 0;
     const selectCountries = document.getElementById('select-countries').checked;
-    // console.log('Select Countries:', selectCountries);
+
     paths.forEach(path => {
-        // Skip paths that are not visible or have a hidden parent
         if (path.style.display === 'none') return;
         const parentGroup = path.closest('g');
         if (parentGroup && parentGroup.style.display === 'none') return;
 
         debugCounters.pathsChecked++;
+
+        console.time('getBBox');
         const bbox = path.getBBox();
+        console.timeEnd('getBBox');
+
+        console.time('isBBoxInLasso');
         if (isBBoxInLasso(bbox)) {
+            console.timeEnd('isBBoxInLasso');
+
+            console.time('isPathInLasso');
             const isInLasso = isPathInLasso(path);
+            console.timeEnd('isPathInLasso');
+
             if (isInLasso) {
                 debugCounters.pathsSelected++;
                 const postalCode = path.id || 'Unknown';
@@ -145,16 +156,18 @@ function selectPathsInLasso() {
                 path.classList.add('selected');
                 path.style.filter = '';
 
-                // If "select countries" toggle is on, select the whole country
                 if (selectCountries && parentGroup) {
                     const country = parentGroup.id;
                     addAllPostalCodes(country, currentMode);
-                    // console.log('Select Country:', country);
                 }
             }
+        } else {
+            console.timeEnd('isBBoxInLasso');
         }
-        updateDebugCounters();
     });
+
+    updateDebugCounters(); // Update debug counters
+    console.timeEnd('selectPathsInLasso'); // End timer for the entire function
 }
 
 function isBBoxInLasso(bbox) {
@@ -172,33 +185,27 @@ function isPathInLasso(path) {
     return points.some(point => isPointInPolygon(point, lassoPoints)) || isPointInPolygon(points[0], lassoPoints);
 }
 
-function getPathPoints(path) {
+function getPathPoints(path, useSimplified = false) {
     const points = [];
-    const zoomFactor = getZoomFactor(); // Assume this function returns the current zoom factor
-    const useSimplified = zoomFactor < 5;
     const dAttribute = useSimplified ? 'data-simplified-d' : 'd';
     const pathData = path.getAttribute(dAttribute);
-    
+
     if (!pathData) {
         console.warn(`Path ${path.id} does not have a ${dAttribute} attribute.`);
         return { points, svg: path.ownerSVGElement };
     }
 
     const pathLength = path.getTotalLength();
-    const step = pathLength / 20; // Increase step size to reduce number of points checked
-    // console.log('Path Length:', pathLength);
-    // console.log('Step Size:', step);
+
+    const step = pathLength / 250; // Increase step size to reduce number of points checked
+
     const svg = path.ownerSVGElement;
-    const debugGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    debugGroup.setAttribute("id", "debug-points");
-    svg.appendChild(debugGroup);
     for (let i = 0; i <= pathLength; i += step) {
         const point = path.getPointAtLength(i);
         if (!points.some(p => p.x === point.x && p.y === point.y)) {
             points.push(point);
         }
     }
-    // console.log('Total Points Collected:', points.length);
     return { points, svg };
 }
 
@@ -339,4 +346,266 @@ function addToSelection(path, postalCode) {
     if (!path.classList.contains('selected') || !path.classList.contains(currentMode)) {
         addPostalCodeCallback(path, postalCode, currentMode, true); // Add 'true' to indicate it's from lasso
     }
+}
+
+// Replace getSelectionBoundingBox with getSelectionBoundingPolygon
+function getSelectionBoundingPolygon() {
+    const selectedPaths = document.querySelectorAll('#map-container svg path.selected');
+    if (selectedPaths.length === 0) return null;
+
+    let mergedPolygon = [];
+
+    selectedPaths.forEach(path => {
+        const { points } = getPathPoints(path);
+        mergedPolygon = mergePolygons(mergedPolygon, points);
+    });
+
+    return mergedPolygon;
+}
+
+function mergePolygons(polygon1, polygon2) {
+    if (polygon1.length === 0) return polygon2;
+    if (polygon2.length === 0) return polygon1;
+
+    // Simple merging logic (convex hull)
+    const allPoints = [...polygon1, ...polygon2];
+
+    
+    return computeConvexHull(allPoints);
+}
+
+function computeConvexHull(points) {
+
+    return points; // Placeholder for the actual convex hull algorithm
+
+
+    console.log('Starting computeConvexHull with points:', points);
+
+    // Sort points by x-coordinate (and y-coordinate as a tiebreaker)
+    points.sort((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x);
+    console.log('Points sorted:', points);
+
+    const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+
+    const mergeHulls = (hull1, hull2) => {
+        console.log('Merging hulls:', hull1, hull2);
+        const allPoints = [...hull1, ...hull2];
+        allPoints.sort((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x);
+
+        const lower = [];
+        for (const point of allPoints) {
+            while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], point) <= 0) {
+                lower.pop();
+            }
+            lower.push(point);
+        }
+
+        const upper = [];
+        for (let i = allPoints.length - 1; i >= 0; i--) {
+            const point = allPoints[i];
+            while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], point) <= 0) {
+                upper.pop();
+            }
+            upper.push(point);
+        }
+
+        upper.pop();
+        lower.pop();
+        const merged = lower.concat(upper);
+        console.log('Merged hull:', merged);
+        return merged;
+    };
+
+    let mergedHull = [];
+    for (let i = 0; i < points.length - 1; i++) {
+        const pair = [points[i], points[i + 1]];
+        console.log(`Processing pair: ${i}`, pair);
+        const pairHull = mergeHulls(pair, []); // Compute hull for the pair
+        console.log(`Hull for pair ${i}:`, pairHull);
+        mergedHull = mergeHulls(mergedHull, pairHull); // Merge with the existing hull
+        console.log(`Merged hull after pair ${i}:`, mergedHull);
+    }
+
+    console.log('Final merged hull:', mergedHull);
+    return mergedHull;
+}
+
+function drawPolygon(polygon, color, id) {
+    let existingPolygon = svgElement.querySelector(`#${id}`);
+    if (existingPolygon) existingPolygon.remove();
+
+    const polygonElement = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    polygonElement.setAttribute('id', id);
+    polygonElement.setAttribute('points', polygon.map(p => `${p.x},${p.y}`).join(' '));
+    polygonElement.setAttribute('fill', color);
+    polygonElement.setAttribute('stroke', '#000');
+    polygonElement.setAttribute('stroke-width', '1');
+    polygonElement.setAttribute('opacity', '0.5');
+    svgElement.appendChild(polygonElement);
+}
+
+// Replace calls to getSelectionBoundingBox with getSelectionBoundingPolygon in growSelection
+export function growSelection() {
+    console.time('growSelection'); // Start timer for the entire function
+
+    console.time('getSelectionBoundingPolygon');
+    const mergedPolygon = getSelectionBoundingPolygon(); // Use original polygon for selection
+    console.timeEnd('getSelectionBoundingPolygon');
+
+    if (!mergedPolygon) {
+        console.warn('No selected polygons to expand.');
+        console.timeEnd('growSelection');
+        return;
+    }
+
+    // Draw the original polygon for debugging
+    drawPolygon(mergedPolygon, 'rgba(0, 255, 0, 0.3)', 'original-polygon');
+
+    console.time('createExpandedPolygonFromPolygon');
+    const expandedPolygon = createExpandedPolygonFromPolygon(mergedPolygon);
+    console.timeEnd('createExpandedPolygonFromPolygon');
+
+    // Draw the expanded polygon for debugging
+    drawPolygon(expandedPolygon, 'rgba(255, 0, 0, 0.3)', 'expanded-polygon');
+
+    console.time('processPaths');
+    const paths = document.querySelectorAll('#map-container svg path');
+    let pathsChecked = 0;
+    let pathsSelected = 0;
+
+    // Precompute bounding box for the expanded polygon to quickly exclude paths
+    const expandedPolygonBBox = {
+        // minX: Math.min(...expandedPolygon.map(p => p.x)) , // Expand by 5 units`
+        // maxX: Math.max(...expandedPolygon.map(p => p.x)) , // Expand by 5 units
+        // minY: Math.min(...expandedPolygon.map(p => p.y)) , // Expand by 5 units
+        // maxY: Math.max(...expandedPolygon.map(p => p.y))   // Expand by 5 units
+        minX: Math.min(...expandedPolygon.map(p => p.x)) - 15, // Expand by 5 units
+        maxX: Math.max(...expandedPolygon.map(p => p.x)) + 15, // Expand by 5 units
+        minY: Math.min(...expandedPolygon.map(p => p.y)) - 15, // Expand by 5 units
+        maxY: Math.max(...expandedPolygon.map(p => p.y)) + 15  // Expand by 5 units
+    };
+
+    console.time('drawExpandedPolygonBBox');
+    drawExpandedPolygonBBox(expandedPolygonBBox);
+    console.timeEnd('drawExpandedPolygonBBox');
+
+    paths.forEach(path => {
+        if (!path.classList.contains('selected')) {
+            if (path.style.display === 'none') return;
+            const parentGroup = path.closest('g');
+            if (parentGroup && parentGroup.style.display === 'none') return;
+
+            const bbox = path.getBBox();
+
+            // Quickly exclude paths outside the expanded polygon's bounding box
+            if (
+                bbox.x + bbox.width < expandedPolygonBBox.minX ||
+                bbox.x > expandedPolygonBBox.maxX ||
+                bbox.y + bbox.height < expandedPolygonBBox.minY ||
+                bbox.y > expandedPolygonBBox.maxY
+            ) {
+                return;
+            }
+
+            pathsChecked++;
+            const { points } = getPathPoints(path, true); // Use simplified paths for targets
+
+            // Check if any point of the path is inside the expanded polygon
+            const isInExpandedPolygon = points.some(point => isPointInPolygon(point, expandedPolygon));
+
+            if (isInExpandedPolygon) {
+                pathsSelected++;
+                const postalCode = path.id || 'Unknown';
+                addToSelection(path, postalCode);
+                path.classList.add('selected');
+            }
+        }
+    });
+    console.timeEnd('processPaths');
+
+    // Update debug counters
+    debugCounters.pathsChecked = pathsChecked;
+    debugCounters.pathsSelected = pathsSelected;
+    updateDebugCounters(); // Refresh the lasso-debug div
+
+    console.time('reloadSelectedPostalCodes');
+    reloadSelectedPostalCodes(); // Update the selection display
+    console.timeEnd('reloadSelectedPostalCodes');
+
+    console.timeEnd('growSelection'); // End timer for the entire function
+}
+
+function isBBoxInPolygon(bbox, polygon) {
+    const bboxPoints = [
+        { x: bbox.x, y: bbox.y },
+        { x: bbox.x + bbox.width, y: bbox.y },
+        { x: bbox.x, y: bbox.y + bbox.height },
+        { x: bbox.x + bbox.width, y: bbox.y + bbox.height }
+    ];
+    return bboxPoints.some(point => isPointInPolygon(point, polygon));
+}
+
+function createExpandedPolygonFromPolygon(polygon, expansionRadius = 17) {
+    // Create a set of points representing the expanded polygon
+    const expandedPoints = [];
+
+    polygon.forEach((point, index) => {
+        // Generate points around the current point in a circular pattern
+        for (let angle = 0; angle < 360; angle += 10) { // Adjust step size for smoother circles
+            const radians = (Math.PI / 180) * angle;
+            const x = point.x + expansionRadius * Math.cos(radians);
+            const y = point.y + expansionRadius * Math.sin(radians);
+            expandedPoints.push({ x, y });
+        }
+
+        // Draw the debugging circle for this point
+        drawDebugCircle(point, expansionRadius, `debug-circle-${index}`);
+    });
+
+    // Merge all the circular points into a single convex hull
+    return computeConvexHull(expandedPoints);
+}
+
+function drawDebugCircle(center, radius, id) {
+    // Remove existing circle with the same ID
+    let existingCircle = svgElement.querySelector(`#${id}`);
+    if (existingCircle) existingCircle.remove();
+
+    // Create a new circle element
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('id', id);
+    circle.setAttribute('cx', center.x);
+    circle.setAttribute('cy', center.y);
+    circle.setAttribute('r', radius);
+    circle.setAttribute('fill', 'rgba(0, 0, 255, 0.2)'); // Semi-transparent blue
+    circle.setAttribute('stroke', '#0000ff'); // Blue stroke
+    circle.setAttribute('stroke-width', '1');
+    svgElement.appendChild(circle);
+}
+
+function drawExpandedPolygonBBox(bbox) {
+    let existingBBox = svgElement.querySelector('#expanded-polygon-bbox');
+    if (existingBBox) existingBBox.remove();
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('id', 'expanded-polygon-bbox');
+    rect.setAttribute('x', bbox.minX);
+    rect.setAttribute('y', bbox.minY);
+    rect.setAttribute('width', bbox.maxX - bbox.minX);
+    rect.setAttribute('height', bbox.maxY - bbox.minY);
+    rect.setAttribute('fill', 'none');
+    rect.setAttribute('stroke', 'blue');
+    rect.setAttribute('stroke-width', '2');
+    rect.setAttribute('stroke-dasharray', '5,5'); // Dashed line for better visibility
+    svgElement.appendChild(rect);
+}
+
+// Hook up the grow selection and clear debug polygons buttons
+document.querySelector('.grow-selection-button').addEventListener('click', growSelection);
+document.querySelector('.clear-all-button').addEventListener('click', clearAllDebugPolygons);
+
+function clearAllDebugPolygons() {
+    // Clear debug polygons and circles
+    const debugElements = svgElement.querySelectorAll('[id^="debug-circle-"], #original-polygon, #expanded-polygon');
+    debugElements.forEach(element => element.remove());
 }

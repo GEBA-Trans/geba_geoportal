@@ -6,6 +6,7 @@ import { connectWebSocket } from './websocket.js';
 import { setupLassoSelect } from './lasso.js';
 import { initializeTooltips } from './tooltip.js';
 import { populateRegionDropdown, handleRegionChange } from './regionManager.js';
+import { exportPostalCodeNeighbors } from './exportNeighbors.js';
 
 async function loadRegionOptions() {
     try {
@@ -45,8 +46,8 @@ function initializeApp() {
             return loadSelectedPostalCodes();
         })
         .then(() => {
-            // console.log('Postal codes loaded');
-            // ensureControlsVisibility();
+            // Initialize export functionality
+            document.querySelector('.export-neighbors-button').addEventListener('click', exportPostalCodeNeighbors);
         })
         .catch(error => console.error('Error initializing app:', error));
 }
