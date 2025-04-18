@@ -197,30 +197,7 @@ function getPathPoints(path, useSimplified = false) {
 
     const pathLength = path.getTotalLength();
 
-
-
-
-
-
-
-
-
-
-
     const step = pathLength / 250; // Increase step size to reduce number of points checked
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     const svg = path.ownerSVGElement;
     for (let i = 0; i <= pathLength; i += step) {
@@ -498,11 +475,19 @@ export function growSelection() {
 
     // Precompute bounding box for the expanded polygon to quickly exclude paths
     const expandedPolygonBBox = {
-        minX: Math.min(...expandedPolygon.map(p => p.x)),
-        maxX: Math.max(...expandedPolygon.map(p => p.x)),
-        minY: Math.min(...expandedPolygon.map(p => p.y)),
-        maxY: Math.max(...expandedPolygon.map(p => p.y))
+        // minX: Math.min(...expandedPolygon.map(p => p.x)) , // Expand by 5 units`
+        // maxX: Math.max(...expandedPolygon.map(p => p.x)) , // Expand by 5 units
+        // minY: Math.min(...expandedPolygon.map(p => p.y)) , // Expand by 5 units
+        // maxY: Math.max(...expandedPolygon.map(p => p.y))   // Expand by 5 units
+        minX: Math.min(...expandedPolygon.map(p => p.x)) - 15, // Expand by 5 units
+        maxX: Math.max(...expandedPolygon.map(p => p.x)) + 15, // Expand by 5 units
+        minY: Math.min(...expandedPolygon.map(p => p.y)) - 15, // Expand by 5 units
+        maxY: Math.max(...expandedPolygon.map(p => p.y)) + 15  // Expand by 5 units
     };
+
+    console.time('drawExpandedPolygonBBox');
+    drawExpandedPolygonBBox(expandedPolygonBBox);
+    console.timeEnd('drawExpandedPolygonBBox');
 
     paths.forEach(path => {
         if (!path.classList.contains('selected')) {
@@ -560,49 +545,9 @@ function isBBoxInPolygon(bbox, polygon) {
     return bboxPoints.some(point => isPointInPolygon(point, polygon));
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function createExpandedPolygonFromPolygon(polygon, expansionRadius = 17) {
     // Create a set of points representing the expanded polygon
     const expandedPoints = [];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     polygon.forEach((point, index) => {
         // Generate points around the current point in a circular pattern
@@ -636,6 +581,23 @@ function drawDebugCircle(center, radius, id) {
     circle.setAttribute('stroke', '#0000ff'); // Blue stroke
     circle.setAttribute('stroke-width', '1');
     svgElement.appendChild(circle);
+}
+
+function drawExpandedPolygonBBox(bbox) {
+    let existingBBox = svgElement.querySelector('#expanded-polygon-bbox');
+    if (existingBBox) existingBBox.remove();
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('id', 'expanded-polygon-bbox');
+    rect.setAttribute('x', bbox.minX);
+    rect.setAttribute('y', bbox.minY);
+    rect.setAttribute('width', bbox.maxX - bbox.minX);
+    rect.setAttribute('height', bbox.maxY - bbox.minY);
+    rect.setAttribute('fill', 'none');
+    rect.setAttribute('stroke', 'blue');
+    rect.setAttribute('stroke-width', '2');
+    rect.setAttribute('stroke-dasharray', '5,5'); // Dashed line for better visibility
+    svgElement.appendChild(rect);
 }
 
 // Hook up the grow selection and clear debug polygons buttons
