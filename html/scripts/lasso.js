@@ -16,7 +16,7 @@ let lassoPoints = [];
 let svgElement;
 let addPostalCodeCallback;
 const stepLength = 50; // Adjust this value to control the number of points 
-const selectionCircleRadius = 17;
+const selectionCircleRadius = 25;
 
 
 
@@ -345,7 +345,18 @@ function addToSelection(path, postalCode) {
     }
 }
 
-// Replace getSelectionBoundingBox with getSelectionBoundingPolygon
+
+
+
+
+
+
+
+
+
+
+
+
 function getSelectionBoundingPolygon() {
     const selectedPaths = document.querySelectorAll('#map-container svg path.selected');
     if (selectedPaths.length === 0) return null;
@@ -360,6 +371,20 @@ function getSelectionBoundingPolygon() {
     return mergedPolygon;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function mergePolygons(polygon1, polygon2) {
     if (polygon1.length === 0) return polygon2;
     if (polygon2.length === 0) return polygon1;
@@ -371,12 +396,26 @@ function mergePolygons(polygon1, polygon2) {
     return computeConvexHull(allPoints);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function computeConvexHull(points) {
 
     // return points; // Placeholder for the actual convex hull algorithm
 
 
-    console.log('Starting computeConvexHull with points:', points);
+    // console.log('Starting computeConvexHull with points:', points);
 
     // Sort points by x-coordinate (and y-coordinate as a tiebreaker)
     points.sort((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x);
@@ -456,14 +495,24 @@ export function growSelection() {
     }
 
     // Draw the original polygon for debugging
-    drawPolygon(mergedPolygon, 'rgba(0, 255, 0, 0.3)', 'original-polygon');
+    // drawPolygon(mergedPolygon, 'rgba(7, 49, 216, 0.68)', 'original-polygon');
+
+
+
 
     console.time('createExpandedPolygonFromPolygon');
     const expandedPolygon = createExpandedPolygonFromPolygon(mergedPolygon);
     console.timeEnd('createExpandedPolygonFromPolygon');
 
+
+
     // Draw the expanded polygon for debugging
-    drawPolygon(expandedPolygon, 'rgba(255, 0, 0, 0.3)', 'expanded-polygon');
+    drawPolygon(expandedPolygon, 'rgb(46, 246, 15)', 'expanded-polygon');
+
+
+
+
+
 
     console.time('processPaths');
     const paths = document.querySelectorAll('#map-container svg path');
@@ -528,6 +577,16 @@ export function growSelection() {
     console.timeEnd('growSelection'); // End timer for the entire function
 }
 
+
+
+
+
+
+
+
+
+
+
 function createExpandedPolygonFromPolygon(polygon, expansionRadius = selectionCircleRadius) {
     // Create a set of points representing the expanded polygon
     const expandedPoints = [];
@@ -542,12 +601,23 @@ function createExpandedPolygonFromPolygon(polygon, expansionRadius = selectionCi
         }
 
         // Draw the debugging circle for this point
-        drawDebugCircle(point, expansionRadius, `debug-circle-${index}`);
+        // drawDebugCircle(point, expansionRadius, `debug-circle-${index}`);
     });
 
     // Merge all the circular points into a single convex hull
-    return computeConvexHull(expandedPoints);
+    // return computeConvexHull(expandedPoints);
+    return expandedPoints;
 }
+
+
+
+
+
+
+
+
+
+
 
 function drawDebugCircle(center, radius, id) {
     // Remove existing circle with the same ID
@@ -559,8 +629,8 @@ function drawDebugCircle(center, radius, id) {
     circle.setAttribute('id', id);
     circle.setAttribute('cx', center.x);
     circle.setAttribute('cy', center.y);
-    circle.setAttribute('r', radius);
-    circle.setAttribute('fill', 'rgba(0, 0, 255, 0.2)'); // Semi-transparent blue
+    circle.setAttribute('r', radius/2);
+    circle.setAttribute('fill', 'rgba(234, 255, 0, 0.68)'); // Semi-transparent blue
     circle.setAttribute('stroke', '#0000ff'); // Blue stroke
     circle.setAttribute('stroke-width', '1');
     svgElement.appendChild(circle);
