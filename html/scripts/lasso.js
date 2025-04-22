@@ -16,7 +16,7 @@ let lassoPoints = [];
 let svgElement;
 let addPostalCodeCallback;
 const stepLength = 50; // Adjust this value to control the number of points 
-const selectionCircleRadius = 25;
+const selectionCircleRadius = 17;
 
 
 
@@ -212,10 +212,10 @@ function getPathPoints(path, useSimplified = false) {
 
     const pathLength = path.getTotalLength();
 
-    const step = pathLength / stepLength;
+    // const step = pathLength / stepLength;
 
     const svg = path.ownerSVGElement;
-    for (let i = 0; i <= pathLength; i += step) {
+    for (let i = 0; i <= pathLength; i += stepLength) {
         const point = path.getPointAtLength(i);
         if (!points.some(p => p.x === point.x && p.y === point.y)) {
             points.push(point);
@@ -498,21 +498,14 @@ export function growSelection() {
     // drawPolygon(mergedPolygon, 'rgba(7, 49, 216, 0.68)', 'original-polygon');
 
 
+    console.time('createExpandedPolygonCollection');
+    const expandedPolygonCollection = createExpandedPolygonCollection(mergedPolygon);
+    console.timeEnd('createExpandedPolygonCollection');
 
-
-    console.time('createExpandedPolygonFromPolygon');
-    const expandedPolygon = createExpandedPolygonFromPolygon(mergedPolygon);
-    console.timeEnd('createExpandedPolygonFromPolygon');
-
-
-
-    // Draw the expanded polygon for debugging
-    drawPolygon(expandedPolygon, 'rgb(46, 246, 15)', 'expanded-polygon');
-
-
-
-
-
+    // Draw the expanded polygons for debugging
+    expandedPolygonCollection.forEach((expandedPolygon, index) => {
+        drawPolygon(expandedPolygon, 'rgb(46, 246, 15)', `expanded-polygon-${index}`);
+    });
 
     console.time('processPaths');
     const paths = document.querySelectorAll('#map-container svg path');
@@ -520,15 +513,8 @@ export function growSelection() {
     let pathsSelected = 0;
 
     // Precompute bounding box for the expanded polygon to quickly exclude paths
-    const expandedPolygonBBox = {
-        minX: Math.min(...expandedPolygon.map(p => p.x)) - selectionCircleRadius,
-        maxX: Math.max(...expandedPolygon.map(p => p.x)) + selectionCircleRadius,
-        minY: Math.min(...expandedPolygon.map(p => p.y)) - selectionCircleRadius,
-        maxY: Math.max(...expandedPolygon.map(p => p.y)) + selectionCircleRadius
-    };
-
     console.time('drawExpandedPolygonBBox');
-    drawExpandedPolygonBBox(expandedPolygonBBox);
+    drawExpandedPolygonBBox(expandedPolygonCollection);
     console.timeEnd('drawExpandedPolygonBBox');
 
     paths.forEach(path => {
@@ -539,21 +525,24 @@ export function growSelection() {
 
             const bbox = path.getBBox();
 
+
             // Quickly exclude paths outside the expanded polygon's bounding box
             if (
-                bbox.x + bbox.width < expandedPolygonBBox.minX ||
-                bbox.x > expandedPolygonBBox.maxX ||
-                bbox.y + bbox.height < expandedPolygonBBox.minY ||
-                bbox.y > expandedPolygonBBox.maxY
+                bbox.x + bbox.width < expandedPolygonCollection.minX ||
+                bbox.x > expandedPolygonCollection.maxX ||
+                bbox.y + bbox.height < expandedPolygonCollection.minY ||
+                bbox.y > expandedPolygonCollection.maxY
             ) {
                 return;
             }
 
             pathsChecked++;
-            const { points } = getPathPoints(path, true); // Use simplified paths for targets
+            const { points } = getPathPoints(path, false); // Use simplified paths for targets
 
-            // Check if any point of the path is inside the expanded polygon
-            const isInExpandedPolygon = points.some(point => isPointInPolygon(point, expandedPolygon));
+            // Check if any point of the path is inside any expanded polygon
+            const isInExpandedPolygon = expandedPolygonCollection.some(expandedPolygon =>
+                points.some(point => isPointInPolygon(point, expandedPolygon))
+            );
 
             if (isInExpandedPolygon) {
                 pathsSelected++;
@@ -587,11 +576,13 @@ export function growSelection() {
 
 
 
-function createExpandedPolygonFromPolygon(polygon, expansionRadius = selectionCircleRadius) {
-    // Create a set of points representing the expanded polygon
-    const expandedPoints = [];
+function createExpandedPolygonCollection(polygon, expansionRadius = selectionCircleRadius) {
+    // Create an array of expanded polygons
+    const expandedPolygons = [];
 
     polygon.forEach((point, index) => {
+        const expandedPoints = [];
+
         // Generate points around the current point in a circular pattern
         for (let angle = 0; angle < 360; angle += 10) { // Adjust step size for smoother circles
             const radians = (Math.PI / 180) * angle;
@@ -600,13 +591,10 @@ function createExpandedPolygonFromPolygon(polygon, expansionRadius = selectionCi
             expandedPoints.push({ x, y });
         }
 
-        // Draw the debugging circle for this point
-        // drawDebugCircle(point, expansionRadius, `debug-circle-${index}`);
+        expandedPolygons.push(expandedPoints);
     });
 
-    // Merge all the circular points into a single convex hull
-    // return computeConvexHull(expandedPoints);
-    return expandedPoints;
+    return expandedPolygons;
 }
 
 
@@ -636,16 +624,30 @@ function drawDebugCircle(center, radius, id) {
     svgElement.appendChild(circle);
 }
 
-function drawExpandedPolygonBBox(bbox) {
+function drawExpandedPolygonBBox(expandedPolygonCollection) {
+    // Remove existing bounding box
     let existingBBox = svgElement.querySelector('#expanded-polygon-bbox');
     if (existingBBox) existingBBox.remove();
 
+    // Calculate the bounding box for the entire collection of expanded polygons
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+    expandedPolygonCollection.forEach(expandedPolygon => {
+        expandedPolygon.forEach(point => {
+            if (point.x < minX) minX = point.x;
+            if (point.y < minY) minY = point.y;
+            if (point.x > maxX) maxX = point.x;
+            if (point.y > maxY) maxY = point.y;
+        });
+    });
+
+    // Create a new bounding box rectangle
     const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     rect.setAttribute('id', 'expanded-polygon-bbox');
-    rect.setAttribute('x', bbox.minX);
-    rect.setAttribute('y', bbox.minY);
-    rect.setAttribute('width', bbox.maxX - bbox.minX);
-    rect.setAttribute('height', bbox.maxY - bbox.minY);
+    rect.setAttribute('x', minX);
+    rect.setAttribute('y', minY);
+    rect.setAttribute('width', maxX - minX);
+    rect.setAttribute('height', maxY - minY);
     rect.setAttribute('fill', 'none');
     rect.setAttribute('stroke', 'blue');
     rect.setAttribute('stroke-width', '2');
