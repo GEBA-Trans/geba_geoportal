@@ -1,5 +1,3 @@
--- Declare the JSON input
-DECLARE @json NVARCHAR(MAX) = '
 [{"id":"CH-09","neighbours":["CH-08","CH-07","AT-68","AT-67","DE-88"]}
 ,{"id":"CH-08","neighbours":["CH-09","CH-07","CH-06","CH-05","DE-88","DE-79","DE-78"]}
 ,{"id":"CH-07","neighbours":["CH-09","CH-08","CH-06","AT-65","IT-39","IT-23","DE-79","DE-78"]}
@@ -1128,30 +1126,3 @@ DECLARE @json NVARCHAR(MAX) = '
 ,{"id":"AL-02","neighbours":["AL-09","AL-04","AL-03","AL-01"]}
 ,{"id":"AL-01","neighbours":["AL-08","AL-04","AL-03","AL-02"]}
 ]
-';
-
--- Create temp table
-DROP TABLE IF EXISTS #TMPREG;
-CREATE TABLE #TMPREG (
-    PathID NVARCHAR(50),
-    Neighbour NVARCHAR(50)
-);
-
--- Parse JSON and insert
-INSERT INTO #TMPREG (PathID, Neighbour)
-SELECT 
-    main.id AS PathID,
-    TRIM(neigh.value) AS Neighbour
-FROM OPENJSON(@json)
-WITH (
-    id NVARCHAR(50),
-    neighbours NVARCHAR(MAX) AS JSON
-) AS main
-CROSS APPLY OPENJSON(main.neighbours) AS neigh;
-
--- Truncate target table and insert
-TRUNCATE TABLE dbo.svg_ctry_zip_EU_NB;
-
-INSERT INTO dbo.svg_ctry_zip_EU_NB (Path_ID, Neighbour)
-	SELECT PathID, Neighbour FROM #TMPREG;
-
