@@ -15,7 +15,7 @@ let currentMode; // Add this line to keep track of the current mode
 let lassoPoints = [];
 let svgElement;
 let addPostalCodeCallback;
-const stepLength = 50; // Adjust this value to control the number of points 
+const stepLength = 35; // Adjust this value to control the number of points 
 const selectionCircleRadius = 17;
 
 
