@@ -11,7 +11,16 @@ export function exportPostalCodeNeighbors() {
 
     let processedCount = 0; // Counter to limit processing
 
+    // Skip all paths until we reach "IT-53"
+    let skip = false;
     for (const path of visiblePaths) {
+        if (skip) {
+            if (path.id === 'IT-53') {
+                skip = false;
+            } else {
+                continue;
+            }
+        }
         if (!path.id) {
             console.warn('Skipping path without ID:', path);
             continue;
