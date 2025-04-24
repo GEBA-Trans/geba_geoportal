@@ -481,11 +481,30 @@ export function growSelection() {
         drawPolygon(expandedPolygon, 'rgb(211, 15, 246)', `expanded-polygon-${index}`);
     });
 
+    // Compute the overall bbox for all expanded polygons
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    expandedPolygonCollection.forEach(poly => {
+        poly.forEach(p => {
+            if (p.x < minX) minX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y > maxY) maxY = p.y;
+        });
+    });
+    const selectionBBox = {
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY
+    };
+    // Draw the selection bbox in blue
+    drawBBoxRect(selectionBBox, 'blue', 'debug-selection-bbox');
+
     const paths = document.querySelectorAll('#map-container svg path');
     let pathsChecked = 0;
     let pathsSelected = 0;
 
-    paths.forEach(path => {
+    paths.forEach((path, idx) => {
         if (!path.classList.contains('selected')) {
             if (path.style.display === 'none') return;
             const parentGroup = path.closest('g');
@@ -493,14 +512,23 @@ export function growSelection() {
 
             const bbox = path.getBBox();
 
+            // Check bbox overlap
+            const overlaps = !(
+                bbox.x + bbox.width < selectionBBox.x ||
+                bbox.x > selectionBBox.x + selectionBBox.width ||
+                bbox.y + bbox.height < selectionBBox.y ||
+                bbox.y > selectionBBox.y + selectionBBox.height
+            );
+
+            // Draw the path's bbox: green if overlapping, red if not
+            drawBBoxRect(
+                { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height },
+                overlaps ? 'green' : 'red',
+                `debug-path-bbox-${idx}`
+            );
 
             // Quickly exclude paths outside the expanded polygon's bounding box
-            if (
-                bbox.x + bbox.width < expandedPolygonCollection.minX ||
-                bbox.x > expandedPolygonCollection.maxX ||
-                bbox.y + bbox.height < expandedPolygonCollection.minY ||
-                bbox.y > expandedPolygonCollection.maxY
-            ) {
+            if (!overlaps) {
                 return;
             }
 
@@ -511,8 +539,8 @@ export function growSelection() {
             const targetExpandedPolygons = createExpandedPolygonCollection(points);
 
             // Draw the expanded polygons for debugging (optional)
-            targetExpandedPolygons.forEach((expandedPolygon, idx) => {
-                drawPolygon(expandedPolygon, 'rgba(255, 162, 0, 0.5)', `path-${path.id}-expanded-${idx}`);
+            targetExpandedPolygons.forEach((expandedPolygon, idx2) => {
+                drawPolygon(expandedPolygon, 'rgba(255, 162, 0, 0.5)', `path-${path.id}-expanded-${idx2}`);
             });
 
             // Check if any expanded polygon of the path intersects with any expanded selection polygon
@@ -541,16 +569,6 @@ export function growSelection() {
 
 }
 
-
-
-
-
-
-
-
-
-
-
 function createExpandedPolygonCollection(polygon, expansionRadius = selectionCircleRadius) {
     // Create an array of expanded polygons
     const expandedPolygons = [];
@@ -571,16 +589,6 @@ function createExpandedPolygonCollection(polygon, expansionRadius = selectionCir
 
     return expandedPolygons;
 }
-
-
-
-
-
-
-
-
-
-
 
 function drawDebugCircle(center, radius, id) {
     // Remove existing circle with the same ID
@@ -627,6 +635,25 @@ function drawExpandedPolygonBBox(expandedPolygonCollection) {
     rect.setAttribute('stroke', 'blue');
     rect.setAttribute('stroke-width', '2');
     rect.setAttribute('stroke-dasharray', '5,5'); // Dashed line for better visibility
+    svgElement.appendChild(rect);
+}
+
+// Helper to draw a bounding box rectangle for debugging
+function drawBBoxRect(bbox, color, id) {
+    // Remove existing rect with same id
+    let existingRect = svgElement.querySelector(`#${id}`);
+    if (existingRect) existingRect.remove();
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('id', id);
+    rect.setAttribute('x', bbox.x);
+    rect.setAttribute('y', bbox.y);
+    rect.setAttribute('width', bbox.width);
+    rect.setAttribute('height', bbox.height);
+    rect.setAttribute('fill', 'none');
+    rect.setAttribute('stroke', color);
+    rect.setAttribute('stroke-width', '2');
+    rect.setAttribute('stroke-dasharray', '4,2');
     svgElement.appendChild(rect);
 }
 
