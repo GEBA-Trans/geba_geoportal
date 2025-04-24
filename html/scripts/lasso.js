@@ -138,7 +138,6 @@ function drawLasso() {
 }
 
 function selectPathsInLasso() {
-    console.time('selectPathsInLasso'); // Start timer for the entire function
 
     const paths = document.querySelectorAll('#map-container svg path');
     debugCounters.pathsChecked = 0;
@@ -152,17 +151,11 @@ function selectPathsInLasso() {
 
         debugCounters.pathsChecked++;
 
-        console.time('getBBox');
         const bbox = path.getBBox();
-        console.timeEnd('getBBox');
 
-        console.time('isBBoxInLasso');
         if (isBBoxInLasso(bbox)) {
-            console.timeEnd('isBBoxInLasso');
 
-            console.time('isPathInLasso');
             const isInLasso = isPathInLasso(path);
-            console.timeEnd('isPathInLasso');
 
             if (isInLasso) {
                 debugCounters.pathsSelected++;
@@ -177,12 +170,10 @@ function selectPathsInLasso() {
                 }
             }
         } else {
-            console.timeEnd('isBBoxInLasso');
         }
     });
 
     updateDebugCounters(); // Update debug counters
-    console.timeEnd('selectPathsInLasso'); // End timer for the entire function
 }
 
 function isBBoxInLasso(bbox) {
@@ -211,8 +202,6 @@ function getPathPoints(path, useSimplified = false) {
     }
 
     const pathLength = path.getTotalLength();
-
-    // const step = pathLength / stepLength;
 
     const svg = path.ownerSVGElement;
     for (let i = 0; i <= pathLength; i += stepLength) {
@@ -480,42 +469,21 @@ function drawPolygon(polygon, color, id) {
     svgElement.appendChild(polygonElement);
 }
 
-// Replace calls to getSelectionBoundingBox with getSelectionBoundingPolygon in growSelection
 export function growSelection() {
-    console.time('growSelection'); // Start timer for the entire function
-
-    console.time('getSelectionBoundingPolygon');
     const mergedPolygon = getSelectionBoundingPolygon(); // Use original polygon for selection
-    console.timeEnd('getSelectionBoundingPolygon');
-
     if (!mergedPolygon) {
         console.warn('No selected polygons to expand.');
-        console.timeEnd('growSelection');
         return;
     }
 
-    // Draw the original polygon for debugging
-    // drawPolygon(mergedPolygon, 'rgba(7, 49, 216, 0.68)', 'original-polygon');
-
-
-    console.time('createExpandedPolygonCollection');
     const expandedPolygonCollection = createExpandedPolygonCollection(mergedPolygon);
-    console.timeEnd('createExpandedPolygonCollection');
-
-    // Draw the expanded polygons for debugging
     expandedPolygonCollection.forEach((expandedPolygon, index) => {
-        drawPolygon(expandedPolygon, 'rgb(46, 246, 15)', `expanded-polygon-${index}`);
+        drawPolygon(expandedPolygon, 'rgb(211, 15, 246)', `expanded-polygon-${index}`);
     });
 
-    console.time('processPaths');
     const paths = document.querySelectorAll('#map-container svg path');
     let pathsChecked = 0;
     let pathsSelected = 0;
-
-    // Precompute bounding box for the expanded polygon to quickly exclude paths
-    console.time('drawExpandedPolygonBBox');
-    drawExpandedPolygonBBox(expandedPolygonCollection);
-    console.timeEnd('drawExpandedPolygonBBox');
 
     paths.forEach(path => {
         if (!path.classList.contains('selected')) {
@@ -539,9 +507,19 @@ export function growSelection() {
             pathsChecked++;
             const { points } = getPathPoints(path, false); // Use simplified paths for targets
 
-            // Check if any point of the path is inside any expanded polygon
+            // Expand the target path's polygon
+            const targetExpandedPolygons = createExpandedPolygonCollection(points);
+
+            // Draw the expanded polygons for debugging (optional)
+            targetExpandedPolygons.forEach((expandedPolygon, idx) => {
+                drawPolygon(expandedPolygon, 'rgba(255, 162, 0, 0.5)', `path-${path.id}-expanded-${idx}`);
+            });
+
+            // Check if any expanded polygon of the path intersects with any expanded selection polygon
             const isInExpandedPolygon = expandedPolygonCollection.some(expandedPolygon =>
-                points.some(point => isPointInPolygon(point, expandedPolygon))
+                targetExpandedPolygons.some(targetPolygon =>
+                    targetPolygon.some(point => isPointInPolygon(point, expandedPolygon))
+                )
             );
 
             if (isInExpandedPolygon) {
@@ -550,20 +528,17 @@ export function growSelection() {
                 addToSelection(path, postalCode);
                 path.classList.add('selected');
             }
+            pathsChecked++;
         }
     });
-    console.timeEnd('processPaths');
 
     // Update debug counters
     debugCounters.pathsChecked = pathsChecked;
     debugCounters.pathsSelected = pathsSelected;
     updateDebugCounters(); // Refresh the lasso-debug div
 
-    console.time('reloadSelectedPostalCodes');
     reloadSelectedPostalCodes(); // Update the selection display
-    console.timeEnd('reloadSelectedPostalCodes');
 
-    console.timeEnd('growSelection'); // End timer for the entire function
 }
 
 
@@ -584,15 +559,15 @@ function createExpandedPolygonCollection(polygon, expansionRadius = selectionCir
         const expandedPoints = [];
 
         // Generate points around the current point in a circular pattern
-        for (let angle = 0; angle < 360; angle += 10) { // Adjust step size for smoother circles
+        for (let angle = 0; angle < 360; angle += 45) { // Adjust step size for smoother circles
             const radians = (Math.PI / 180) * angle;
             const x = point.x + expansionRadius * Math.cos(radians);
             const y = point.y + expansionRadius * Math.sin(radians);
             expandedPoints.push({ x, y });
         }
-
         expandedPolygons.push(expandedPoints);
     });
+
 
     return expandedPolygons;
 }
