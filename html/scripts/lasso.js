@@ -25,8 +25,8 @@ const selectionSize = 3;
 export function setupLassoSelect(svg, addPostalCodeFunc) {
     svgElement = svg;
     addPostalCodeCallback = addPostalCodeFunc;
-    const lassoButton = document.querySelector('.lasso-button');
-    const lassoIndicatorButton = document.querySelector('.lasso-indicator-button');
+    const lassoButton = document.getElementById('lasso-button');
+    const lassoIndicatorButton = document.getElementById('lasso-active-indicator');
     lassoButton.addEventListener('click', toggleLasso);
     lassoIndicatorButton.addEventListener('click', toggleLasso);
 
@@ -62,7 +62,7 @@ function toggleLasso() {
         mapContainer.style.backgroundColor = ''; // Reset background color
     }
 
-    const lassoButton = document.querySelector('.lasso-button');
+    const lassoButton = document.getElementById('lasso-button');
     const lassoStatus = document.getElementById('lasso-status');
     lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times" style="color: red;"></i>' : '<i class="fas fa-highlighter"></i>';
     lassoButton.title = isLassoActive ? 'Cancel Lasso' : 'Lasso Select';
@@ -643,8 +643,8 @@ function drawBBoxRect(bbox, color, id) {
 }
 
 // Hook up the grow selection and clear debug polygons buttons
-document.querySelector('.grow-selection-button').addEventListener('click', growSelection);
-document.querySelector('.clear-all-button').addEventListener('click', clearAllDebugPolygons);
+document.getElementById('grow-selection-button').addEventListener('click', growSelection);
+document.getElementById('clear-expansion-button').addEventListener('click', clearAllDebugPolygons);
 
 function clearAllDebugPolygons() {
     // Clear debug polygons and circles

@@ -77,7 +77,7 @@ function findNeighbors(targetPath, paths) {
 
 // Ensure the export button is hooked up correctly
 document.addEventListener('DOMContentLoaded', () => {
-    const exportButton = document.querySelector('.export-neighbors-button');
+    const exportButton = document.getElementById('export-neighbors-button');
     if (exportButton) {
         console.log('Export button found. Adding click event listener.');
         exportButton.addEventListener('click', exportPostalCodeNeighbors);

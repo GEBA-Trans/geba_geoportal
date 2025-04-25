@@ -46,8 +46,9 @@ export function initializeTooltips() {
         { element: document.getElementById('zoom-factor'), tooltipText: 'Current zoom', placement: 'top' },
         { element: document.getElementById('reset-zoom'), tooltipText: 'Reset zoom to 1', placement: 'top' },
         { element: document.getElementById('zoom-visible'), tooltipText: 'Zoom to visible area', placement: 'top' },
-        { element: document.getElementById('lasso-group'), tooltipText: 'Toggle lasso tool', placement: 'top' },
-        { element: document.querySelector('.grow-selection-button'), tooltipText: 'Expand selection area', placement: 'top' }
+        { element: document.getElementById('lasso-button'), tooltipText: 'Toggle lasso tool', placement: 'top' },
+        { element: document.getElementById('grow-selection-button'), tooltipText: 'Expand selection area', placement: 'top' },
+        { element: document.getElementById('clear-selected-button'), tooltipText: 'Clear selection area', placement: 'top' }
     ];
 
     tooltipElements.forEach(({ element, tooltipText, placement }) => {

@@ -32,6 +32,21 @@ h1 {
 .grow-selection-button:hover {
     color: #0056b3;
 }
+
+#clear-expansion-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 1em;
+    transition: color 0.2s ease;
+}
+
+#clear-expansion-button:hover {
+    color: #ff0000 !important;
+}
+
+
 #zoom-controls {
     display: flex;
     background-color: white;
@@ -268,7 +283,7 @@ path.selected.delivery {
     background-color: #ecf0f1;
 }
 
-.clear-all-button {
+.clear-selected-button {
     background-color: #dc3545;
     color: white;
     border: none;
@@ -280,12 +295,12 @@ path.selected.delivery {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.clear-all-button:hover {
+.clear-selected-button:hover {
     background-color: #c82333;
     color: #fff;
 }
 
-.clear-all-button:active {
+.clear-selected-button:active {
     background-color: #a71d2a;
 }
 

@@ -47,7 +47,7 @@ function initializeApp() {
         })
         .then(() => {
             // Initialize export functionality
-            document.querySelector('.export-neighbors-button').addEventListener('click', exportPostalCodeNeighbors);
+            document.getElementById('export-neighbors-button').addEventListener('click', exportPostalCodeNeighbors);
         })
         .catch(error => console.error('Error initializing app:', error));
 }
