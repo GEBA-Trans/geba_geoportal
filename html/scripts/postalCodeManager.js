@@ -96,7 +96,7 @@ function updateList(listId, postalCodes) {
 
     if (postalCodes.size > 0) {
         const clearAllButton = document.createElement('button');
-        clearAllButton.className = 'clear-all-button';
+        clearAllButton.className = 'clear-selected-button';
         clearAllButton.innerHTML = '<i class="fas fa-trash-alt"></i> Clear All';
         clearAllButton.addEventListener('click', () => clearAllPostalCodes(postalCodes));
         list.appendChild(clearAllButton);

@@ -72,6 +72,12 @@
         "wholemsg": "false"
     },
     {
+        "id": "a1a7f6782877d9dc",
+        "type": "websocket-listener",
+        "path": "/ws/points",
+        "wholemsg": "false"
+    },
+    {
         "id": "e2ce18803eb9b981",
         "type": "inject",
         "z": "58c7f7e83196ef44",
@@ -225,10 +231,10 @@
         "type": "websocket in",
         "z": "58c7f7e83196ef44",
         "g": "24768e2fe67b6e66",
-        "name": "Map",
+        "name": "",
         "server": "aae82fba46156eb6",
         "client": "",
-        "x": 450,
+        "x": 470,
         "y": 240,
         "wires": [
             [
@@ -344,6 +350,81 @@
         "x": 860,
         "y": 280,
         "wires": []
+    },
+    {
+        "id": "f7c237741ebc9209",
+        "type": "websocket in",
+        "z": "58c7f7e83196ef44",
+        "name": "",
+        "server": "a1a7f6782877d9dc",
+        "client": "",
+        "x": 440,
+        "y": 680,
+        "wires": [
+            [
+                "8c0635a23c5f755b",
+                "8ce7f30a27a52502"
+            ]
+        ]
+    },
+    {
+        "id": "8c0635a23c5f755b",
+        "type": "debug",
+        "z": "58c7f7e83196ef44",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "8ce7f30a27a52502",
+        "type": "file",
+        "z": "58c7f7e83196ef44",
+        "name": "",
+        "filename": "/data/neighbors.csv",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 880,
+        "y": 780,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "61ec127e7e853657",
+        "type": "inject",
+        "z": "58c7f7e83196ef44",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"id\":\"CH-08\",\"neighbors\":[\"CH-09\",\"CH-07\",\"CH-06\",\"CH-05\",\"DE-88\",\"DE-79\",\"DE-78\"]}",
+        "payloadType": "json",
+        "x": 390,
+        "y": 880,
+        "wires": [
+            [
+                "8ce7f30a27a52502"
+            ]
+        ]
     },
     {
         "id": "3ed886625239a5d0",

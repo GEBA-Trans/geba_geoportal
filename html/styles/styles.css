@@ -19,6 +19,33 @@ h1 {
     font-weight: 700;
 }
 
+.grow-selection-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 1em;
+    color: #007bff;
+    transition: color 0.2s ease;
+}
+
+.grow-selection-button:hover {
+    color: #0056b3;
+}
+
+#clear-expansion-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 1em;
+    transition: color 0.2s ease;
+}
+
+#clear-expansion-button:hover {
+    color: #ff0000 !important;
+}
+
 
 #zoom-controls {
     display: flex;
@@ -256,7 +283,7 @@ path.selected.delivery {
     background-color: #ecf0f1;
 }
 
-.clear-all-button {
+.clear-selected-button {
     background-color: #dc3545;
     color: white;
     border: none;
@@ -265,10 +292,16 @@ path.selected.delivery {
     cursor: pointer;
     font-size: 0.9em;
     margin-bottom: 10px;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.clear-all-button:hover {
+.clear-selected-button:hover {
     background-color: #c82333;
+    color: #fff;
+}
+
+.clear-selected-button:active {
+    background-color: #a71d2a;
 }
 
 #lasso {
@@ -712,4 +745,19 @@ path.postal-code {
     cursor: pointer;
     padding: 0;
     margin: 0;
+}
+
+.export-neighbors-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    margin: 10px;
+}
+
+.export-neighbors-button:hover {
+    background-color: #0056b3;
 }
