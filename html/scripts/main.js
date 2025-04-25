@@ -6,7 +6,7 @@ import { connectWebSocket } from './websocket.js';
 import { setupLassoSelect } from './lasso.js';
 import { initializeTooltips } from './tooltip.js';
 import { populateRegionDropdown, handleRegionChange } from './regionManager.js';
-import { exportPostalCodeNeighbors } from './exportNeighbors.js';
+import { exportPostalCodeneighbours } from './exportNeighbours.js';
 
 async function loadRegionOptions() {
     try {
@@ -47,7 +47,7 @@ function initializeApp() {
         })
         .then(() => {
             // Initialize export functionality
-            document.getElementById('export-neighbors-button').addEventListener('click', exportPostalCodeNeighbors);
+            document.getElementById('export-neighbours-button').addEventListener('click', exportPostalCodeneighbours);
         })
         .catch(error => console.error('Error initializing app:', error));
 }

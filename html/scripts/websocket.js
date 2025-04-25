@@ -2,7 +2,7 @@ import { updatePostalCodeCount, updatePostalCodeLists, getSelectedPostalCodes } 
 
 let socket;
 let lookupSocket;
-let neighborSocket;
+let neighboursocket;
 let isWebSocketConnected = false;
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 3;
@@ -70,16 +70,16 @@ function connectWebSocket() {
 
     // connect to neighbor websocket
 
-    neighborSocket = new WebSocket(wsUrl + `/ws/points`);
+    neighboursocket = new WebSocket(wsUrl + `/ws/points`);
     console.log('Attempting to connect to Neighbor WebSocket at:', wsUrl + `/ws/points`);
 
-    neighborSocket.onopen = function(event) {
+    neighboursocket.onopen = function(event) {
         console.log('Neighbor WebSocket connection established');
         // Process any pending messages
         while (pendingNeighborMessages.length > 0) {
             const message = pendingNeighborMessages.shift();
             try {
-                neighborSocket.send(message);
+                neighboursocket.send(message);
                 console.log('Sent queued message to Neighbor WebSocket:', message);
             } catch (error) {
                 console.error('Error sending queued message to Neighbor WebSocket:', error);
@@ -87,19 +87,19 @@ function connectWebSocket() {
         }
     };
 
-    neighborSocket.onerror = function(error) {
+    neighboursocket.onerror = function(error) {
         console.error('Neighbor WebSocket error:', error);
     };
 
-    neighborSocket.onclose = function(event) {
+    neighboursocket.onclose = function(event) {
         console.log('Neighbor WebSocket connection closed. Code:', event.code, 'Reason:', event.reason);
     }
 }
 
-function sendToNeighborSocket(payload) {
+function sendToneighboursocket(payload) {
     const message = JSON.stringify(payload);
-    if (neighborSocket.readyState === WebSocket.OPEN) {
-        neighborSocket.send(message);
+    if (neighboursocket.readyState === WebSocket.OPEN) {
+        neighboursocket.send(message);
     } else {
         console.error('Neighbor WebSocket is not open, queuing message');
         pendingNeighborMessages.push(message); // Queue the message
@@ -216,11 +216,11 @@ function showLookupResults() {
     document.getElementById('lookup-results').style.display = 'block';
 }
 
-function updateNeighborTable(neighbors) {
+function updateNeighborTable(neighbours) {
     const tableBody = document.getElementById('neighbor-table').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = ''; // Clear existing rows
 
-    neighbors.forEach(neighbor => {
+    neighbours.forEach(neighbor => {
         const row = tableBody.insertRow();
         row.insertCell(0).textContent = neighbor.id || 'N/A';
         row.insertCell(1).textContent = neighbor.distance || 'N/A';
@@ -228,4 +228,4 @@ function updateNeighborTable(neighbors) {
     });
 }
 
-export { connectWebSocket, sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts, lookupCompanies, sendToNeighborSocket };
+export { connectWebSocket, sendToWebSocket, isWebSocketConnected, pendingPostalCodes, requestPendingCounts, lookupCompanies, sendToneighboursocket };
