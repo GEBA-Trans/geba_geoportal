@@ -464,6 +464,9 @@ function computeConvexHull(points) {
 }
 
 function drawPolygon(polygon, color, id) {
+
+    if (!(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
+
     let existingPolygon = svgElement.querySelector(`#${id}`);
     if (existingPolygon) existingPolygon.remove();
 
@@ -610,6 +613,10 @@ function createExpandedPolygonCollection(polygon, expansionDiameter = selectionS
 
 // Helper to draw a bounding box rectangle for debugging
 function drawBBoxRect(bbox, color, id) {
+
+    // Only draw when running on localhost
+    if (!(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
+
     // Remove existing rect with same id
     let existingRect = svgElement.querySelector(`#${id}`);
     if (existingRect) existingRect.remove();
