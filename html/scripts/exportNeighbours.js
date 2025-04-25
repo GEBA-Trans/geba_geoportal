@@ -1,13 +1,13 @@
 import { growSelection } from './lasso.js';
-import { sendToNeighborSocket } from './websocket.js'; // Import the function to send data to the neighbor WebSocket
+import { sendToneighboursocket } from './websocket.js'; // Import the function to send data to the neighbor WebSocket
 
-export function exportPostalCodeNeighbors() {
-    console.log('Starting exportPostalCodeNeighbors...');
+export function exportPostalCodeneighbours() {
+    console.log('Starting exportPostalCodeneighbours...');
     const paths = document.querySelectorAll('#map-container svg path');
     console.log(`Found ${paths.length} total paths.`);
     const visiblePaths = Array.from(paths).filter(path => path.style.display !== 'none');
     console.log(`Filtered to ${visiblePaths.length} visible paths.`);
-    const neighborsMap = new Map();
+    const neighboursMap = new Map();
 
     let processedCount = 0; // Counter to limit processing
 
@@ -27,12 +27,12 @@ export function exportPostalCodeNeighbors() {
         }
         console.log(`Processing Path_ID: ${path.id}`);
         // highlightPostalCode(path); // Visual feedback for the current Path_ID
-        const neighbors = findNeighbors(path, visiblePaths);
-        console.log(`Found ${neighbors.length} neighbors for Path_ID: ${path.id}`);
+        const neighbours = findneighbours(path, visiblePaths);
+        console.log(`Found ${neighbours.length} neighbours for Path_ID: ${path.id}`);
 
-        // Post path.id and neighbors to the neighbor WebSocket
-        const payload = { id: path.id, neighbors };
-        sendToNeighborSocket(payload);
+        // Post path.id and neighbours to the neighbor WebSocket
+        const payload = { id: path.id, neighbours };
+        sendToneighboursocket(payload);
 
         // processedCount++;
         // if (processedCount >= 50) {
@@ -41,14 +41,14 @@ export function exportPostalCodeNeighbors() {
         // }
     }
 
-    // const csvContent = generateCSV(neighborsMap);
+    // const csvContent = generateCSV(neighboursMap);
     // console.log('Generated CSV content:', csvContent);
-    // downloadCSV(csvContent, 'postal_code_neighbors.csv');
+    // downloadCSV(csvContent, 'postal_code_neighbours.csv');
     // console.log('CSV download triggered.');
 }
 
-function findNeighbors(targetPath, paths) {
-    console.log(`Finding neighbors for Path_ID: ${targetPath.id}`);
+function findneighbours(targetPath, paths) {
+    console.log(`Finding neighbours for Path_ID: ${targetPath.id}`);
 
     // Temporarily mark the target path as selected
     targetPath.classList.add('selected');
@@ -61,8 +61,8 @@ function findNeighbors(targetPath, paths) {
         Array.from(document.querySelectorAll('#map-container svg path.selected'))
     );
 
-    // Collect neighbors by filtering the Set
-    const neighbors = Array.from(selectedPaths)
+    // Collect neighbours by filtering the Set
+    const neighbours = Array.from(selectedPaths)
         .filter(path => path !== targetPath && path.id) // Exclude the target path and ensure the path has an ID
         .map(path => path.id);
 
@@ -70,17 +70,17 @@ function findNeighbors(targetPath, paths) {
     targetPath.classList.remove('selected');
     selectedPaths.forEach(path => path.classList.remove('selected'));
 
-    console.log(`Neighbors found for Path_ID ${targetPath.id}:`, neighbors);
-    return neighbors;
+    console.log(`neighbours found for Path_ID ${targetPath.id}:`, neighbours);
+    return neighbours;
 }
 
 
 // Ensure the export button is hooked up correctly
 document.addEventListener('DOMContentLoaded', () => {
-    const exportButton = document.getElementById('export-neighbors-button');
+    const exportButton = document.getElementById('export-neighbours-button');
     if (exportButton) {
         console.log('Export button found. Adding click event listener.');
-        exportButton.addEventListener('click', exportPostalCodeNeighbors);
+        exportButton.addEventListener('click', exportPostalCodeneighbours);
     } else {
         console.error('Export button not found.');
     }
