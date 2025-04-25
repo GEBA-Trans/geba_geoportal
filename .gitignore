@@ -27,4 +27,5 @@ data/*
 !data/flows.json
 
 
-
+# Ignore all zip files
+*.zip
