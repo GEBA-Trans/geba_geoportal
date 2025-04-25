@@ -499,7 +499,7 @@ export function growSelection() {
             if (p.y > maxY) maxY = p.y;
         });
     });
-
+    // Expand selectionBBox by selectionSize
     const selectionBBox = {
         x: minX ,
         y: minY ,
@@ -607,53 +607,6 @@ function createExpandedPolygonCollection(polygon, expansionDiameter = selectionS
     return expandedPolygons;
 }
 
-function drawDebugCircle(center, radius, id) {
-    // Remove existing circle with the same ID
-    let existingCircle = svgElement.querySelector(`#${id}`);
-    if (existingCircle) existingCircle.remove();
-
-    // Create a new circle element
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('id', id);
-    circle.setAttribute('cx', center.x);
-    circle.setAttribute('cy', center.y);
-    circle.setAttribute('r', radius/2);
-    circle.setAttribute('fill', 'rgba(234, 255, 0, 0.68)'); // Semi-transparent blue
-    circle.setAttribute('stroke', '#0000ff'); // Blue stroke
-    circle.setAttribute('stroke-width', '1');
-    svgElement.appendChild(circle);
-}
-
-function drawExpandedPolygonBBox(expandedPolygonCollection) {
-    // Remove existing bounding box
-    let existingBBox = svgElement.querySelector('#expanded-polygon-bbox');
-    if (existingBBox) existingBBox.remove();
-
-    // Calculate the bounding box for the entire collection of expanded polygons
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-
-    expandedPolygonCollection.forEach(expandedPolygon => {
-        expandedPolygon.forEach(point => {
-            if (point.x < minX) minX = point.x;
-            if (point.y < minY) minY = point.y;
-            if (point.x > maxX) maxX = point.x;
-            if (point.y > maxY) maxY = point.y;
-        });
-    });
-
-    // Create a new bounding box rectangle
-    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    rect.setAttribute('id', 'expanded-polygon-bbox');
-    rect.setAttribute('x', minX);
-    rect.setAttribute('y', minY);
-    rect.setAttribute('width', maxX - minX);
-    rect.setAttribute('height', maxY - minY);
-    rect.setAttribute('fill', 'none');
-    rect.setAttribute('stroke', 'blue');
-    rect.setAttribute('stroke-width', '2');
-    rect.setAttribute('stroke-dasharray', '5,5'); // Dashed line for better visibility
-    svgElement.appendChild(rect);
-}
 
 // Helper to draw a bounding box rectangle for debugging
 function drawBBoxRect(bbox, color, id) {
@@ -663,10 +616,10 @@ function drawBBoxRect(bbox, color, id) {
 
     // Expand bbox by selectionSize for debug drawing as well
     const expandedBBox = {
-        x: bbox.x - selectionSize,
-        y: bbox.y - selectionSize,
-        width: bbox.width + 2 * selectionSize,
-        height: bbox.height + 2 * selectionSize
+        x: bbox.x,
+        y: bbox.y,
+        width: bbox.width,
+        height: bbox.height
     };
 
     const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
