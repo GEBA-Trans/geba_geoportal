@@ -15,8 +15,8 @@ let currentMode; // Add this line to keep track of the current mode
 let lassoPoints = [];
 let svgElement;
 let addPostalCodeCallback;
-const stepLength = 5; // Adjust this value to control the number of points 
-const selectionCircleRadius = 5;
+const stepLength = 6 // Adjust this value to control the number of points 
+const selectionSize = 3;
 
 
 
@@ -151,9 +151,16 @@ function selectPathsInLasso() {
 
         debugCounters.pathsChecked++;
 
-        const bbox = path.getBBox();
+        // Expand bbox by selectionSize
+        let bbox = path.getBBox();
+        bbox = {
+            x: bbox.x - selectionSize,
+            y: bbox.y - selectionSize,
+            width: bbox.width + 2 * selectionSize,
+            height: bbox.height + 2 * selectionSize
+        }; // <-- BBOX: get the bounding box of the path and expand
 
-        if (isBBoxInLasso(bbox)) {
+        if (isBBoxInLasso(bbox)) { // <-- BBOX: compare bbox corners to lasso polygon
 
             const isInLasso = isPathInLasso(path);
 
@@ -183,6 +190,7 @@ function isBBoxInLasso(bbox) {
         { x: bbox.x, y: bbox.y + bbox.height },
         { x: bbox.x + bbox.width, y: bbox.y + bbox.height }
     ];
+    // <-- BBOX: check if any bbox corner is inside the lasso polygon
     return bboxPoints.some(point => isPointInPolygon(point, lassoPoints));
 }
 
@@ -491,11 +499,12 @@ export function growSelection() {
             if (p.y > maxY) maxY = p.y;
         });
     });
+
     const selectionBBox = {
-        x: minX,
-        y: minY,
-        width: maxX - minX,
-        height: maxY - minY
+        x: minX ,
+        y: minY ,
+        width: (maxX - minX) ,
+        height: (maxY - minY)
     };
     // Draw the selection bbox in blue
     drawBBoxRect(selectionBBox, 'blue', 'debug-selection-bbox');
@@ -510,7 +519,14 @@ export function growSelection() {
             const parentGroup = path.closest('g');
             if (parentGroup && parentGroup.style.display === 'none') return;
 
-            const bbox = path.getBBox();
+            // Expand bbox by selectionSize
+            let bbox = path.getBBox();
+            bbox = {
+                x: bbox.x - selectionSize,
+                y: bbox.y - selectionSize,
+                width: bbox.width + 2 * selectionSize,
+                height: bbox.height + 2 * selectionSize
+            }; // <-- BBOX: get the bounding box of the path and expand
 
             // Check bbox overlap
             const overlaps = !(
@@ -518,7 +534,7 @@ export function growSelection() {
                 bbox.x > selectionBBox.x + selectionBBox.width ||
                 bbox.y + bbox.height < selectionBBox.y ||
                 bbox.y > selectionBBox.y + selectionBBox.height
-            );
+            ); // <-- BBOX: compare path bbox to selection bbox
 
             // Draw the path's bbox: green if overlapping, red if not
             drawBBoxRect(
@@ -569,10 +585,11 @@ export function growSelection() {
 
 }
 
-function createExpandedPolygonCollection(polygon, expansionRadius = selectionCircleRadius) {
+function createExpandedPolygonCollection(polygon, expansionDiameter = selectionSize) {
     // Create an array of expanded polygons
     const expandedPolygons = [];
-
+    const expansionRadius = expansionDiameter * 2; // Use half the diameter for radius
+    console.log('Expansion radius:', expansionRadius);
     polygon.forEach((point, index) => {
         const expandedPoints = [];
 
@@ -644,12 +661,20 @@ function drawBBoxRect(bbox, color, id) {
     let existingRect = svgElement.querySelector(`#${id}`);
     if (existingRect) existingRect.remove();
 
+    // Expand bbox by selectionSize for debug drawing as well
+    const expandedBBox = {
+        x: bbox.x - selectionSize,
+        y: bbox.y - selectionSize,
+        width: bbox.width + 2 * selectionSize,
+        height: bbox.height + 2 * selectionSize
+    };
+
     const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     rect.setAttribute('id', id);
-    rect.setAttribute('x', bbox.x);
-    rect.setAttribute('y', bbox.y);
-    rect.setAttribute('width', bbox.width);
-    rect.setAttribute('height', bbox.height);
+    rect.setAttribute('x', expandedBBox.x);
+    rect.setAttribute('y', expandedBBox.y);
+    rect.setAttribute('width', expandedBBox.width);
+    rect.setAttribute('height', expandedBBox.height);
     rect.setAttribute('fill', 'none');
     rect.setAttribute('stroke', color);
     rect.setAttribute('stroke-width', '2');
