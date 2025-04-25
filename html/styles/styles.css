@@ -747,7 +747,7 @@ path.postal-code {
     margin: 0;
 }
 
-.export-neighbors-button {
+#export-neighbours-button {
     background-color: #007bff;
     color: white;
     border: none;
@@ -758,6 +758,6 @@ path.postal-code {
     margin: 10px;
 }
 
-.export-neighbors-button:hover {
+#export-neighbours-button:hover {
     background-color: #0056b3;
 }
