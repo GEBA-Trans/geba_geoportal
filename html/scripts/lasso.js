@@ -522,13 +522,13 @@ export function growSelection() {
             const parentGroup = path.closest('g');
             if (parentGroup && parentGroup.style.display === 'none') return;
 
-            // Expand bbox by selectionSize
+            // Expand bbox by double selectionSize to get the expanded bbox
             let bbox = path.getBBox();
             bbox = {
-                x: bbox.x - selectionSize,
-                y: bbox.y - selectionSize,
-                width: bbox.width + 2 * selectionSize,
-                height: bbox.height + 2 * selectionSize
+                x: bbox.x - 2 * selectionSize,
+                y: bbox.y - 2 * selectionSize,
+                width: bbox.width + 4 * selectionSize,
+                height: bbox.height + 4 * selectionSize
             }; // <-- BBOX: get the bounding box of the path and expand
 
             // Check bbox overlap
