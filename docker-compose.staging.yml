@@ -8,6 +8,8 @@ services:
       - traefik.http.routers.geoportal-secure.rule=Host(`geoportal.staging.gebatrans.app`)
       - traefik.http.routers.geoportal-secure.service=geoportal
       - traefik.http.services.geoportal.loadbalancer.server.port=80
+    volumes:
+      - ./settings.js:/usr/share/nginx/html/scripts/settings.js
     depends_on:
       - geoportal-connect
     networks:
