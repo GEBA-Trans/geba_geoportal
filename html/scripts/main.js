@@ -1,4 +1,4 @@
-import { loadSVG, toggleCountryVisibility } from './mapLoader.js';
+import { loadSVG } from './mapLoader.js';
 import { initializeZoomPan, setupZoomControls, setupPanning, triggerZoomVisible } from './zoomPan.js';
 import { setupPostalCodeClicks, loadSelectedPostalCodes, setMode, togglePostalCode } from './postalCodeManager.js';
 import { setupModeToggle, setupLookupButton } from './uiSetup.js';
@@ -7,29 +7,6 @@ import { setupLassoSelect } from './lasso.js';
 import { initializeTooltips } from './tooltip.js';
 import { populateRegionDropdown, handleRegionChange } from './regionManager.js';
 import { exportPostalCodeneighbours } from './exportNeighbours.js';
-
-async function loadRegionOptions() {
-    try {
-        const response = await fetch('data/regions.json');
-        const regions = await response.json();
-        const selectElement = document.getElementById('regions');
-
-        regions.forEach(region => {
-            const option = document.createElement('option');
-            option.value = region.value;
-            option.textContent = region.text;
-            selectElement.appendChild(option);
-        });
-
-        selectElement.addEventListener('change', function() {
-            if (this.value) {
-                window.location.href = this.value;
-            }
-        });
-    } catch (error) {
-        console.error('Error loading region options:', error);
-    }
-}
 
 function initializeApp() {
     loadSVG()
@@ -54,37 +31,6 @@ function initializeApp() {
                 console.error('Error initializing app:', error);
             }
         });
-}
-
-function initializeTooltip(element, tooltipText, placement) {
-    const tooltip = document.createElement('div');
-    tooltip.className = 'tooltip';
-    tooltip.textContent = tooltipText;
-    document.body.appendChild(tooltip);
-
-    const popperInstance = Popper.createPopper(element, tooltip, {
-        placement: placement, // Use the placement value
-        modifiers: [
-            {
-                name: 'offset',
-                options: {
-                    offset: [0, 8],
-                },
-            },
-        ],
-    });
-
-    element.addEventListener('mouseenter', () => {
-        tooltip.style.visibility = 'visible';
-        tooltip.style.opacity = '1';
-        popperInstance.update().then(() => {
-        });
-    });
-
-    element.addEventListener('mouseleave', () => {
-        tooltip.style.visibility = 'hidden';
-        tooltip.style.opacity = '0';
-    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
