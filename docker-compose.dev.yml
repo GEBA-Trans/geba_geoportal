@@ -5,6 +5,7 @@ services:
       - "8080:80"
     volumes:
       - ./html:/usr/share/nginx/html
+      - ./settings.js:/usr/share/nginx/html/scripts/settings.js
     depends_on:
       - geoportal-connect
 
