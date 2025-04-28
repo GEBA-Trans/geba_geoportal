@@ -56,6 +56,39 @@ export function setToolMode(mode) {
     currentMode = mode;
 }
 
+// Helper to update path styles and listeners
+function updatePathStyles(isActive) {
+    const paths = document.querySelectorAll('#map-container svg path');
+    paths.forEach(path => {
+        if (isActive) {
+            if (!path.classList.contains('selected')) {
+                path.style.filter = 'grayscale(75%)';
+            }
+            path.classList.add('crosshair-cursor');
+        } else {
+            path.style.filter = '';
+            path.classList.remove('crosshair-cursor');
+        }
+    });
+}
+
+function updatePathMouseover(isActive) {
+    const paths = document.querySelectorAll('#map-container svg path');
+    paths.forEach(path => {
+        if (isActive) {
+            path.addEventListener('mouseover', crosshairMouseover);
+        } else {
+            path.removeEventListener('mouseover', crosshairMouseover);
+        }
+    });
+}
+
+function crosshairMouseover(e) {
+    if (isAreaSelectorActive) {
+        e.currentTarget.classList.add('crosshair-cursor');
+    }
+}
+
 function toggleLassoSelector() {
     isAreaSelectorActive = !isAreaSelectorActive;
     const lassoButton = document.getElementById('lasso-button');
@@ -74,28 +107,12 @@ function toggleLassoSelector() {
     mapContainer.classList.toggle('lasso-inactive', !isAreaSelectorActive);
 
     if (isAreaSelectorActive) {
-        disablePostalCodeClicks(); // Disable clicks when lasso is active
-        const paths = document.querySelectorAll('#map-container svg path');
-        paths.forEach(path => {
-            if (!path.classList.contains('selected')) {
-                path.style.filter = 'grayscale(75%)';
-            }
-            path.classList.add('crosshair-cursor');
-            path.addEventListener('mouseover', () => {
-                if (isAreaSelectorActive) {
-                    path.classList.add('crosshair-cursor');
-                }
-            });
-        });
-
+        disablePostalCodeClicks();
     } else {
-        enablePostalCodeClicks(); // Enable clicks when lasso is inactive
-        const paths = document.querySelectorAll('#map-container svg path');
-        paths.forEach(path => {
-            path.style.filter = '';
-            path.classList.remove('crosshair-cursor');
-        });
+        enablePostalCodeClicks();
     }
+    updatePathStyles(isAreaSelectorActive);
+    updatePathMouseover(isAreaSelectorActive);
 }
 
 function startLassoSelection(e) {
