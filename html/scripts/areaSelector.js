@@ -19,29 +19,29 @@ let svgElement;
 let addPostalCodeCallback;
 
 // Store handler references for cleanup
-let areaSelectorButtonHandler, areaSelectorIndicatorHandler, svgMouseDownHandler, svgMouseMoveHandler, documentMouseUpHandler;
+let lassoButtonHandler, lassoIndicatorHandler, svgMouseDownHandler, svgMouseMoveHandler, documentMouseUpHandler;
 
 export function setupAreaSelector(svg, addPostalCodeFunc) {
     svgElement = svg;
     addPostalCodeCallback = addPostalCodeFunc;
     // Try new IDs first, fallback to old lasso IDs if not found
-    let areaSelectorButton = document.getElementById('area-selector-button') || document.getElementById('lasso-button');
-    let areaSelectorIndicatorButton = document.getElementById('area-selector-active-indicator') || document.getElementById('lasso-active-indicator');
+    let lassoButton = document.getElementById('area-selector-button') || document.getElementById('lasso-button');
+    let lassoIndicatorButton = document.getElementById('area-selector-active-indicator') || document.getElementById('lasso-active-indicator');
 
-    if (!areaSelectorButton || !areaSelectorIndicatorButton) {
+    if (!lassoButton || !lassoIndicatorButton) {
         console.warn('[areaSelector] Selector buttons not found. Please check your HTML IDs.');
         return;
     }
 
     // Store handlers for removal
-    areaSelectorButtonHandler = toggleSelector;
-    areaSelectorIndicatorHandler = toggleSelector;
+    lassoButtonHandler = toggleSelector;
+    lassoIndicatorHandler = toggleSelector;
     svgMouseDownHandler = startLassoSelection;
     svgMouseMoveHandler = updateLassoSelection;
     documentMouseUpHandler = endLassoSelection;
 
-    areaSelectorButton.addEventListener('click', areaSelectorButtonHandler);
-    areaSelectorIndicatorButton.addEventListener('click', areaSelectorIndicatorHandler);
+    lassoButton.addEventListener('click', lassoButtonHandler);
+    lassoIndicatorButton.addEventListener('click', lassoIndicatorHandler);
     svgElement.addEventListener('mousedown', svgMouseDownHandler);
     svgElement.addEventListener('mousemove', svgMouseMoveHandler);
     document.addEventListener('mouseup', documentMouseUpHandler);
