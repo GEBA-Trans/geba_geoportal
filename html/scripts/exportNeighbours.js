@@ -1,4 +1,4 @@
-import { growSelection } from './areaSelector.js';
+import { growSelection } from './growSelection.js';
 import { sendToneighboursocket } from './websocket.js'; // Import the function to send data to the neighbor WebSocket
 
 export function exportPostalCodeNeighbours() {
