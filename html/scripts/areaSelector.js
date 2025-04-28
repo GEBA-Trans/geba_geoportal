@@ -25,8 +25,8 @@ export function setupLassoSelector(svg, addPostalCodeFunc) {
     }
 
     // Store handlers for removal
-    lassoButtonHandler = toggleSelector;
-    lassoIndicatorHandler = toggleSelector;
+    lassoButtonHandler = toggleLassoSelector;
+    lassoIndicatorHandler = toggleLassoSelector;
     svgMouseDownHandler = startLassoSelection;
     svgMouseMoveHandler = updateLassoSelection;
     documentMouseUpHandler = endLassoSelection;
@@ -54,23 +54,15 @@ export function setToolMode(mode) {
     currentMode = mode;
 }
 
-function toggleSelector() {
-    // console.log('Toggle Lasso');
+function toggleLassoSelector() {
     isAreaSelectorActive = !isAreaSelectorActive;
-
-    // console.log('Lasso Active:', isLassoActive);
     const lassoButton = document.getElementById('lasso-button');
     const lassoStatus = document.getElementById('lasso-status');
     const lassoIndicator = document.getElementById('lasso-active-indicator');
-    // Use class for icon color
     lassoButton.innerHTML = isAreaSelectorActive ? '<i class="fas fa-times icon-cancel"></i>' : '<i class="fas fa-highlighter"></i>';
     lassoButton.title = isAreaSelectorActive ? 'Cancel Lasso' : 'Lasso Select';
-
-    // Use class for status visibility
     lassoStatus.classList.toggle('lasso-status-visible', isAreaSelectorActive);
     lassoStatus.classList.toggle('lasso-status-hidden', !isAreaSelectorActive);
-
-    // Toggle lasso indicator visibility
     if (lassoIndicator) {
         lassoIndicator.style.display = isAreaSelectorActive ? 'block' : 'none';
     }
