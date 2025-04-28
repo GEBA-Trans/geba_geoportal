@@ -41,11 +41,6 @@ export async function populateRegionDropdown() {
         // Set the initial selected option based on the current URL
         const urlParams = new URLSearchParams(window.location.search);
         const currentMap = urlParams.get('map');
-        // if (currentMap) {
-        //     const value = `/?map=${currentMap}`;
-        //     select.value = value;
-        //     handleRegionChange(select.selectedOptions[0]);
-        // }
 
         // Add event listener to handle selection change
         select.addEventListener('change', (event) => {

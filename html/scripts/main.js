@@ -57,10 +57,6 @@ function initializeApp() {
 }
 
 function initializeTooltip(element, tooltipText, placement) {
-    // Only show debug logs on localhost
-    // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-    //     console.log('Initializing tooltip:', element, tooltipText, placement);
-    // }
     const tooltip = document.createElement('div');
     tooltip.className = 'tooltip';
     tooltip.textContent = tooltipText;
@@ -79,29 +75,16 @@ function initializeTooltip(element, tooltipText, placement) {
     });
 
     element.addEventListener('mouseenter', () => {
-        // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-        //     console.log('Mouse entered:', element);
-        // }
         tooltip.style.visibility = 'visible';
         tooltip.style.opacity = '1';
         popperInstance.update().then(() => {
-            // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-            //     console.log('Popper updated:', tooltip);
-            // }
         });
     });
 
     element.addEventListener('mouseleave', () => {
-        // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-        //     console.log('Mouse left:', element);
-        // }
         tooltip.style.visibility = 'hidden';
         tooltip.style.opacity = '0';
     });
-
-    // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-    //     console.log('Event listeners attached for:', element);
-    // }
 }
 
 document.addEventListener('DOMContentLoaded', function() {

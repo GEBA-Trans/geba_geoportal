@@ -25,7 +25,6 @@ function connectWebSocket() {
         console.log('WebSocket connection established');
         isWebSocketConnected = true;
         reconnectAttempts = 0;
-        // requestPendingCounts();
         processPendingWebSocketMessages();
     };
 
