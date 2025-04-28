@@ -382,15 +382,10 @@ function mergePolygons(polygon1, polygon2) {
     const allPoints = [...polygon1, ...polygon2];
 
 
-    return computeConvexHull(allPoints);
+    return mergePointSetsToHull(allPoints);
 }
 
-function computeConvexHull(points) {
-
-    // return points; // Placeholder for the actual convex hull algorithm
-
-
-    // console.log('Starting computeConvexHull with points:', points);
+function mergePointSetsToHull(points) {
 
     // Sort points by x-coordinate (and y-coordinate as a tiebreaker)
     points.sort((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x);
