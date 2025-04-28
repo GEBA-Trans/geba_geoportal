@@ -101,7 +101,6 @@ function toggleSelector() {
             path.style.filter = '';
             path.classList.remove('crosshair-cursor');
         });
-        hi
     }
 }
 
