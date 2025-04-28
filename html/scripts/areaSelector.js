@@ -1,8 +1,7 @@
 import { disablePostalCodeClicks, enablePostalCodeClicks, addAllPostalCodes, reloadSelectedPostalCodes } from './postalCodeManager.js';
-import { showError } from './main.js';
-import { stepLength, selectionSize } from './settings.js';
+import { selectionSize } from './settings.js';
 import { growSelection, setGrowSelectionDeps } from './growSelection.js';
-import { getPathPoints, isPointInPolygon, isBBoxInPolygon, isPathInSelection } from './polygonUtils.js';
+import { isBBoxInPolygon, isPathInSelection } from './polygonUtils.js';
 
 export let isAreaSelectorActive = false;
 
@@ -242,9 +241,8 @@ function addToSelection(path, postalCode) {
     }
 }
 
+// Set up dependencies for growSelection, so it can access selection logic and utility functions from this module
 setGrowSelectionDeps({
-    getPathPoints,
-    isPointInPolygon,
     addToSelection,
     reloadSelectedPostalCodes
 });
