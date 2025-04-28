@@ -33,3 +33,13 @@ export function isPointInPolygon(point, polygon) {
     }
     return inside;
 }
+
+export function isBBoxInPolygon(bbox, polygon) {
+    const bboxPoints = [
+        { x: bbox.x, y: bbox.y },
+        { x: bbox.x + bbox.width, y: bbox.y },
+        { x: bbox.x, y: bbox.y + bbox.height },
+        { x: bbox.x + bbox.width, y: bbox.y + bbox.height }
+    ];
+    return bboxPoints.some(point => isPointInPolygon(point, polygon));
+}

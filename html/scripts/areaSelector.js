@@ -2,7 +2,7 @@ import { disablePostalCodeClicks, enablePostalCodeClicks, addAllPostalCodes, rel
 import { showError } from './main.js';
 import { stepLength, selectionSize } from './settings.js';
 import { growSelection, setGrowSelectionDeps } from './growSelection.js';
-import { getPathPoints, isPointInPolygon } from './polygonUtils.js';
+import { getPathPoints, isPointInPolygon, isBBoxInPolygon } from './polygonUtils.js';
 
 export let isAreaSelectorActive = false;
 
@@ -163,9 +163,9 @@ function selectPathsInSelection() {
             y: bbox.y - selectionSize,
             width: bbox.width + 2 * selectionSize,
             height: bbox.height + 2 * selectionSize
-        }; // <-- BBOX: get the bounding box of the path and expand
+        };
 
-        if (isBBoxInSelection(bbox)) {
+        if (isBBoxInPolygon(bbox, selectionPoints)) {
 
             const isInSelection = isPathInSelection(path);
 
@@ -185,17 +185,6 @@ function selectPathsInSelection() {
         }
     });
 
-}
-
-function isBBoxInSelection(bbox) {
-    const bboxPoints = [
-        { x: bbox.x, y: bbox.y },
-        { x: bbox.x + bbox.width, y: bbox.y },
-        { x: bbox.x, y: bbox.y + bbox.height },
-        { x: bbox.x + bbox.width, y: bbox.y + bbox.height }
-    ];
-    // <-- BBOX: check if any bbox corner is inside the lasso polygon
-    return bboxPoints.some(point => isPointInPolygon(point, selectionPoints));
 }
 
 function isPathInSelection(path) {
