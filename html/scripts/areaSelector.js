@@ -4,15 +4,6 @@ import { stepLength, selectionSize } from './settings.js';
 
 export let isAreaSelectorActive = false;
 
-let debugCounters = {
-    selectionPoints: 0,
-    pathsChecked: 0,
-    pathsSelected: 0,
-    timeTaken: 0
-};
-
-let lassoStartTime;
-
 let currentMode;
 let selectionPoints = [];
 let svgElement;
@@ -102,8 +93,7 @@ function toggleSelector() {
                 }
             });
         });
-        debugCounters.timeTaken = 0; // Reset timeTaken when activating lasso
-        showDebugCounters();
+
     } else {
         enablePostalCodeClicks(); // Enable clicks when lasso is inactive
         const paths = document.querySelectorAll('#map-container svg path');
@@ -111,7 +101,7 @@ function toggleSelector() {
             path.style.filter = '';
             path.classList.remove('crosshair-cursor');
         });
-        hideDebugCounters();
+        hi
     }
 }
 
@@ -121,9 +111,6 @@ function startLassoSelection(e) {
     e.preventDefault();
     const point = getLassoSVGPoint(e.clientX, e.clientY);
     selectionPoints = [point];
-    lassoStartTime = performance.now(); // Record the start time
-    debugCounters.selectionPoints = 1;
-    updateDebugCounters();
 }
 
 function updateLassoSelection(e) {
@@ -131,8 +118,6 @@ function updateLassoSelection(e) {
     e.preventDefault();
     const point = getLassoSVGPoint(e.clientX, e.clientY);
     selectionPoints.push(point);
-    debugCounters.selectionPoints = selectionPoints.length;
-    updateDebugCounters();
     drawLasso();
 }
 
@@ -169,8 +154,6 @@ function drawLasso() {
 function selectPathsInSelection() {
 
     const paths = document.querySelectorAll('#map-container svg path');
-    debugCounters.pathsChecked = 0;
-    debugCounters.pathsSelected = 0;
     const selectCountries = document.getElementById('select-countries').checked;
 
     paths.forEach(path => {
@@ -178,7 +161,7 @@ function selectPathsInSelection() {
         const parentGroup = path.closest('g');
         if (parentGroup && parentGroup.style.display === 'none') return;
 
-        debugCounters.pathsChecked++;
+
 
         // Expand bbox by selectionSize
         let bbox = path.getBBox();
@@ -194,7 +177,7 @@ function selectPathsInSelection() {
             const isInSelection = isPathInSelection(path);
 
             if (isInSelection) {
-                debugCounters.pathsSelected++;
+        
                 const postalCode = path.id || 'Unknown';
                 addToSelection(path, postalCode);
                 path.classList.add('selected');
@@ -209,7 +192,6 @@ function selectPathsInSelection() {
         }
     });
 
-    updateDebugCounters(); // Update debug counters
 }
 
 function isBBoxInSelection(bbox) {
@@ -283,12 +265,7 @@ function endLassoSelection(e) {
 
     drawLasso();
 
-    const endTime = performance.now();
-    const timeTaken = endTime - lassoStartTime;
-    debugCounters.timeTaken = timeTaken.toFixed(2); // Round to 2 decimal places
-
     selectPathsInSelection();
-    updateDebugCounters(); // Update counters one last time
     clearLasso();
     reloadSelectedPostalCodes(); // Add this line to reload selected postal codes after lasso selection
     // Remove debug points after a short delay
@@ -298,49 +275,9 @@ function endLassoSelection(e) {
             svgElement.removeChild(debugGroup);
         }
     }, 2000);
-    // Don't reset the timeTaken here
 
 }
 
-// Add this function to update the debug counters on screen
-function updateDebugCounters() {
-    if (!(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
-    let debugElement = document.getElementById('lasso-debug');
-    if (!debugElement) {
-        debugElement = document.createElement('div');
-        debugElement.id = 'lasso-debug';
-        debugElement.className = 'lasso-debug';
-        document.body.appendChild(debugElement);
-        debugElement.addEventListener('click', hideDebugCounters);
-    }
-    debugElement.innerHTML = `
-        Lasso Points: ${debugCounters.selectionPoints}<br>
-        Paths Checked: ${debugCounters.pathsChecked}<br>
-        Paths Selected: ${debugCounters.pathsSelected}<br>
-        Time Taken: ${debugCounters.timeTaken || '0.00'} ms<br>
-        (Click to hide)
-    `;
-}
-
-// Add this variable at the top of the file
-
-function showDebugCounters() {
-    if (!(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
-    const debugElement = document.getElementById('lasso-debug');
-    if (debugElement) {
-        debugElement.style.display = 'block';
-    } else {
-        updateDebugCounters();
-    }
-}
-
-function hideDebugCounters() {
-    if (!(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
-    const debugElement = document.getElementById('lasso-debug');
-    if (debugElement) {
-        debugElement.style.display = 'none';
-    }
-}
 
 // New function to add to selection
 function addToSelection(path, postalCode) {
@@ -476,8 +413,6 @@ export function growSelection() {
     drawBBoxRect(selectionBBox, 'blue', 'debug-selection-bbox');
 
     const paths = document.querySelectorAll('#map-container svg path');
-    let pathsChecked = 0;
-    let pathsSelected = 0;
 
     paths.forEach((path, idx) => {
         if (!path.classList.contains('selected')) {
@@ -514,7 +449,6 @@ export function growSelection() {
                 return;
             }
 
-            pathsChecked++;
             const { points } = getPathPoints(path, false); // Use simplified paths for targets
 
             // Expand the target path's polygon
@@ -533,19 +467,12 @@ export function growSelection() {
             );
 
             if (isInExpandedPolygon) {
-                pathsSelected++;
                 const postalCode = path.id || 'Unknown';
                 addToSelection(path, postalCode);
                 path.classList.add('selected');
             }
-            pathsChecked++;
         }
     });
-
-    // Update debug counters
-    debugCounters.pathsChecked = pathsChecked;
-    debugCounters.pathsSelected = pathsSelected;
-    updateDebugCounters(); // Refresh the lasso-debug div
 
     reloadSelectedPostalCodes(); // Update the selection display
 
