@@ -306,6 +306,7 @@ function endLasso(e) {
 
 // Add this function to update the debug counters on screen
 function updateDebugCounters() {
+    if (!(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
     let debugElement = document.getElementById('lasso-debug');
     if (!debugElement) {
         debugElement = document.createElement('div');
@@ -338,6 +339,7 @@ function updateDebugCounters() {
 let lassoStartTime;
 
 function showDebugCounters() {
+    if (!(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
     const debugElement = document.getElementById('lasso-debug');
     if (debugElement) {
         debugElement.style.display = 'block';
@@ -347,6 +349,7 @@ function showDebugCounters() {
 }
 
 function hideDebugCounters() {
+    if (!(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
     const debugElement = document.getElementById('lasso-debug');
     if (debugElement) {
         debugElement.style.display = 'none';
