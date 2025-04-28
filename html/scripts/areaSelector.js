@@ -2,11 +2,11 @@ import { disablePostalCodeClicks, enablePostalCodeClicks, addAllPostalCodes, rel
 import { showError } from './main.js';
 import { stepLength, selectionSize } from './settings.js';
 
-export let isLassoActive = false;
+export let isAreaSelectorActive = false;
 
 // Add these variables at the top of the file
 let debugCounters = {
-    lassoPoints: 0,
+    selectionPoints: 0,
     pathsChecked: 0,
     pathsSelected: 0,
     timeTaken: 0
@@ -14,28 +14,34 @@ let debugCounters = {
 
 
 let currentMode; // Add this line to keep track of the current mode
-let lassoPoints = [];
+let selectionPoints = [];
 let svgElement;
 let addPostalCodeCallback;
 
 // Store handler references for cleanup
-let lassoButtonHandler, lassoIndicatorHandler, svgMouseDownHandler, svgMouseMoveHandler, documentMouseUpHandler;
+let areaSelectorButtonHandler, areaSelectorIndicatorHandler, svgMouseDownHandler, svgMouseMoveHandler, documentMouseUpHandler;
 
-export function setupLassoSelect(svg, addPostalCodeFunc) {
+export function setupAreaSelector(svg, addPostalCodeFunc) {
     svgElement = svg;
     addPostalCodeCallback = addPostalCodeFunc;
-    const lassoButton = document.getElementById('lasso-button');
-    const lassoIndicatorButton = document.getElementById('lasso-active-indicator');
+    // Try new IDs first, fallback to old lasso IDs if not found
+    let areaSelectorButton = document.getElementById('area-selector-button') || document.getElementById('lasso-button');
+    let areaSelectorIndicatorButton = document.getElementById('area-selector-active-indicator') || document.getElementById('lasso-active-indicator');
+
+    if (!areaSelectorButton || !areaSelectorIndicatorButton) {
+        console.warn('[areaSelector] Selector buttons not found. Please check your HTML IDs.');
+        return;
+    }
 
     // Store handlers for removal
-    lassoButtonHandler = toggleLasso;
-    lassoIndicatorHandler = toggleLasso;
-    svgMouseDownHandler = startLasso;
-    svgMouseMoveHandler = updateLasso;
-    documentMouseUpHandler = endLasso;
+    areaSelectorButtonHandler = toggleSelector;
+    areaSelectorIndicatorHandler = toggleSelector;
+    svgMouseDownHandler = startSelection;
+    svgMouseMoveHandler = updateSelection;
+    documentMouseUpHandler = endSelection;
 
-    lassoButton.addEventListener('click', lassoButtonHandler);
-    lassoIndicatorButton.addEventListener('click', lassoIndicatorHandler);
+    areaSelectorButton.addEventListener('click', areaSelectorButtonHandler);
+    areaSelectorIndicatorButton.addEventListener('click', areaSelectorIndicatorHandler);
     svgElement.addEventListener('mousedown', svgMouseDownHandler);
     svgElement.addEventListener('mousemove', svgMouseMoveHandler);
     document.addEventListener('mouseup', documentMouseUpHandler);
@@ -57,32 +63,32 @@ export function setLassoMode(mode) {
     currentMode = mode;
 }
 
-function toggleLasso() {
+function toggleSelector() {
     // console.log('Toggle Lasso');
-    isLassoActive = !isLassoActive;
+    isAreaSelectorActive = !isAreaSelectorActive;
 
     // console.log('Lasso Active:', isLassoActive);
     const lassoButton = document.getElementById('lasso-button');
     const lassoStatus = document.getElementById('lasso-status');
     const lassoIndicator = document.getElementById('lasso-active-indicator');
     // Use class for icon color
-    lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times icon-cancel"></i>' : '<i class="fas fa-highlighter"></i>';
-    lassoButton.title = isLassoActive ? 'Cancel Lasso' : 'Lasso Select';
+    lassoButton.innerHTML = isAreaSelectorActive ? '<i class="fas fa-times icon-cancel"></i>' : '<i class="fas fa-highlighter"></i>';
+    lassoButton.title = isAreaSelectorActive ? 'Cancel Lasso' : 'Lasso Select';
 
     // Use class for status visibility
-    lassoStatus.classList.toggle('lasso-status-visible', isLassoActive);
-    lassoStatus.classList.toggle('lasso-status-hidden', !isLassoActive);
+    lassoStatus.classList.toggle('lasso-status-visible', isAreaSelectorActive);
+    lassoStatus.classList.toggle('lasso-status-hidden', !isAreaSelectorActive);
 
     // Toggle lasso indicator visibility
     if (lassoIndicator) {
-        lassoIndicator.style.display = isLassoActive ? 'block' : 'none';
+        lassoIndicator.style.display = isAreaSelectorActive ? 'block' : 'none';
     }
 
     const mapContainer = document.getElementById('map-container');
-    mapContainer.classList.toggle('lasso-active', isLassoActive);
-    mapContainer.classList.toggle('lasso-inactive', !isLassoActive);
+    mapContainer.classList.toggle('lasso-active', isAreaSelectorActive);
+    mapContainer.classList.toggle('lasso-inactive', !isAreaSelectorActive);
 
-    if (isLassoActive) {
+    if (isAreaSelectorActive) {
         const paths = document.querySelectorAll('#map-container svg path');
         paths.forEach(path => {
             if (!path.classList.contains('selected')) {
@@ -90,7 +96,7 @@ function toggleLasso() {
             }
             path.classList.add('crosshair-cursor');
             path.addEventListener('mouseover', () => {
-                if (isLassoActive) {
+                if (isAreaSelectorActive) {
                     path.classList.add('crosshair-cursor');
                 }
             });
@@ -107,23 +113,23 @@ function toggleLasso() {
     }
 }
 
-function startLasso(e) {
+function startSelection(e) {
     // console.log('Start Lasso');
-    if (!isLassoActive) return;
+    if (!isAreaSelectorActive) return;
     e.preventDefault();
     const point = getSVGPoint(e.clientX, e.clientY);
-    lassoPoints = [point];
+    selectionPoints = [point];
     lassoStartTime = performance.now(); // Record the start time
-    debugCounters.lassoPoints = 1;
+    debugCounters.selectionPoints = 1;
     updateDebugCounters();
 }
 
-function updateLasso(e) {
-    if (!isLassoActive || lassoPoints.length === 0) return;
+function updateSelection(e) {
+    if (!isAreaSelectorActive || selectionPoints.length === 0) return;
     e.preventDefault();
     const point = getSVGPoint(e.clientX, e.clientY);
-    lassoPoints.push(point);
-    debugCounters.lassoPoints = lassoPoints.length;
+    selectionPoints.push(point);
+    debugCounters.selectionPoints = selectionPoints.length;
     updateDebugCounters();
     drawLasso();
 }
@@ -141,7 +147,7 @@ function drawLasso() {
 
     const lasso = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
     lasso.setAttribute('id', 'lasso');
-    lasso.setAttribute('points', lassoPoints.map(p => `${p.x},${p.y}`).join(' '));
+    lasso.setAttribute('points', selectionPoints.map(p => `${p.x},${p.y}`).join(' '));
     // Use mode color for lasso
     let color = '#ff0000'; // fallback
     if (currentMode === 'loading') {
@@ -212,12 +218,12 @@ function isBBoxInLasso(bbox) {
         { x: bbox.x + bbox.width, y: bbox.y + bbox.height }
     ];
     // <-- BBOX: check if any bbox corner is inside the lasso polygon
-    return bboxPoints.some(point => isPointInPolygon(point, lassoPoints));
+    return bboxPoints.some(point => isPointInPolygon(point, selectionPoints));
 }
 
 function isPathInLasso(path) {
     const { points } = getPathPoints(path);
-    return points.some(point => isPointInPolygon(point, lassoPoints)) || isPointInPolygon(points[0], lassoPoints);
+    return points.some(point => isPointInPolygon(point, selectionPoints)) || isPointInPolygon(points[0], selectionPoints);
 }
 
 function getPathPoints(path, useSimplified = false) {
@@ -271,17 +277,17 @@ export function isPointInPolygon(point, polygon) {
 function clearLasso() {
     const lasso = svgElement.querySelector('#lasso');
     if (lasso) lasso.remove();
-    lassoPoints = [];
+    selectionPoints = [];
 }
 
-function endLasso(e) {
-    if (!isLassoActive || lassoPoints.length === 0) return;
+function endSelection(e) {
+    if (!isAreaSelectorActive || selectionPoints.length === 0) return;
     e.preventDefault();
     const point = getSVGPoint(e.clientX, e.clientY);
-    lassoPoints.push(point);
+    selectionPoints.push(point);
 
     // If the user clicks without dragging, end the lasso
-    if (lassoPoints.length === 2 && lassoPoints[0].x === lassoPoints[1].x && lassoPoints[0].y === lassoPoints[1].y) {
+    if (selectionPoints.length === 2 && selectionPoints[0].x === selectionPoints[1].x && selectionPoints[0].y === selectionPoints[1].y) {
         clearLasso();
         return;
     }
@@ -319,7 +325,7 @@ function updateDebugCounters() {
         debugElement.addEventListener('click', hideDebugCounters);
     }
     debugElement.innerHTML = `
-        Lasso Points: ${debugCounters.lassoPoints}<br>
+        Lasso Points: ${debugCounters.selectionPoints}<br>
         Paths Checked: ${debugCounters.pathsChecked}<br>
         Paths Selected: ${debugCounters.pathsSelected}<br>
         Time Taken: ${debugCounters.timeTaken || '0.00'} ms<br>

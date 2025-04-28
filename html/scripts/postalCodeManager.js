@@ -1,4 +1,4 @@
-import { isPointInPolygon, setLassoMode, isLassoActive } from './lasso.js';
+import { isPointInPolygon, setLassoMode, isAreaSelectorActive } from './areaSelector.js';
 import { getColorVariation } from './mapLoader.js'; // Add this import
 import { showError } from './main.js';
 
@@ -232,7 +232,7 @@ function clearAllPostalCodes(postalCodes) {
         if (pathElement) {
             pathElement.classList.remove('selected', 'loading', 'delivery');
             pathElement.style.fill = '';
-            if (isLassoActive) {
+            if (isAreaSelectorActive) {
                 pathElement.style.filter = 'grayscale(75%)'; // Reapply the grayscale filter only if lasso is active
             }
         }
