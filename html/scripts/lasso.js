@@ -1,4 +1,5 @@
 import { disablePostalCodeClicks, enablePostalCodeClicks, addAllPostalCodes, reloadSelectedPostalCodes } from './postalCodeManager.js';
+import { showError } from './main.js';
 
 export let isLassoActive = false;
 
@@ -458,9 +459,10 @@ function drawPolygon(polygon, color, id) {
 }
 
 export function growSelection() {
-    const mergedPolygon = getSelectionBoundingPolygon(); // Use original polygon for selection
+    const mergedPolygon = getSelectionBoundingPolygon();
     if (!mergedPolygon) {
-        console.warn('No selected polygons to expand.');
+        showError('No selected polygons to expand. Please select an area first.');
+        console.warn('DEV: No selected polygons to expand.');
         return;
     }
 

@@ -118,3 +118,18 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('lookup-results').style.display = 'none';
     });
 });
+
+// Global error display utility
+export function showError(message, timeout = 5000) {
+    const errorBar = document.getElementById('global-error');
+    const errorMsg = document.getElementById('global-error-message');
+    if (!errorBar || !errorMsg) return;
+    errorMsg.textContent = message;
+    errorBar.style.display = 'block';
+    // Hide on click
+    errorBar.onclick = () => { errorBar.style.display = 'none'; };
+    // Auto-hide after timeout
+    if (timeout > 0) {
+        setTimeout(() => { errorBar.style.display = 'none'; }, timeout);
+    }
+}

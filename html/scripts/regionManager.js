@@ -1,6 +1,6 @@
-
 import { toggleCountryVisibility } from './mapLoader.js';
 import { triggerZoomVisible } from './zoomPan.js';
+import { showError } from './main.js';
 
 export async function populateRegionDropdown() {
     try {
@@ -53,7 +53,8 @@ export async function populateRegionDropdown() {
             handleRegionChange(selectedOption);
         });
     } catch (error) {
-        console.error('Error populating region dropdown:', error);
+        showError('Failed to load region list. Please refresh the page.');
+        console.error('DEV: Error populating region dropdown:', error);
     }
 }
 

@@ -1,5 +1,6 @@
 import { isPointInPolygon, setLassoMode, isLassoActive } from './lasso.js';
 import { getColorVariation } from './mapLoader.js'; // Add this import
+import { showError } from './main.js';
 
 const LOADING_MODE = 'loading';
 const DELIVERY_MODE = 'delivery';
@@ -193,7 +194,8 @@ function groupPostalCodesByCountry(postalCodes) {
                 grouped['Hidden'] = [];
             }
             grouped['Hidden'].push(postalCode);
-            console.warn(`Postal code not found: ${postalCode}`);
+            // Only log for dev, not user
+            console.warn('DEV: Postal code not found:', postalCode);
         }
 
     });
@@ -296,7 +298,8 @@ export function loadSelectedPostalCodes() {
             updatePostalCodeSelectionColor('delivery', document.getElementById('delivery-color').value);
             resolve();
         } catch (error) {
-            console.error('Error loading postal codes:', error);
+            showError('Failed to load postal codes. Please refresh the page.');
+            console.error('DEV: Error loading postal codes:', error);
             reject(error);
         }
     });
@@ -304,7 +307,8 @@ export function loadSelectedPostalCodes() {
 
 function loadPostalCodesFromData(data, targetSet, mode, country) {
     if (!Array.isArray(data)) {
-        console.error('Invalid data format for postal codes:', data);
+        showError('Invalid data format for postal codes.');
+        console.error('DEV: Invalid data format for postal codes:', data);
         return;
     }
 
@@ -479,6 +483,7 @@ export function reloadSelectedPostalCodes() {
     loadSelectedPostalCodes().then(() => {
         // console.log('Selected postal codes reloaded.');
     }).catch(error => {
-        console.error('Error reloading selected postal codes:', error);
+        showError('Failed to reload selected postal codes. Please refresh the page.');
+        console.error('DEV: Error reloading selected postal codes:', error);
     });
 }
