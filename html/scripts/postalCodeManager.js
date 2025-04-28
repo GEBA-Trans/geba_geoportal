@@ -1,4 +1,4 @@
-import { isPointInPolygon, setLassoMode, isAreaSelectorActive } from './areaSelector.js';
+import { isPointInPolygon, setToolMode, isAreaSelectorActive } from './areaSelector.js';
 import { getColorVariation } from './mapLoader.js'; // Add this import
 import { showError } from './main.js';
 
@@ -271,7 +271,7 @@ export function setMode(mode) {
     currentMode = mode;
     document.getElementById('loading-mode').classList.toggle('active', mode === 'loading');
     document.getElementById('delivery-mode').classList.toggle('active', mode === 'delivery');
-    setLassoMode(mode); // Add this line to update the lasso mode
+    setToolMode(mode); // Add this line to update the lasso mode
 }
 
 export function loadSelectedPostalCodes() {

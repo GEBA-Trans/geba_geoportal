@@ -4,7 +4,6 @@ import { stepLength, selectionSize } from './settings.js';
 
 export let isAreaSelectorActive = false;
 
-// Add these variables at the top of the file
 let debugCounters = {
     selectionPoints: 0,
     pathsChecked: 0,
@@ -12,8 +11,9 @@ let debugCounters = {
     timeTaken: 0
 };
 
+let lassoStartTime;
 
-let currentMode; // Add this line to keep track of the current mode
+let currentMode;
 let selectionPoints = [];
 let svgElement;
 let addPostalCodeCallback;
@@ -36,9 +36,9 @@ export function setupAreaSelector(svg, addPostalCodeFunc) {
     // Store handlers for removal
     areaSelectorButtonHandler = toggleSelector;
     areaSelectorIndicatorHandler = toggleSelector;
-    svgMouseDownHandler = startSelection;
-    svgMouseMoveHandler = updateSelection;
-    documentMouseUpHandler = endSelection;
+    svgMouseDownHandler = startLassoSelection;
+    svgMouseMoveHandler = updateLassoSelection;
+    documentMouseUpHandler = endLassoSelection;
 
     areaSelectorButton.addEventListener('click', areaSelectorButtonHandler);
     areaSelectorIndicatorButton.addEventListener('click', areaSelectorIndicatorHandler);
@@ -59,7 +59,7 @@ export function destroyLassoSelect() {
 }
 
 // Add this new function to set the current mode
-export function setLassoMode(mode) {
+export function setToolMode(mode) {
     currentMode = mode;
 }
 
@@ -115,28 +115,28 @@ function toggleSelector() {
     }
 }
 
-function startSelection(e) {
+function startLassoSelection(e) {
     // console.log('Start Lasso');
     if (!isAreaSelectorActive) return;
     e.preventDefault();
-    const point = getSVGPoint(e.clientX, e.clientY);
+    const point = getLassoSVGPoint(e.clientX, e.clientY);
     selectionPoints = [point];
     lassoStartTime = performance.now(); // Record the start time
     debugCounters.selectionPoints = 1;
     updateDebugCounters();
 }
 
-function updateSelection(e) {
+function updateLassoSelection(e) {
     if (!isAreaSelectorActive || selectionPoints.length === 0) return;
     e.preventDefault();
-    const point = getSVGPoint(e.clientX, e.clientY);
+    const point = getLassoSVGPoint(e.clientX, e.clientY);
     selectionPoints.push(point);
     debugCounters.selectionPoints = selectionPoints.length;
     updateDebugCounters();
     drawLasso();
 }
 
-function getSVGPoint(x, y) {
+function getLassoSVGPoint(x, y) {
     const pt = svgElement.createSVGPoint();
     pt.x = x;
     pt.y = y;
@@ -166,7 +166,7 @@ function drawLasso() {
     svgElement.appendChild(lasso);
 }
 
-function selectPathsInLasso() {
+function selectPathsInSelection() {
 
     const paths = document.querySelectorAll('#map-container svg path');
     debugCounters.pathsChecked = 0;
@@ -189,11 +189,11 @@ function selectPathsInLasso() {
             height: bbox.height + 2 * selectionSize
         }; // <-- BBOX: get the bounding box of the path and expand
 
-        if (isBBoxInLasso(bbox)) { // <-- BBOX: compare bbox corners to lasso polygon
+        if (isBBoxInSelection(bbox)) {
 
-            const isInLasso = isPathInLasso(path);
+            const isInSelection = isPathInSelection(path);
 
-            if (isInLasso) {
+            if (isInSelection) {
                 debugCounters.pathsSelected++;
                 const postalCode = path.id || 'Unknown';
                 addToSelection(path, postalCode);
@@ -212,7 +212,7 @@ function selectPathsInLasso() {
     updateDebugCounters(); // Update debug counters
 }
 
-function isBBoxInLasso(bbox) {
+function isBBoxInSelection(bbox) {
     const bboxPoints = [
         { x: bbox.x, y: bbox.y },
         { x: bbox.x + bbox.width, y: bbox.y },
@@ -223,7 +223,7 @@ function isBBoxInLasso(bbox) {
     return bboxPoints.some(point => isPointInPolygon(point, selectionPoints));
 }
 
-function isPathInLasso(path) {
+function isPathInSelection(path) {
     const { points } = getPathPoints(path);
     return points.some(point => isPointInPolygon(point, selectionPoints)) || isPointInPolygon(points[0], selectionPoints);
 }
@@ -250,19 +250,6 @@ function getPathPoints(path, useSimplified = false) {
     return { points, svg };
 }
 
-// Add this function to get the current zoom factor
-function getZoomFactor() {
-    const zoomFactorElement = document.getElementById('zoom-factor');
-    if (zoomFactorElement) {
-        const zoomText = zoomFactorElement.textContent;
-        const zoomMatch = zoomText.match(/Zoom:\s*([\d.]+)x/);
-        if (zoomMatch) {
-            return parseFloat(zoomMatch[1]);
-        }
-    }
-    return 1; // Default zoom factor
-}
-
 export function isPointInPolygon(point, polygon) {
     let inside = false;
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
@@ -282,10 +269,10 @@ function clearLasso() {
     selectionPoints = [];
 }
 
-function endSelection(e) {
+function endLassoSelection(e) {
     if (!isAreaSelectorActive || selectionPoints.length === 0) return;
     e.preventDefault();
-    const point = getSVGPoint(e.clientX, e.clientY);
+    const point = getLassoSVGPoint(e.clientX, e.clientY);
     selectionPoints.push(point);
 
     // If the user clicks without dragging, end the lasso
@@ -300,7 +287,7 @@ function endSelection(e) {
     const timeTaken = endTime - lassoStartTime;
     debugCounters.timeTaken = timeTaken.toFixed(2); // Round to 2 decimal places
 
-    selectPathsInLasso();
+    selectPathsInSelection();
     updateDebugCounters(); // Update counters one last time
     clearLasso();
     reloadSelectedPostalCodes(); // Add this line to reload selected postal codes after lasso selection
@@ -336,7 +323,6 @@ function updateDebugCounters() {
 }
 
 // Add this variable at the top of the file
-let lassoStartTime;
 
 function showDebugCounters() {
     if (!(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
