@@ -1,9 +1,9 @@
 import { growSelection } from './lasso.js';
 import { sendToneighboursocket } from './websocket.js'; // Import the function to send data to the neighbor WebSocket
 
-export function exportPostalCodeneighbours() {
+export function exportPostalCodeNeighbours() {
     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-        console.log('Starting exportPostalCodeneighbours...');
+        console.log('Starting exportPostalCodeNeighbours...');
     }
     const paths = document.querySelectorAll('#map-container svg path');
     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
@@ -37,7 +37,7 @@ export function exportPostalCodeneighbours() {
             console.log(`Processing Path_ID: ${path.id}`);
         }
         // highlightPostalCode(path); // Visual feedback for the current Path_ID
-        const neighbours = findneighbours(path, visiblePaths);
+        const neighbours = findNeighbours(path, visiblePaths);
         if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
             console.log(`Found ${neighbours.length} neighbours for Path_ID: ${path.id}`);
         }
@@ -65,7 +65,7 @@ export function exportPostalCodeneighbours() {
     // }
 }
 
-function findneighbours(targetPath, paths) {
+function findNeighbours(targetPath, paths) {
     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
         console.log(`Finding neighbours for Path_ID: ${targetPath.id}`);
     }
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportButton = document.getElementById('export-neighbours-button');
     if (exportButton) {
         console.log('Export button found. Adding click event listener.');
-        exportButton.addEventListener('click', exportPostalCodeneighbours);
+        exportButton.addEventListener('click', exportPostalCodeNeighbours);
     } else {
         console.error('Export button not found.');
     }

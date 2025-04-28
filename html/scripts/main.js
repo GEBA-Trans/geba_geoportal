@@ -6,7 +6,7 @@ import { connectWebSocket } from './websocket.js';
 import { setupLassoSelect } from './lasso.js';
 import { initializeTooltips } from './tooltip.js';
 import { populateRegionDropdown, handleRegionChange } from './regionManager.js';
-import { exportPostalCodeneighbours } from './exportNeighbours.js';
+import { exportPostalCodeNeighbours } from './exportNeighbours.js';
 
 function initializeApp() {
     loadSVG()
@@ -24,7 +24,7 @@ function initializeApp() {
         })
         .then(() => {
             // Initialize export functionality
-            document.getElementById('export-neighbours-button').addEventListener('click', exportPostalCodeneighbours);
+            document.getElementById('export-neighbours-button').addEventListener('click', exportPostalCodeNeighbours);
         })
         .catch(error => {
             if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
