@@ -1,12 +1,18 @@
-import { growSelection } from './lasso.js';
+import { growSelection } from './areaSelector.js';
 import { sendToneighboursocket } from './websocket.js'; // Import the function to send data to the neighbor WebSocket
 
-export function exportPostalCodeneighbours() {
-    console.log('Starting exportPostalCodeneighbours...');
+export function exportPostalCodeNeighbours() {
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        console.log('Starting exportPostalCodeNeighbours...');
+    }
     const paths = document.querySelectorAll('#map-container svg path');
-    console.log(`Found ${paths.length} total paths.`);
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        console.log(`Found ${paths.length} total paths.`);
+    }
     const visiblePaths = Array.from(paths).filter(path => path.style.display !== 'none');
-    console.log(`Filtered to ${visiblePaths.length} visible paths.`);
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        console.log(`Filtered to ${visiblePaths.length} visible paths.`);
+    }
     const neighboursMap = new Map();
 
     let processedCount = 0; // Counter to limit processing
@@ -22,13 +28,19 @@ export function exportPostalCodeneighbours() {
             }
         }
         if (!path.id) {
-            console.warn('Skipping path without ID:', path);
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                console.warn('Skipping path without ID:', path);
+            }
             continue;
         }
-        console.log(`Processing Path_ID: ${path.id}`);
+        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            console.log(`Processing Path_ID: ${path.id}`);
+        }
         // highlightPostalCode(path); // Visual feedback for the current Path_ID
-        const neighbours = findneighbours(path, visiblePaths);
-        console.log(`Found ${neighbours.length} neighbours for Path_ID: ${path.id}`);
+        const neighbours = findNeighbours(path, visiblePaths);
+        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            console.log(`Found ${neighbours.length} neighbours for Path_ID: ${path.id}`);
+        }
 
         // Post path.id and neighbours to the neighbor WebSocket
         const payload = { id: path.id, neighbours };
@@ -36,19 +48,27 @@ export function exportPostalCodeneighbours() {
 
         // processedCount++;
         // if (processedCount >= 50) {
-        //     console.log('Debug limit reached. Stopping after 5 Path_IDs.');
+        //     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        //         console.log('Debug limit reached. Stopping after 5 Path_IDs.');
+        //     }
         //     break; // Stop the loop after processing 5 Path_IDs
         // }
     }
 
     // const csvContent = generateCSV(neighboursMap);
-    // console.log('Generated CSV content:', csvContent);
+    // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    //     console.log('Generated CSV content:', csvContent);
+    // }
     // downloadCSV(csvContent, 'postal_code_neighbours.csv');
-    // console.log('CSV download triggered.');
+    // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    //     console.log('CSV download triggered.');
+    // }
 }
 
-function findneighbours(targetPath, paths) {
-    console.log(`Finding neighbours for Path_ID: ${targetPath.id}`);
+function findNeighbours(targetPath, paths) {
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        console.log(`Finding neighbours for Path_ID: ${targetPath.id}`);
+    }
 
     // Temporarily mark the target path as selected
     targetPath.classList.add('selected');
@@ -70,7 +90,9 @@ function findneighbours(targetPath, paths) {
     targetPath.classList.remove('selected');
     selectedPaths.forEach(path => path.classList.remove('selected'));
 
-    console.log(`neighbours found for Path_ID ${targetPath.id}:`, neighbours);
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        console.log(`neighbours found for Path_ID ${targetPath.id}:`, neighbours);
+    }
     return neighbours;
 }
 
@@ -80,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportButton = document.getElementById('export-neighbours-button');
     if (exportButton) {
         console.log('Export button found. Adding click event listener.');
-        exportButton.addEventListener('click', exportPostalCodeneighbours);
+        exportButton.addEventListener('click', exportPostalCodeNeighbours);
     } else {
         console.error('Export button not found.');
     }

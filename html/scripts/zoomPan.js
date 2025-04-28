@@ -1,4 +1,4 @@
-import { isLassoActive } from './lasso.js';
+import { isAreaSelectorActive } from './areaSelector.js';
 
 let svgElement;
 let originalViewBox;
@@ -53,7 +53,7 @@ export function setupPanning() {
 }
 
 function startDragging(e) {
-    if (!isLassoActive) {
+    if (!isAreaSelectorActive) {
         isDragging = true;
         startX = e.clientX;
         startY = e.clientY;
@@ -61,7 +61,7 @@ function startDragging(e) {
 }
 
 function drag(e) {
-    if (!isDragging || isLassoActive) return;
+    if (!isDragging || isAreaSelectorActive) return;
     e.preventDefault();
 
     requestAnimationFrame(() => {

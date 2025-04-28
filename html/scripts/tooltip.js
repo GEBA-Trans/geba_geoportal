@@ -1,5 +1,7 @@
+// Store references for cleanup
+const tooltipCleanupHandlers = [];
+
 function initializeTooltip(element, tooltipText, placement) {
-    // console.log('Initializing tooltip:', element, tooltipText, placement);
     const tooltip = document.createElement('div');
     tooltip.className = 'tooltip';
     tooltip.textContent = tooltipText;
@@ -17,23 +19,33 @@ function initializeTooltip(element, tooltipText, placement) {
         ],
     });
 
-    element.addEventListener('mouseenter', () => {
-        // console.log('Mouse entered:', element);
+    // Store event handlers for cleanup
+    const mouseEnterHandler = () => {
         tooltip.style.visibility = 'visible';
         tooltip.style.opacity = '1';
-        popperInstance.update().then(() => {
-            // console.log('Popper updated:', tooltip);
-        });
-    });
-
-    element.addEventListener('mouseleave', () => {
-        // console.log('Mouse left:', element);
+        popperInstance.update();
+    };
+    const mouseLeaveHandler = () => {
         tooltip.style.visibility = 'hidden';
         tooltip.style.opacity = '0';
+    };
+    element.addEventListener('mouseenter', mouseEnterHandler);
+    element.addEventListener('mouseleave', mouseLeaveHandler);
+    // Store cleanup function
+    tooltipCleanupHandlers.push(() => {
+        element.removeEventListener('mouseenter', mouseEnterHandler);
+        element.removeEventListener('mouseleave', mouseLeaveHandler);
+        if (tooltip.parentNode) tooltip.parentNode.removeChild(tooltip);
+        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            // Only show debug logs on localhost
+        }
+        popperInstance.destroy && popperInstance.destroy();
     });
+}
 
-    // Log to confirm event listeners are attached
-    // console.log('Event listeners attached for:', element);
+export function cleanupTooltips() {
+    tooltipCleanupHandlers.forEach(fn => fn());
+    tooltipCleanupHandlers.length = 0;
 }
 
 export function initializeTooltips() {

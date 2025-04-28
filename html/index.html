@@ -30,8 +30,8 @@
             <button id="reset-zoom" title="Reset Zoom" ><i class="fas fa-sync-alt"></i></button>
             <button id="zoom-visible" title="Zoom to Visible area" ><i class="fas fa-eye"></i></button> <!-- Add this line -->
             <div class="divider"></div> <!-- Add this line for the divider -->
-            <span id="lasso-group" style="display: flex;">
-                <span id="lasso-status" style="display: none;">Lassoing... Click and drag to select.</span> <!-- Add this line -->
+            <span id="lasso-group" class="lasso-group-flex">
+                <span id="lasso-status" class="lasso-status-hidden">Lassoing... Click and drag to select.</span> <!-- Add this line -->
                 <button id="lasso-button" title="Lasso Select"><i class="fas fa-highlighter"></i></button> <!-- Update icon class to lasso -->
                 <button id="grow-selection-button" title="Grow Selection"><i class="fas fa-expand-arrows-alt"></i></button>
                 <button id="clear-expansion-button" title="Clear All"><i class="fas fa-trash-alt"></i></button>
@@ -114,7 +114,9 @@
 
         <div id="websocket-messages"></div>
     </div>
-    
+    <div id="global-error" style="display:none;position:fixed;top:0;left:0;width:100vw;z-index:2000;background:#e74c3c;color:#fff;padding:12px 24px;font-size:1.1em;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);cursor:pointer;">
+            <span id="global-error-message"></span>
+        </div>
     <!-- Update the script import to use the new main.js -->
     <script type="module" src="scripts/main.js"></script>
 </body>

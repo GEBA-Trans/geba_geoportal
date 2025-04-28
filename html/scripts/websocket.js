@@ -1,4 +1,5 @@
 import { updatePostalCodeCount, updatePostalCodeLists, getSelectedPostalCodes } from './postalCodeManager.js';
+import { showError } from './main.js';
 
 let socket;
 let lookupSocket;
@@ -24,7 +25,6 @@ function connectWebSocket() {
         console.log('WebSocket connection established');
         isWebSocketConnected = true;
         reconnectAttempts = 0;
-        // requestPendingCounts();
         processPendingWebSocketMessages();
     };
 
@@ -88,11 +88,13 @@ function connectWebSocket() {
     };
 
     neighboursocket.onerror = function(error) {
-        console.error('Neighbor WebSocket error:', error);
+        console.error('DEV: Neighbor WebSocket error:', error);
+        showError('Neighbor connection error. Please check your network or try again later.');
     };
 
     neighboursocket.onclose = function(event) {
         console.log('Neighbor WebSocket connection closed. Code:', event.code, 'Reason:', event.reason);
+        showError('Neighbor connection closed. Some features may not work.');
     }
 }
 
@@ -126,7 +128,8 @@ function displayWebSocketMessage(message) {
             updatePostalCodeLists();
         }
     } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+        showError('Received invalid data from server. Please refresh the page.');
+        console.error('DEV: Error parsing WebSocket message:', error);
     }
 }
 
@@ -154,16 +157,15 @@ function processPendingWebSocketMessages() {
 
 function lookupCompanies() {
     const selectedPostalCodes = getSelectedPostalCodes();
-    
     const payload = {
         loadingPostalCodes: selectedPostalCodes.loading,
         deliveryPostalCodes: selectedPostalCodes.delivery
     };
-
     if (lookupSocket.readyState === WebSocket.OPEN) {
         lookupSocket.send(JSON.stringify(payload));
     } else {
-        console.error('Lookup WebSocket is not open');
+        showError('Lookup connection is not open. Please try again later.');
+        console.error('DEV: Lookup WebSocket is not open');
     }
 }
 
@@ -171,34 +173,31 @@ function getSavedPostalCodes() {
     const cookieValue = document.cookie
         .split('; ')
         .find(row => row.startsWith('selectedPostalCodes='));
-    
     if (cookieValue) {
         try {
             return JSON.parse(cookieValue.split('=')[1]);
         } catch (error) {
-            console.error('Error parsing saved postal codes:', error);
+            showError('Failed to load saved postal codes. Please clear your cookies and try again.');
+            console.error('DEV: Error parsing saved postal codes:', error);
         }
     }
-    
     return { loading: [], delivery: [] };
 }
 
 function updateResultsTable(data) {
     const tableBody = document.getElementById('company-table').getElementsByTagName('tbody')[0];
-    tableBody.innerHTML = ''; // Clear existing rows
-
+    tableBody.innerHTML = '';
     if (!data || typeof data !== 'object') {
-        console.error('Invalid data received from lookup WebSocket');
+        showError('Invalid data received from lookup.');
+        console.error('DEV: Invalid data received from lookup WebSocket');
         return;
     }
-
     let companies = data.companies || data;
-
     if (!Array.isArray(companies)) {
-        console.error('Companies data is not an array:', companies);
+        showError('Company data is not in the expected format.');
+        console.error('DEV: Companies data is not an array:', companies);
         return;
     }
-
     companies.forEach(company => {
         if (typeof company === 'object' && company !== null) {
             const row = tableBody.insertRow();
@@ -207,7 +206,7 @@ function updateResultsTable(data) {
             row.insertCell(2).textContent = company.coverageArea || 'N/A';
             row.insertCell(3).textContent = company.rating || 'N/A';
         } else {
-            console.warn('Invalid company data:', company);
+            console.warn('DEV: Invalid company data:', company);
         }
     });
 }
