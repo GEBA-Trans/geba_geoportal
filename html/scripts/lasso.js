@@ -18,21 +18,38 @@ let addPostalCodeCallback;
 const stepLength = 6 // Adjust this value to control the number of points 
 const selectionSize = 3;
 
-
-
-
+// Store handler references for cleanup
+let lassoButtonHandler, lassoIndicatorHandler, svgMouseDownHandler, svgMouseMoveHandler, documentMouseUpHandler;
 
 export function setupLassoSelect(svg, addPostalCodeFunc) {
     svgElement = svg;
     addPostalCodeCallback = addPostalCodeFunc;
     const lassoButton = document.getElementById('lasso-button');
     const lassoIndicatorButton = document.getElementById('lasso-active-indicator');
-    lassoButton.addEventListener('click', toggleLasso);
-    lassoIndicatorButton.addEventListener('click', toggleLasso);
 
-    svgElement.addEventListener('mousedown', startLasso);
-    svgElement.addEventListener('mousemove', updateLasso);
-    document.addEventListener('mouseup', endLasso);
+    // Store handlers for removal
+    lassoButtonHandler = toggleLasso;
+    lassoIndicatorHandler = toggleLasso;
+    svgMouseDownHandler = startLasso;
+    svgMouseMoveHandler = updateLasso;
+    documentMouseUpHandler = endLasso;
+
+    lassoButton.addEventListener('click', lassoButtonHandler);
+    lassoIndicatorButton.addEventListener('click', lassoIndicatorHandler);
+    svgElement.addEventListener('mousedown', svgMouseDownHandler);
+    svgElement.addEventListener('mousemove', svgMouseMoveHandler);
+    document.addEventListener('mouseup', documentMouseUpHandler);
+}
+
+// Cleanup function to remove all event listeners
+export function destroyLassoSelect() {
+    const lassoButton = document.getElementById('lasso-button');
+    const lassoIndicatorButton = document.getElementById('lasso-active-indicator');
+    if (lassoButton && lassoButtonHandler) lassoButton.removeEventListener('click', lassoButtonHandler);
+    if (lassoIndicatorButton && lassoIndicatorHandler) lassoIndicatorButton.removeEventListener('click', lassoIndicatorHandler);
+    if (svgElement && svgMouseDownHandler) svgElement.removeEventListener('mousedown', svgMouseDownHandler);
+    if (svgElement && svgMouseMoveHandler) svgElement.removeEventListener('mousemove', svgMouseMoveHandler);
+    document.removeEventListener('mouseup', documentMouseUpHandler);
 }
 
 // Add this new function to set the current mode
@@ -342,18 +359,6 @@ function addToSelection(path, postalCode) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 function getSelectionBoundingPolygon() {
     const selectedPaths = document.querySelectorAll('#map-container svg path.selected');
     if (selectedPaths.length === 0) return null;
@@ -368,20 +373,6 @@ function getSelectionBoundingPolygon() {
     return mergedPolygon;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function mergePolygons(polygon1, polygon2) {
     if (polygon1.length === 0) return polygon2;
     if (polygon2.length === 0) return polygon1;
@@ -392,20 +383,6 @@ function mergePolygons(polygon1, polygon2) {
 
     return computeConvexHull(allPoints);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function computeConvexHull(points) {
 
