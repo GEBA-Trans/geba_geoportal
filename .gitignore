@@ -29,3 +29,4 @@ data/*
 
 # Ignore all zip files
 *.zip
+html/scripts/settings.js
