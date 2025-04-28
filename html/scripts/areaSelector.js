@@ -21,7 +21,7 @@ let addPostalCodeCallback;
 // Store handler references for cleanup
 let lassoButtonHandler, lassoIndicatorHandler, svgMouseDownHandler, svgMouseMoveHandler, documentMouseUpHandler;
 
-export function setupAreaSelector(svg, addPostalCodeFunc) {
+export function setupLassoSelector(svg, addPostalCodeFunc) {
     svgElement = svg;
     addPostalCodeCallback = addPostalCodeFunc;
     // Try new IDs first, fallback to old lasso IDs if not found

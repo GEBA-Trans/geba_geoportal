@@ -3,7 +3,7 @@ import { initializeZoomPan, setupZoomControls, setupPanning, triggerZoomVisible 
 import { setupPostalCodeClicks, loadSelectedPostalCodes, setMode, togglePostalCode } from './postalCodeManager.js';
 import { setupModeToggle, setupLookupButton } from './uiSetup.js';
 import { connectWebSocket } from './websocket.js';
-import { setupAreaSelector } from './areaSelector.js';
+import { setupLassoSelector } from './areaSelector.js';
 import { initializeTooltips } from './tooltip.js';
 import { populateRegionDropdown, handleRegionChange } from './regionManager.js';
 import { exportPostalCodeNeighbours } from './exportNeighbours.js';
@@ -16,7 +16,7 @@ function initializeApp() {
             setupPostalCodeClicks();
             setupZoomControls();
             setupPanning();
-            setupAreaSelector(svgElement, togglePostalCode);
+            setupLassoSelector(svgElement, togglePostalCode);
             setupModeToggle();
             setupLookupButton();
             setMode('loading');
