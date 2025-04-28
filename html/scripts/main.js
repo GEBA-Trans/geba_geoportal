@@ -49,11 +49,18 @@ function initializeApp() {
             // Initialize export functionality
             document.getElementById('export-neighbours-button').addEventListener('click', exportPostalCodeneighbours);
         })
-        .catch(error => console.error('Error initializing app:', error));
+        .catch(error => {
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                console.error('Error initializing app:', error);
+            }
+        });
 }
 
 function initializeTooltip(element, tooltipText, placement) {
-    // console.log('Initializing tooltip:', element, tooltipText, placement);
+    // Only show debug logs on localhost
+    // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    //     console.log('Initializing tooltip:', element, tooltipText, placement);
+    // }
     const tooltip = document.createElement('div');
     tooltip.className = 'tooltip';
     tooltip.textContent = tooltipText;
@@ -72,22 +79,29 @@ function initializeTooltip(element, tooltipText, placement) {
     });
 
     element.addEventListener('mouseenter', () => {
-        // console.log('Mouse entered:', element);
+        // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        //     console.log('Mouse entered:', element);
+        // }
         tooltip.style.visibility = 'visible';
         tooltip.style.opacity = '1';
         popperInstance.update().then(() => {
-            // console.log('Popper updated:', tooltip);
+            // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            //     console.log('Popper updated:', tooltip);
+            // }
         });
     });
 
     element.addEventListener('mouseleave', () => {
-        // console.log('Mouse left:', element);
+        // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        //     console.log('Mouse left:', element);
+        // }
         tooltip.style.visibility = 'hidden';
         tooltip.style.opacity = '0';
     });
 
-    // Log to confirm event listeners are attached
-    // console.log('Event listeners attached for:', element);
+    // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    //     console.log('Event listeners attached for:', element);
+    // }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
