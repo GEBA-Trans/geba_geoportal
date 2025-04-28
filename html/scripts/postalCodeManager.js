@@ -210,15 +210,6 @@ function groupPostalCodesByCountry(postalCodes) {
     return grouped;
 }
 
-function getColorForCount(count) {
-    count = Math.max(0, Math.min(99, count));
-    const percentage = count / 99;
-    const r = Math.round(255 * (1 - percentage));
-    const g = Math.round(255 * percentage);
-    const b = 0;
-    return `rgb(${r}, ${g}, ${b})`;
-}
-
 function removePostalCode(postalCode) {
     loadingPostalCodes.delete(postalCode);
     deliveryPostalCodes.delete(postalCode);
