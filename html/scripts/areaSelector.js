@@ -161,7 +161,7 @@ function drawLasso() {
     svgElement.appendChild(lasso);
 }
 
-function selectPathsInSelection() {
+function selectLassoedPathsInSelection() {
 
     const paths = document.querySelectorAll('#map-container svg path');
     const selectCountries = document.getElementById('select-countries').checked;
@@ -221,7 +221,7 @@ function endLassoSelection(e) {
 
     drawLasso();
 
-    selectPathsInSelection();
+    selectLassoedPathsInSelection();
     clearLasso();
     reloadSelectedPostalCodes(); // Add this line to reload selected postal codes after lasso selection
     // Remove debug points after a short delay
