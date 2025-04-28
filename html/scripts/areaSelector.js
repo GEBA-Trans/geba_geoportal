@@ -89,6 +89,7 @@ function toggleSelector() {
     mapContainer.classList.toggle('lasso-inactive', !isAreaSelectorActive);
 
     if (isAreaSelectorActive) {
+        disablePostalCodeClicks(); // Disable clicks when lasso is active
         const paths = document.querySelectorAll('#map-container svg path');
         paths.forEach(path => {
             if (!path.classList.contains('selected')) {
@@ -104,6 +105,7 @@ function toggleSelector() {
         debugCounters.timeTaken = 0; // Reset timeTaken when activating lasso
         showDebugCounters();
     } else {
+        enablePostalCodeClicks(); // Enable clicks when lasso is inactive
         const paths = document.querySelectorAll('#map-container svg path');
         paths.forEach(path => {
             path.style.filter = '';
