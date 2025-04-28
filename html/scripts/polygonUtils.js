@@ -43,3 +43,8 @@ export function isBBoxInPolygon(bbox, polygon) {
     ];
     return bboxPoints.some(point => isPointInPolygon(point, polygon));
 }
+
+export function isPathInSelection(path, polygon) {
+    const { points } = getPathPoints(path);
+    return points.some(point => isPointInPolygon(point, polygon)) || isPointInPolygon(points[0], polygon);
+}

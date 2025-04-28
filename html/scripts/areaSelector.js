@@ -2,7 +2,7 @@ import { disablePostalCodeClicks, enablePostalCodeClicks, addAllPostalCodes, rel
 import { showError } from './main.js';
 import { stepLength, selectionSize } from './settings.js';
 import { growSelection, setGrowSelectionDeps } from './growSelection.js';
-import { getPathPoints, isPointInPolygon, isBBoxInPolygon } from './polygonUtils.js';
+import { getPathPoints, isPointInPolygon, isBBoxInPolygon, isPathInSelection } from './polygonUtils.js';
 
 export let isAreaSelectorActive = false;
 
@@ -166,11 +166,9 @@ function selectPathsInSelection() {
         };
 
         if (isBBoxInPolygon(bbox, selectionPoints)) {
-
-            const isInSelection = isPathInSelection(path);
-
+            const isInSelection = isPathInSelection(path, selectionPoints);
             if (isInSelection) {
-        
+
                 const postalCode = path.id || 'Unknown';
                 addToSelection(path, postalCode);
                 path.classList.add('selected');
@@ -181,15 +179,9 @@ function selectPathsInSelection() {
                     addAllPostalCodes(country, currentMode);
                 }
             }
-        } else {
         }
     });
 
-}
-
-function isPathInSelection(path) {
-    const { points } = getPathPoints(path);
-    return points.some(point => isPointInPolygon(point, selectionPoints)) || isPointInPolygon(points[0], selectionPoints);
 }
 
 function clearLasso() {
