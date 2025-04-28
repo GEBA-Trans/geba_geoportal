@@ -65,6 +65,7 @@ function toggleLasso() {
     // console.log('Lasso Active:', isLassoActive);
     const lassoButton = document.getElementById('lasso-button');
     const lassoStatus = document.getElementById('lasso-status');
+    const lassoIndicator = document.getElementById('lasso-active-indicator');
     // Use class for icon color
     lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times icon-cancel"></i>' : '<i class="fas fa-highlighter"></i>';
     lassoButton.title = isLassoActive ? 'Cancel Lasso' : 'Lasso Select';
@@ -72,6 +73,11 @@ function toggleLasso() {
     // Use class for status visibility
     lassoStatus.classList.toggle('lasso-status-visible', isLassoActive);
     lassoStatus.classList.toggle('lasso-status-hidden', !isLassoActive);
+
+    // Toggle lasso indicator visibility
+    if (lassoIndicator) {
+        lassoIndicator.style.display = isLassoActive ? 'block' : 'none';
+    }
 
     const mapContainer = document.getElementById('map-container');
     mapContainer.classList.toggle('lasso-active', isLassoActive);
