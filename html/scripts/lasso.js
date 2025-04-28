@@ -63,29 +63,19 @@ function toggleLasso() {
     isLassoActive = !isLassoActive;
 
     // console.log('Lasso Active:', isLassoActive);
-    const mapContainer = document.getElementById('map-container');
-    mapContainer.classList.toggle('lasso-active', isLassoActive);
-
-    const lassoActiveIndicator = document.getElementById('lasso-active-indicator');
-    lassoActiveIndicator.style.display = isLassoActive ? 'block' : 'none';
-
-    // Change cursor and background color based on lasso state
-    if (isLassoActive) {
-        disablePostalCodeClicks();
-        mapContainer.style.cursor = 'crosshair'; // Cursor for lasso active
-        mapContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'; // Change background color
-    } else {
-        enablePostalCodeClicks();
-        mapContainer.style.cursor = 'grab'; // Cursor for pan hand when lasso is not active
-        mapContainer.style.backgroundColor = ''; // Reset background color
-    }
-
     const lassoButton = document.getElementById('lasso-button');
     const lassoStatus = document.getElementById('lasso-status');
-    lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times" style="color: red;"></i>' : '<i class="fas fa-highlighter"></i>';
+    // Use class for icon color
+    lassoButton.innerHTML = isLassoActive ? '<i class="fas fa-times icon-cancel"></i>' : '<i class="fas fa-highlighter"></i>';
     lassoButton.title = isLassoActive ? 'Cancel Lasso' : 'Lasso Select';
 
-    lassoStatus.style.display = isLassoActive ? 'flex' : 'none';
+    // Use class for status visibility
+    lassoStatus.classList.toggle('lasso-status-visible', isLassoActive);
+    lassoStatus.classList.toggle('lasso-status-hidden', !isLassoActive);
+
+    const mapContainer = document.getElementById('map-container');
+    mapContainer.classList.toggle('lasso-active', isLassoActive);
+    mapContainer.classList.toggle('lasso-inactive', !isLassoActive);
 
     if (isLassoActive) {
         const paths = document.querySelectorAll('#map-container svg path');
@@ -93,10 +83,10 @@ function toggleLasso() {
             if (!path.classList.contains('selected')) {
                 path.style.filter = 'grayscale(75%)';
             }
-            path.style.cursor = 'crosshair'; // Ensure cursor remains crosshair
+            path.classList.add('crosshair-cursor');
             path.addEventListener('mouseover', () => {
                 if (isLassoActive) {
-                    path.style.cursor = 'crosshair'; // Ensure cursor remains crosshair on hover
+                    path.classList.add('crosshair-cursor');
                 }
             });
         });
@@ -106,7 +96,7 @@ function toggleLasso() {
         const paths = document.querySelectorAll('#map-container svg path');
         paths.forEach(path => {
             path.style.filter = '';
-            path.style.cursor = ''; // Reset cursor
+            path.classList.remove('crosshair-cursor');
         });
         hideDebugCounters();
     }
@@ -141,15 +131,23 @@ function getSVGPoint(x, y) {
 }
 
 function drawLasso() {
-
     let existingLasso = svgElement.querySelector('#lasso');
     if (existingLasso) existingLasso.remove();
 
     const lasso = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
     lasso.setAttribute('id', 'lasso');
     lasso.setAttribute('points', lassoPoints.map(p => `${p.x},${p.y}`).join(' '));
-    lasso.setAttribute('fill', 'rgba(255, 0, 0, 0.1)'); // Red fill with 10% opacity
-    lasso.setAttribute('stroke', '#ff0000'); // Bright red stroke
+    // Use mode color for lasso
+    let color = '#ff0000'; // fallback
+    if (currentMode === 'loading') {
+        const loadingColorInput = document.getElementById('loading-color');
+        if (loadingColorInput) color = loadingColorInput.value;
+    } else if (currentMode === 'delivery') {
+        const deliveryColorInput = document.getElementById('delivery-color');
+        if (deliveryColorInput) color = deliveryColorInput.value;
+    }
+    lasso.setAttribute('fill', color + '22'); // 13% opacity
+    lasso.setAttribute('stroke', color);
     lasso.setAttribute('stroke-width', '2');
     lasso.setAttribute('vector-effect', 'non-scaling-stroke');
     svgElement.appendChild(lasso);
@@ -311,19 +309,8 @@ function updateDebugCounters() {
     if (!debugElement) {
         debugElement = document.createElement('div');
         debugElement.id = 'lasso-debug';
-        debugElement.style.position = 'fixed';
-        debugElement.style.top = '10px';
-        debugElement.style.right = '10px';
-        debugElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        debugElement.style.color = 'white';
-        debugElement.style.padding = '10px';
-        debugElement.style.borderRadius = '5px';
-        debugElement.style.fontFamily = 'monospace';
-        debugElement.style.zIndex = '1000';
-        debugElement.style.cursor = 'pointer';
+        debugElement.className = 'lasso-debug';
         document.body.appendChild(debugElement);
-
-        // Add click event listener to hide debug counters
         debugElement.addEventListener('click', hideDebugCounters);
     }
     debugElement.innerHTML = `

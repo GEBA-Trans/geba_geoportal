@@ -732,3 +732,48 @@ button, .grow-selection-button, #clear-expansion-button, .delete-btn, .clear-sel
 #export-neighbours-button:hover {
     background-color: #0056b3;
 }
+
+.lasso-active {
+    cursor: crosshair !important;
+    background-color: rgba(0,0,0,0.1) !important;
+}
+.lasso-inactive {
+    cursor: grab !important;
+    background-color: transparent !important;
+}
+.grayscale {
+    filter: grayscale(75%) !important;
+}
+.crosshair-cursor {
+    cursor: crosshair !important;
+}
+.icon-cancel {
+    color: red !important;
+}
+.lasso-debug {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+    z-index: 1000;
+    cursor: pointer;
+}
+.highlighted {
+    stroke: #ff0000 !important;
+    stroke-width: 2px !important;
+    fill-opacity: 0.7 !important;
+    animation: highlight 1s infinite !important;
+}
+.lasso-status-hidden {
+    display: none !important;
+}
+.lasso-status-visible {
+    display: flex !important;
+}
+.lasso-group-flex {
+    display: flex !important;
+}
