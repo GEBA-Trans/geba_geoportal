@@ -2,10 +2,6 @@
 const tooltipCleanupHandlers = [];
 
 function initializeTooltip(element, tooltipText, placement) {
-    // Only show debug logs on localhost
-    // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-    //     console.log('Initializing tooltip:', element, tooltipText, placement);
-    // }
     const tooltip = document.createElement('div');
     tooltip.className = 'tooltip';
     tooltip.textContent = tooltipText;
@@ -42,7 +38,6 @@ function initializeTooltip(element, tooltipText, placement) {
         if (tooltip.parentNode) tooltip.parentNode.removeChild(tooltip);
         if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
             // Only show debug logs on localhost
-            // console.log('Tooltip destroyed for:', element);
         }
         popperInstance.destroy && popperInstance.destroy();
     });
