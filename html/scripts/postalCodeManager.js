@@ -1,6 +1,7 @@
-import { isPointInPolygon, setLassoMode, isAreaSelectorActive } from './areaSelector.js';
+import { isPointInPolygon } from './polygonUtils.js';
 import { getColorVariation } from './mapLoader.js'; // Add this import
 import { showError } from './main.js';
+import { setToolMode } from './areaSelector.js';
 
 const LOADING_MODE = 'loading';
 const DELIVERY_MODE = 'delivery';
@@ -232,8 +233,9 @@ function clearAllPostalCodes(postalCodes) {
         if (pathElement) {
             pathElement.classList.remove('selected', 'loading', 'delivery');
             pathElement.style.fill = '';
-            if (isAreaSelectorActive) {
-                pathElement.style.filter = 'grayscale(75%)'; // Reapply the grayscale filter only if lasso is active
+            // Only apply grayscale if isAreaSelectorActive is defined and true
+            if (typeof isAreaSelectorActive !== 'undefined' && isAreaSelectorActive) {
+                pathElement.style.filter = 'grayscale(75%)';
             }
         }
         // sendToWebSocket('deselect', postalCode);
@@ -271,7 +273,7 @@ export function setMode(mode) {
     currentMode = mode;
     document.getElementById('loading-mode').classList.toggle('active', mode === 'loading');
     document.getElementById('delivery-mode').classList.toggle('active', mode === 'delivery');
-    setLassoMode(mode); // Add this line to update the lasso mode
+    setToolMode(mode); // Add this line to update the lasso mode
 }
 
 export function loadSelectedPostalCodes() {
