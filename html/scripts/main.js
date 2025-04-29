@@ -60,6 +60,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('#lookup-results .lookup-close-btn').addEventListener('click', function() {
         document.getElementById('lookup-results').style.display = 'none';
     });
+
+    // Show debug overlays button only on localhost
+    const debugBtn = document.getElementById('clear-svg-debug-overlays-button');
+    if (debugBtn && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+        debugBtn.style.display = 'inline-block';
+    }
 });
 
 // Global error display utility

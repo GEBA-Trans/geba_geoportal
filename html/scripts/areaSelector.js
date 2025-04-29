@@ -292,10 +292,13 @@ setGrowSelectionDeps({
 // Hook up the grow selection and clear debug polygons buttons
 // (growSelection is now imported)
 document.getElementById('grow-selection-button').addEventListener('click', growSelection);
-document.getElementById('clear-expansion-button').addEventListener('click', clearAllDebugPolygons);
+document.getElementById('clear-svg-debug-overlays-button').addEventListener('click', clearAllSvgDebugOverlays);
 
-function clearAllDebugPolygons() {
-    // Clear debug polygons and circles
-    const debugElements = svgElement.querySelectorAll('[id^="debug-circle-"], #original-polygon, #expanded-polygon');
-    debugElements.forEach(element => element.remove());
+function clearAllSvgDebugOverlays() {
+    // Remove all debug polygons and rectangles drawn by svgDebugUtils
+    const svg = svgElement || document.querySelector('#map-container svg');
+    if (!svg) return;
+    // Remove all polygons and rects with id starting with debug-, expanded-polygon, or containing -expanded-
+    const debugElements = svg.querySelectorAll('[id^="debug-"], [id^="expanded-polygon"], [id*="-expanded-"]');
+    debugElements.forEach(el => el.remove());
 }

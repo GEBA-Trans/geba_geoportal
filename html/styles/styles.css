@@ -547,7 +547,7 @@ path.postal-code {
     text-align: center;
 }
 
-button, .grow-selection-button, #clear-expansion-button, .delete-btn, .clear-selected-button, .lookup-button, .toggle-btn, .add-all-btn, .remove-country-btn, #export-neighbours-button, #lasso-active-indicator .lasso-indicator-button {
+button, .grow-selection-button, #clear-svg-debug-overlays-button, .delete-btn, .clear-selected-button, .lookup-button, .toggle-btn, .add-all-btn, .remove-country-btn, #export-neighbours-button, #lasso-active-indicator .lasso-indicator-button {
     background: none;
     border: none;
     cursor: pointer;
@@ -565,14 +565,8 @@ button, .grow-selection-button, #clear-expansion-button, .delete-btn, .clear-sel
     color: #0056b3;
 }
 
-#clear-expansion-button {
-    padding: 5px;
-    font-size: 1em;
-    transition: color 0.2s ease;
-}
-
-#clear-expansion-button:hover {
-    color: #ff0000 !important;
+#clear-svg-debug-overlays-button {
+    display: none;
 }
 
 .delete-btn {
