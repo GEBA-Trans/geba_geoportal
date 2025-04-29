@@ -1,7 +1,7 @@
 import { disablePostalCodeClicks, enablePostalCodeClicks, addAllPostalCodes, reloadSelectedPostalCodes } from './postalCodeManager.js';
 import { selectionSize } from './settings.js';
 import { growSelection, setGrowSelectionDeps } from './growSelection.js';
-import { isBBoxInPolygon, isPathInSelection } from './polygonUtils.js';
+import { isBBoxInPolygon, isPathInSelection, getPathPoints, isPointInPolygon } from './polygonUtils.js';
 import { drawPolygon, drawBBoxRect } from './svgDebugUtils.js';
 
 export let isAreaSelectorActive = false;
@@ -223,7 +223,10 @@ function selectLassoedPathsInSelection() {
         // Only do expensive checks if bbox overlaps
         if (isBBoxInPolygon(bbox, selectionPoints)) {
             const isInSelection = isPathInSelection(path, selectionPoints);
-            if (isInSelection) {
+            // New: also check if all lasso points are inside the path
+            const { points: pathPoints } = getPathPoints(path);
+            const lassoInsidePath = selectionPoints.length > 2 && selectionPoints.every(pt => isPointInPolygon(pt, pathPoints));
+            if (isInSelection || lassoInsidePath) {
                 const postalCode = path.id || 'Unknown';
                 addToSelection(path, postalCode);
                 path.classList.add('selected');
