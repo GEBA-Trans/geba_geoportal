@@ -2,6 +2,7 @@ import { disablePostalCodeClicks, enablePostalCodeClicks, addAllPostalCodes, rel
 import { selectionSize } from './settings.js';
 import { growSelection, setGrowSelectionDeps } from './growSelection.js';
 import { isBBoxInPolygon, isPathInSelection } from './polygonUtils.js';
+import { drawPolygon, drawBBoxRect } from './svgDebugUtils.js';
 
 export let isAreaSelectorActive = false;
 
@@ -158,6 +159,25 @@ function drawLasso() {
     lasso.setAttribute('stroke-width', '2');
     lasso.setAttribute('vector-effect', 'non-scaling-stroke');
     svgElement.appendChild(lasso);
+    // Debug: draw the lasso polygon as well
+    if (selectionPoints.length > 2) {
+        drawPolygon(selectionPoints, color, 'debug-lasso-polygon');
+        // Draw debug bbox around lasso using svgDebugUtils
+        let minX = Math.min(...selectionPoints.map(p => p.x));
+        let minY = Math.min(...selectionPoints.map(p => p.y));
+        let maxX = Math.max(...selectionPoints.map(p => p.x));
+        let maxY = Math.max(...selectionPoints.map(p => p.y));
+        const bbox = {
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY
+        };
+        drawBBoxRect(bbox, '#ffa500', 'debug-lasso-bbox');
+    } else {
+        // Remove debug bbox if not enough points
+        drawBBoxRect({x:0,y:0,width:0,height:0}, '#ffa500', 'debug-lasso-bbox');
+    }
 }
 
 function selectLassoedPathsInSelection() {
