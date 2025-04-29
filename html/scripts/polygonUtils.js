@@ -41,7 +41,29 @@ export function isBBoxInPolygon(bbox, polygon) {
         { x: bbox.x, y: bbox.y + bbox.height },
         { x: bbox.x + bbox.width, y: bbox.y + bbox.height }
     ];
-    return bboxPoints.some(point => isPointInPolygon(point, polygon));
+    // 1. Any bbox corner inside polygon
+    if (bboxPoints.some(point => isPointInPolygon(point, polygon))) return true;
+    // 2. Any polygon vertex inside bbox
+    if (polygon.some(p => p.x >= bbox.x && p.x <= bbox.x + bbox.width && p.y >= bbox.y && p.y <= bbox.y + bbox.height)) return true;
+    // 3. Any edge intersection (bbox edge with polygon edge)
+    function edges(poly) {
+        return poly.map((p, i) => [p, poly[(i + 1) % poly.length]]);
+    }
+    const bboxEdges = edges(bboxPoints);
+    const polyEdges = edges(polygon);
+    function segmentsIntersect(a, b, c, d) {
+        // Returns true if line segments ab and cd intersect
+        function ccw(p1, p2, p3) {
+            return (p3.y - p1.y) * (p2.x - p1.x) > (p2.y - p1.y) * (p3.x - p1.x);
+        }
+        return (ccw(a, c, d) !== ccw(b, c, d)) && (ccw(a, b, c) !== ccw(a, b, d));
+    }
+    for (const [a, b] of bboxEdges) {
+        for (const [c, d] of polyEdges) {
+            if (segmentsIntersect(a, b, c, d)) return true;
+        }
+    }
+    return false;
 }
 
 export function isPathInSelection(path, polygon) {

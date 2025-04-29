@@ -2,9 +2,11 @@
 
 export function drawPolygon(polygon, color, id) {
     if (!(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
-    let existingPolygon = document.querySelector(`#${id}`);
-    if (existingPolygon) existingPolygon.remove();
+    // Remove any existing debug shape with this id
     const svgElement = document.querySelector('#map-container svg');
+    let existing = svgElement.querySelector(`#${id}`);
+    if (existing) existing.remove();
+    // Draw new polygon
     const polygonElement = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
     polygonElement.setAttribute('id', id);
     polygonElement.setAttribute('points', polygon.map(p => `${p.x},${p.y}`).join(' '));
@@ -17,18 +19,22 @@ export function drawPolygon(polygon, color, id) {
 
 export function drawBBoxRect(bbox, color, id) {
     if (!(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
-    let existingRect = document.querySelector(`#${id}`);
-    if (existingRect) existingRect.remove();
+    // Remove any existing debug shape with this id
     const svgElement = document.querySelector('#map-container svg');
-    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    rect.setAttribute('id', id);
-    rect.setAttribute('x', bbox.x);
-    rect.setAttribute('y', bbox.y);
-    rect.setAttribute('width', bbox.width);
-    rect.setAttribute('height', bbox.height);
-    rect.setAttribute('fill', 'none');
-    rect.setAttribute('stroke', color);
-    rect.setAttribute('stroke-width', '2');
-    rect.setAttribute('stroke-dasharray', '4,2');
-    svgElement.appendChild(rect);
+    let existing = svgElement.querySelector(`#${id}`);
+    if (existing) existing.remove();
+    // Only draw if bbox has positive width and height
+    if (bbox.width > 0 && bbox.height > 0) {
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('id', id);
+        rect.setAttribute('x', bbox.x);
+        rect.setAttribute('y', bbox.y);
+        rect.setAttribute('width', bbox.width);
+        rect.setAttribute('height', bbox.height);
+        rect.setAttribute('fill', 'none');
+        rect.setAttribute('stroke', color);
+        rect.setAttribute('stroke-width', '2');
+        rect.setAttribute('stroke-dasharray', '4,2');
+        svgElement.appendChild(rect);
+    }
 }

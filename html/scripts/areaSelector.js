@@ -1,7 +1,8 @@
 import { disablePostalCodeClicks, enablePostalCodeClicks, addAllPostalCodes, reloadSelectedPostalCodes } from './postalCodeManager.js';
 import { selectionSize } from './settings.js';
 import { growSelection, setGrowSelectionDeps } from './growSelection.js';
-import { isBBoxInPolygon, isPathInSelection } from './polygonUtils.js';
+import { isBBoxInPolygon, isPathInSelection, getPathPoints, isPointInPolygon } from './polygonUtils.js';
+import { drawPolygon, drawBBoxRect } from './svgDebugUtils.js';
 
 export let isAreaSelectorActive = false;
 
@@ -158,19 +159,47 @@ function drawLasso() {
     lasso.setAttribute('stroke-width', '2');
     lasso.setAttribute('vector-effect', 'non-scaling-stroke');
     svgElement.appendChild(lasso);
+    // Debug: draw the lasso polygon as well
+    if (selectionPoints.length > 2) {
+        drawPolygon(selectionPoints, color, 'debug-lasso-polygon');
+        // Draw debug bbox around lasso using svgDebugUtils
+        let minX = Math.min(...selectionPoints.map(p => p.x));
+        let minY = Math.min(...selectionPoints.map(p => p.y));
+        let maxX = Math.max(...selectionPoints.map(p => p.x));
+        let maxY = Math.max(...selectionPoints.map(p => p.y));
+        const bbox = {
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY
+        };
+        drawBBoxRect(bbox, '#ffa500', 'debug-lasso-bbox');
+    } else {
+        // Remove debug bbox if not enough points
+        drawBBoxRect({x:0,y:0,width:0,height:0}, '#ffa500', 'debug-lasso-bbox');
+    }
 }
 
 function selectLassoedPathsInSelection() {
-
     const paths = document.querySelectorAll('#map-container svg path');
     const selectCountries = document.getElementById('select-countries').checked;
 
-    paths.forEach(path => {
+    // Compute lasso bounding box
+    let minX = Math.min(...selectionPoints.map(p => p.x));
+    let minY = Math.min(...selectionPoints.map(p => p.y));
+    let maxX = Math.max(...selectionPoints.map(p => p.x));
+    let maxY = Math.max(...selectionPoints.map(p => p.y));
+    const lassoBBox = {
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY
+    };
+
+    paths.forEach((path, idx) => {
         if (path.style.display === 'none') return;
         const parentGroup = path.closest('g');
         if (parentGroup && parentGroup.style.display === 'none') return;
-
-
 
         // Expand bbox by selectionSize
         let bbox = path.getBBox();
@@ -181,10 +210,23 @@ function selectLassoedPathsInSelection() {
             height: bbox.height + 2 * selectionSize
         };
 
+        // Fast AABB overlap check
+        const overlaps = !(
+            bbox.x + bbox.width < lassoBBox.x ||
+            bbox.x > lassoBBox.x + lassoBBox.width ||
+            bbox.y + bbox.height < lassoBBox.y ||
+            bbox.y > lassoBBox.y + lassoBBox.height
+        );
+        drawBBoxRect(bbox, overlaps ? 'green' : 'red', `debug-path-bbox-${idx}`);
+        if (!overlaps) return;
+
+        // Only do expensive checks if bbox overlaps
         if (isBBoxInPolygon(bbox, selectionPoints)) {
             const isInSelection = isPathInSelection(path, selectionPoints);
-            if (isInSelection) {
-
+            // New: also check if all lasso points are inside the path
+            const { points: pathPoints } = getPathPoints(path);
+            const lassoInsidePath = selectionPoints.length > 2 && selectionPoints.every(pt => isPointInPolygon(pt, pathPoints));
+            if (isInSelection || lassoInsidePath) {
                 const postalCode = path.id || 'Unknown';
                 addToSelection(path, postalCode);
                 path.classList.add('selected');
@@ -250,10 +292,13 @@ setGrowSelectionDeps({
 // Hook up the grow selection and clear debug polygons buttons
 // (growSelection is now imported)
 document.getElementById('grow-selection-button').addEventListener('click', growSelection);
-document.getElementById('clear-expansion-button').addEventListener('click', clearAllDebugPolygons);
+document.getElementById('clear-svg-debug-overlays-button').addEventListener('click', clearAllSvgDebugOverlays);
 
-function clearAllDebugPolygons() {
-    // Clear debug polygons and circles
-    const debugElements = svgElement.querySelectorAll('[id^="debug-circle-"], #original-polygon, #expanded-polygon');
-    debugElements.forEach(element => element.remove());
+function clearAllSvgDebugOverlays() {
+    // Remove all debug polygons and rectangles drawn by svgDebugUtils
+    const svg = svgElement || document.querySelector('#map-container svg');
+    if (!svg) return;
+    // Remove all polygons and rects with id starting with debug-, expanded-polygon, or containing -expanded-
+    const debugElements = svg.querySelectorAll('[id^="debug-"], [id^="expanded-polygon"], [id*="-expanded-"]');
+    debugElements.forEach(el => el.remove());
 }
