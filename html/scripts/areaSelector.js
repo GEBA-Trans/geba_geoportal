@@ -181,16 +181,25 @@ function drawLasso() {
 }
 
 function selectLassoedPathsInSelection() {
-
     const paths = document.querySelectorAll('#map-container svg path');
     const selectCountries = document.getElementById('select-countries').checked;
 
-    paths.forEach(path => {
+    // Compute lasso bounding box
+    let minX = Math.min(...selectionPoints.map(p => p.x));
+    let minY = Math.min(...selectionPoints.map(p => p.y));
+    let maxX = Math.max(...selectionPoints.map(p => p.x));
+    let maxY = Math.max(...selectionPoints.map(p => p.y));
+    const lassoBBox = {
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY
+    };
+
+    paths.forEach((path, idx) => {
         if (path.style.display === 'none') return;
         const parentGroup = path.closest('g');
         if (parentGroup && parentGroup.style.display === 'none') return;
-
-
 
         // Expand bbox by selectionSize
         let bbox = path.getBBox();
@@ -201,10 +210,20 @@ function selectLassoedPathsInSelection() {
             height: bbox.height + 2 * selectionSize
         };
 
+        // Fast AABB overlap check
+        const overlaps = !(
+            bbox.x + bbox.width < lassoBBox.x ||
+            bbox.x > lassoBBox.x + lassoBBox.width ||
+            bbox.y + bbox.height < lassoBBox.y ||
+            bbox.y > lassoBBox.y + lassoBBox.height
+        );
+        drawBBoxRect(bbox, overlaps ? 'green' : 'red', `debug-path-bbox-${idx}`);
+        if (!overlaps) return;
+
+        // Only do expensive checks if bbox overlaps
         if (isBBoxInPolygon(bbox, selectionPoints)) {
             const isInSelection = isPathInSelection(path, selectionPoints);
             if (isInSelection) {
-
                 const postalCode = path.id || 'Unknown';
                 addToSelection(path, postalCode);
                 path.classList.add('selected');
