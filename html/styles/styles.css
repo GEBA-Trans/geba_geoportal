@@ -771,3 +771,28 @@ button, .grow-selection-button, #clear-svg-debug-overlays-button, .delete-btn, .
 .lasso-group-flex {
     display: flex !important;
 }
+
+#grow-selection-indicator {
+    display: none;
+    position: fixed;
+    top: 50px;
+    left: 10px;
+    background-color: #1976d2;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 1.1em;
+    z-index: 1100;
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+    align-items: center;
+    gap: 10px;
+}
+#grow-selection-indicator i {
+    margin-right: 8px;
+    color: #fff;
+}
+#grow-selection-progress {
+    font-weight: bold;
+    color: #bbdefb;
+}

@@ -59,6 +59,19 @@ export function growSelection() {
     let batchIndex = 0;
     let anyNewSelected = false;
 
+    // Show the grow selection indicator
+    const indicator = document.getElementById('grow-selection-indicator');
+    const progressText = document.getElementById('grow-selection-progress');
+    if (indicator) indicator.style.display = 'flex';
+    const totalBatches = Math.ceil(candidatePaths.length / batchSize);
+
+    function updateProgress() {
+        if (progressText) {
+            progressText.textContent = `Selected: ${alreadySelected.size} | Batch: ${Math.min(batchIndex / batchSize + 1, totalBatches)}/${totalBatches}`;
+        }
+    }
+    updateProgress();
+
     function processBatch() {
         const batch = candidatePaths.slice(batchIndex, batchIndex + batchSize);
         batch.forEach((path, idx) => {
@@ -125,9 +138,13 @@ export function growSelection() {
             }
         });
         batchIndex += batchSize;
+        updateProgress();
         if (typeof reloadSelectedPostalCodes === 'function') reloadSelectedPostalCodes();
         if (batchIndex < candidatePaths.length) {
             setTimeout(processBatch, 0); // Schedule next batch
+        } else {
+            // Hide the indicator when done
+            if (indicator) indicator.style.display = 'none';
         }
     }
     processBatch();
