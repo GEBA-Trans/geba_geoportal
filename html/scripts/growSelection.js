@@ -7,36 +7,50 @@ import { setMode } from './postalCodeManager.js';
 
 // Expands the current selection by a configurable size, highlights expanded areas, and adds intersecting polygons to the selection.
 export function growSelection() {
-    // Determine active mode
-    const loadingButton = document.getElementById('loading-mode');
-    const deliveryButton = document.getElementById('delivery-mode');
-    const isLoadingMode = loadingButton && loadingButton.classList.contains('active');
+    // Determine active and other mode
+    const isLoadingMode = document.getElementById('loading-mode')?.classList.contains('active');
     const activeMode = isLoadingMode ? 'loading' : 'delivery';
     const otherMode = isLoadingMode ? 'delivery' : 'loading';
 
-    // Only expand the paths in the active mode
-    const selectedPaths = Array.from(document.querySelectorAll(`#map-container svg path.selected.${activeMode}`));
+    // Select all visible paths in the current mode if none are selected
+    let selectedPaths = Array.from(document.querySelectorAll(`#map-container svg path.selected.${activeMode}`));
     if (selectedPaths.length === 0) {
-        showError('No selected polygons to expand. Please select an area first.');
-        console.warn('DEV: No selected polygons to expand.');
+        // Select all visible paths in the current mode
+        selectedPaths = Array.from(document.querySelectorAll(`#map-container svg path.${activeMode}`)).filter(path =>
+            path.style.display !== 'none' &&
+            (!path.closest('g') || path.closest('g').style.display !== 'none')
+        );
+        // Mark them as selected
+        selectedPaths.forEach(path => {
+            const postalCode = path.id || 'Unknown';
+            addToSelection(path, postalCode);
+            path.classList.add('selected', activeMode);
+        });
+    }
+    if (selectedPaths.length === 0) {
+        showError(`No postal codes are available in the current mode (${activeMode}) to expand.`);
         return;
     }
 
-    // Keep track of all paths that are already selected in the active mode
-    const alreadySelected = new Set(
-        Array.from(document.querySelectorAll(`#map-container svg path.selected.${activeMode}`)).map(p => p.id)
+    // Set of already selected ids in the active mode
+    const alreadySelected = new Set(selectedPaths.map(p => p.id));
+
+    // Only consider as candidates: not already selected in active mode, not selected in other mode, and visible
+    const candidatePaths = Array.from(document.querySelectorAll('#map-container svg path')).filter(path =>
+        !alreadySelected.has(path.id) &&
+        !(path.classList.contains('selected') && path.classList.contains(otherMode)) &&
+        path.style.display !== 'none' &&
+        (!path.closest('g') || path.closest('g').style.display !== 'none')
     );
-    const candidatePaths = [];
-    const expandedPolygonsBySelected = [];
 
     // Precompute expanded polygons for each selected path
-    selectedPaths.forEach(selectedPath => {
-        const { points: selectedPoints } = getPathPoints(selectedPath);
-        const expandedPolygonCollection = createExpandedPolygonCollection(selectedPoints);
-        expandedPolygonsBySelected.push({ selectedPath, expandedPolygonCollection });
+    const expandedPolygonsBySelected = selectedPaths.map(selectedPath => {
+        const { points } = getPathPoints(selectedPath);
+        const expandedPolygonCollection = createExpandedPolygonCollection(points);
         expandedPolygonCollection.forEach((expandedPolygon, index) => {
             drawPolygon(expandedPolygon, 'rgb(211, 15, 246)', `expanded-polygon-${selectedPath.id}-${index}`);
         });
+        // Draw debug bbox for the expanded area
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         expandedPolygonCollection.forEach(poly => {
             poly.forEach(p => {
@@ -46,39 +60,20 @@ export function growSelection() {
                 maxY = Math.max(maxY, p.y);
             });
         });
-        const selectionBBox = {
-            x: minX,
-            y: minY,
-            width: maxX - minX,
-            height: maxY - minY
-        };
-        drawBBoxRect(selectionBBox, 'blue', `debug-selection-bbox-${selectedPath.id}`);
+        drawBBoxRect({ x: minX, y: minY, width: maxX - minX, height: maxY - minY }, 'blue', `debug-selection-bbox-${selectedPath.id}`);
+        return { selectedPath, expandedPolygonCollection };
     });
 
-    // Collect all candidate paths (not already selected, visible, and not in the other mode)
-    const allPaths = Array.from(document.querySelectorAll('#map-container svg path'));
-    allPaths.forEach(path => {
-        if (alreadySelected.has(path.id)) return;
-        if (path.classList.contains('selected') && path.classList.contains(otherMode)) return;
-        if (path.style.display === 'none') return;
-        const parentGroup = path.closest('g');
-        if (parentGroup && parentGroup.style.display === 'none') return;
-        candidatePaths.push(path);
-    });
-
-    const batchSize = 10;
-    let batchIndex = 0;
-    let anyNewSelected = false;
-
-    // Show the grow selection indicator
+    // UI: indicator and controls
     const indicator = document.getElementById('grow-selection-indicator');
     const progressText = document.getElementById('grow-selection-progress');
     if (indicator) indicator.style.display = 'flex';
-    // Hide sidebar and zoom controls during grow selection
     const sidebar = document.getElementById('sidebar');
     const zoomControls = document.getElementById('zoom-controls');
     if (sidebar) sidebar.style.display = 'none';
     if (zoomControls) zoomControls.style.display = 'none';
+    const batchSize = 10;
+    let batchIndex = 0;
     const totalBatches = Math.ceil(candidatePaths.length / batchSize);
 
     function updateProgress() {
@@ -91,7 +86,6 @@ export function growSelection() {
     function processBatch() {
         const batch = candidatePaths.slice(batchIndex, batchIndex + batchSize);
         batch.forEach((path, idx) => {
-            // Expand the path's bounding box for intersection testing
             let bbox = path.getBBox();
             bbox = {
                 x: bbox.x - 2 * selectionSize,
@@ -99,11 +93,8 @@ export function growSelection() {
                 width: bbox.width + 4 * selectionSize,
                 height: bbox.height + 4 * selectionSize
             };
-            // Draw debug bbox for the candidate path
-            // We'll color it green if it overlaps any expanded selection, red otherwise (updated below)
-            let overlapsAny = false;
-            for (const { expandedPolygonCollection, selectedPath } of expandedPolygonsBySelected) {
-                // Calculate the bounding box for all expanded polygons
+            expandedPolygonsBySelected.forEach(({ expandedPolygonCollection, selectedPath }) => {
+                // Compute selection bbox
                 let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
                 expandedPolygonCollection.forEach(poly => {
                     poly.forEach(p => {
@@ -113,12 +104,7 @@ export function growSelection() {
                         maxY = Math.max(maxY, p.y);
                     });
                 });
-                const selectionBBox = {
-                    x: minX,
-                    y: minY,
-                    width: maxX - minX,
-                    height: maxY - minY
-                };
+                const selectionBBox = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
                 // Fast AABB overlap
                 const overlaps = !(
                     bbox.x + bbox.width < selectionBBox.x ||
@@ -126,41 +112,35 @@ export function growSelection() {
                     bbox.y + bbox.height < selectionBBox.y ||
                     bbox.y > selectionBBox.y + selectionBBox.height
                 );
-                if (overlaps) overlapsAny = true;
-                // Draw debug bbox for candidate path
                 drawBBoxRect(bbox, overlaps ? 'green' : 'red', `debug-path-bbox-${selectedPath.id}-${batchIndex + idx}`);
-                if (!overlaps) continue;
-                // Get the points of the current path and create expanded polygons
+                if (!overlaps) return;
+                // Expanded polygons for candidate
                 const { points } = getPathPoints(path, false);
                 const targetExpandedPolygons = createExpandedPolygonCollection(points);
-                // Draw debug polygons for the candidate path
                 targetExpandedPolygons.forEach((expandedPolygon, idx2) => {
                     drawPolygon(expandedPolygon, 'rgba(255, 162, 0, 0.5)', `path-${path.id}-expanded-${selectedPath.id}-${batchIndex + idx}-${idx2}`);
                 });
-                // Check if any expanded polygon of the path intersects with the expanded selection
+                // Intersection test
                 const isInExpandedPolygon = expandedPolygonCollection.some(expandedPolygon =>
                     targetExpandedPolygons.some(targetPolygon =>
                         targetPolygon.some(point => isPointInPolygon(point, expandedPolygon))
                     )
                 );
                 if (isInExpandedPolygon) {
+                    // All selection/deselection logic is handled by addToSelection (from areaSelector.js), which calls into postalCodeManager.js
                     const postalCode = path.id || 'Unknown';
                     addToSelection(path, postalCode);
-                    path.classList.add('selected');
-                    path.classList.add(activeMode); // Ensure correct mode class
+                    path.classList.add('selected', activeMode);
                     alreadySelected.add(path.id);
-                    anyNewSelected = true;
-                    break; // No need to check other expanded polygons for this path
                 }
-            }
+            });
         });
         batchIndex += batchSize;
         updateProgress();
         if (typeof reloadSelectedPostalCodes === 'function') reloadSelectedPostalCodes();
         if (batchIndex < candidatePaths.length) {
-            setTimeout(processBatch, 0); // Schedule next batch
+            setTimeout(processBatch, 0);
         } else {
-            // Hide the indicator and restore sidebar/zoom controls when done
             if (indicator) indicator.style.display = 'none';
             if (sidebar) sidebar.style.display = '';
             if (zoomControls) zoomControls.style.display = '';
