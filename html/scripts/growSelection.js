@@ -2,10 +2,24 @@ import { showError } from './main.js';
 import { selectionSize } from './settings.js';
 import { getPathPoints, isPointInPolygon, mergePolygons } from './polygonUtils.js';
 import { drawPolygon, drawBBoxRect } from './svgDebugUtils.js';
+import { getSelectedPostalCodes } from './postalCodeManager.js';
+import { setMode } from './postalCodeManager.js';
 
 // Expands the current selection by a configurable size, highlights expanded areas, and adds intersecting polygons to the selection.
 export function growSelection() {
-    const selectedPaths = Array.from(document.querySelectorAll('#map-container svg path.selected'));
+    // Determine active mode
+    const loadingButton = document.getElementById('loading-mode');
+    const deliveryButton = document.getElementById('delivery-mode');
+    const isLoadingMode = loadingButton && loadingButton.classList.contains('active');
+    const activeMode = isLoadingMode ? 'loading' : 'delivery';
+    const unloadingMode = isLoadingMode ? 'delivery' : 'loading';
+
+    // Get selected postal codes for both modes
+    const selected = getSelectedPostalCodes();
+    const unloadingSelectedSet = new Set(selected[unloadingMode]);
+
+    // Only expand the paths in the active mode
+    const selectedPaths = Array.from(document.querySelectorAll(`#map-container svg path.selected.${activeMode}`));
     if (selectedPaths.length === 0) {
         showError('No selected polygons to expand. Please select an area first.');
         console.warn('DEV: No selected polygons to expand.');
@@ -13,7 +27,7 @@ export function growSelection() {
     }
 
     // Keep track of all paths that are already selected to skip them
-    const alreadySelected = new Set(selectedPaths.map(p => p.id));
+    const alreadySelected = new Set(selected[activeMode]);
     const candidatePaths = [];
     const expandedPolygonsBySelected = [];
 
@@ -45,10 +59,14 @@ export function growSelection() {
         drawBBoxRect(selectionBBox, 'blue', `debug-selection-bbox-${selectedPath.id}`);
     });
 
-    // Collect all candidate paths (not already selected, visible)
+    // Collect all candidate paths (not already selected, visible, and not in unloading mode)
     const allPaths = Array.from(document.querySelectorAll('#map-container svg path'));
     allPaths.forEach(path => {
         if (alreadySelected.has(path.id)) return;
+        if (unloadingSelectedSet.has(path.id)) {
+            // No debug overlay for unloading paths
+            return;
+        }
         if (path.style.display === 'none') return;
         const parentGroup = path.closest('g');
         if (parentGroup && parentGroup.style.display === 'none') return;
@@ -136,6 +154,7 @@ export function growSelection() {
                     const postalCode = path.id || 'Unknown';
                     addToSelection(path, postalCode);
                     path.classList.add('selected');
+                    path.classList.add(activeMode); // Ensure correct mode class
                     alreadySelected.add(path.id);
                     anyNewSelected = true;
                     break; // No need to check other expanded polygons for this path
