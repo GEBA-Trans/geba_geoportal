@@ -1,7 +1,7 @@
 import { isPointInPolygon } from './polygonUtils.js';
 import { getColorVariation } from './mapLoader.js'; // Add this import
 import { showError } from './main.js';
-import { setToolMode } from './areaSelector.js';
+import { setToolMode, isAreaSelectorActive } from './areaSelector.js';
 
 const LOADING_MODE = 'loading';
 const DELIVERY_MODE = 'delivery';
@@ -445,7 +445,7 @@ function removeAllPostalCodes(country, mode) {
             targetSet.delete(postalCode);
             pathElement.classList.remove('selected', mode);
             pathElement.style.fill = '';
-            if (isLassoActive) {
+            if (isAreaSelectorActive) {
                 pathElement.style.filter = 'grayscale(75%)'; // Reapply the grayscale filter only if lasso is active
             }
             // sendToWebSocket('deselect', postalCode);
