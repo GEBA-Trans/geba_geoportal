@@ -12,11 +12,7 @@ export function growSelection() {
     const deliveryButton = document.getElementById('delivery-mode');
     const isLoadingMode = loadingButton && loadingButton.classList.contains('active');
     const activeMode = isLoadingMode ? 'loading' : 'delivery';
-    const unloadingMode = isLoadingMode ? 'delivery' : 'loading';
-
-    // Get selected postal codes for both modes
-    const selected = getSelectedPostalCodes();
-    const unloadingSelectedSet = new Set(selected[unloadingMode]);
+    const otherMode = isLoadingMode ? 'delivery' : 'loading';
 
     // Only expand the paths in the active mode
     const selectedPaths = Array.from(document.querySelectorAll(`#map-container svg path.selected.${activeMode}`));
@@ -26,8 +22,10 @@ export function growSelection() {
         return;
     }
 
-    // Keep track of all paths that are already selected to skip them
-    const alreadySelected = new Set(selected[activeMode]);
+    // Keep track of all paths that are already selected in the active mode
+    const alreadySelected = new Set(
+        Array.from(document.querySelectorAll(`#map-container svg path.selected.${activeMode}`)).map(p => p.id)
+    );
     const candidatePaths = [];
     const expandedPolygonsBySelected = [];
 
@@ -36,11 +34,9 @@ export function growSelection() {
         const { points: selectedPoints } = getPathPoints(selectedPath);
         const expandedPolygonCollection = createExpandedPolygonCollection(selectedPoints);
         expandedPolygonsBySelected.push({ selectedPath, expandedPolygonCollection });
-        // Draw debug polygons for each selected path
         expandedPolygonCollection.forEach((expandedPolygon, index) => {
             drawPolygon(expandedPolygon, 'rgb(211, 15, 246)', `expanded-polygon-${selectedPath.id}-${index}`);
         });
-        // Draw debug bbox for the expanded area
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         expandedPolygonCollection.forEach(poly => {
             poly.forEach(p => {
@@ -59,14 +55,11 @@ export function growSelection() {
         drawBBoxRect(selectionBBox, 'blue', `debug-selection-bbox-${selectedPath.id}`);
     });
 
-    // Collect all candidate paths (not already selected, visible, and not in unloading mode)
+    // Collect all candidate paths (not already selected, visible, and not in the other mode)
     const allPaths = Array.from(document.querySelectorAll('#map-container svg path'));
     allPaths.forEach(path => {
         if (alreadySelected.has(path.id)) return;
-        if (unloadingSelectedSet.has(path.id)) {
-            // No debug overlay for unloading paths
-            return;
-        }
+        if (path.classList.contains('selected') && path.classList.contains(otherMode)) return;
         if (path.style.display === 'none') return;
         const parentGroup = path.closest('g');
         if (parentGroup && parentGroup.style.display === 'none') return;
