@@ -298,6 +298,22 @@ export function loadSelectedPostalCodes() {
             updatePostalCodeLists();
             updatePostalCodeSelectionColor('loading', document.getElementById('loading-color').value);
             updatePostalCodeSelectionColor('delivery', document.getElementById('delivery-color').value);
+            // Ensure SVG paths have correct classes after loading
+            document.querySelectorAll('#map-container svg path').forEach(path => {
+                path.classList.remove('selected', 'loading', 'delivery');
+            });
+            loadingPostalCodes.forEach(postalCode => {
+                const path = document.getElementById(postalCode);
+                if (path) {
+                    path.classList.add('selected', 'loading');
+                }
+            });
+            deliveryPostalCodes.forEach(postalCode => {
+                const path = document.getElementById(postalCode);
+                if (path) {
+                    path.classList.add('selected', 'delivery');
+                }
+            });
             resolve();
         } catch (error) {
             showError('Failed to load postal codes. Please refresh the page.');
