@@ -14,16 +14,19 @@ export function growSelection() {
 
     // Keep track of all paths that are already selected to skip them
     const alreadySelected = new Set(selectedPaths.map(p => p.id));
-    let anyNewSelected = false;
+    const candidatePaths = [];
+    const expandedPolygonsBySelected = [];
 
-    selectedPaths.forEach((selectedPath, selectedIdx) => {
+    // Precompute expanded polygons for each selected path
+    selectedPaths.forEach(selectedPath => {
         const { points: selectedPoints } = getPathPoints(selectedPath);
         const expandedPolygonCollection = createExpandedPolygonCollection(selectedPoints);
+        expandedPolygonsBySelected.push({ selectedPath, expandedPolygonCollection });
+        // Draw debug polygons for each selected path
         expandedPolygonCollection.forEach((expandedPolygon, index) => {
             drawPolygon(expandedPolygon, 'rgb(211, 15, 246)', `expanded-polygon-${selectedPath.id}-${index}`);
         });
-
-        // Calculate the bounding box for all expanded polygons
+        // Draw debug bbox for the expanded area
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         expandedPolygonCollection.forEach(poly => {
             poly.forEach(p => {
@@ -40,15 +43,25 @@ export function growSelection() {
             height: maxY - minY
         };
         drawBBoxRect(selectionBBox, 'blue', `debug-selection-bbox-${selectedPath.id}`);
+    });
 
-        // Check all map paths for intersection with expanded selection
-        const paths = document.querySelectorAll('#map-container svg path');
-        paths.forEach((path, idx) => {
-            if (alreadySelected.has(path.id)) return; // Skip already selected paths
-            if (path.style.display === 'none') return;
-            const parentGroup = path.closest('g');
-            if (parentGroup && parentGroup.style.display === 'none') return;
+    // Collect all candidate paths (not already selected, visible)
+    const allPaths = Array.from(document.querySelectorAll('#map-container svg path'));
+    allPaths.forEach(path => {
+        if (alreadySelected.has(path.id)) return;
+        if (path.style.display === 'none') return;
+        const parentGroup = path.closest('g');
+        if (parentGroup && parentGroup.style.display === 'none') return;
+        candidatePaths.push(path);
+    });
 
+    const batchSize = 10;
+    let batchIndex = 0;
+    let anyNewSelected = false;
+
+    function processBatch() {
+        const batch = candidatePaths.slice(batchIndex, batchIndex + batchSize);
+        batch.forEach((path, idx) => {
             // Expand the path's bounding box for intersection testing
             let bbox = path.getBBox();
             bbox = {
@@ -57,37 +70,67 @@ export function growSelection() {
                 width: bbox.width + 4 * selectionSize,
                 height: bbox.height + 4 * selectionSize
             };
-            const overlaps = !(
-                bbox.x + bbox.width < selectionBBox.x ||
-                bbox.x > selectionBBox.x + selectionBBox.width ||
-                bbox.y + bbox.height < selectionBBox.y ||
-                bbox.y > selectionBBox.y + selectionBBox.height
-            );
-            drawBBoxRect(bbox, overlaps ? 'green' : 'red', `debug-path-bbox-${selectedPath.id}-${idx}`);
-            if (!overlaps) return;
-
-            // Get the points of the current path and create expanded polygons
-            const { points } = getPathPoints(path, false);
-            const targetExpandedPolygons = createExpandedPolygonCollection(points);
-            targetExpandedPolygons.forEach((expandedPolygon, idx2) => {
-                drawPolygon(expandedPolygon, 'rgba(255, 162, 0, 0.5)', `path-${path.id}-expanded-${selectedPath.id}-${idx2}`);
-            });
-            // Check if any expanded polygon of the path intersects with the expanded selection
-            const isInExpandedPolygon = expandedPolygonCollection.some(expandedPolygon =>
-                targetExpandedPolygons.some(targetPolygon =>
-                    targetPolygon.some(point => isPointInPolygon(point, expandedPolygon))
-                )
-            );
-            if (isInExpandedPolygon) {
-                const postalCode = path.id || 'Unknown';
-                addToSelection(path, postalCode);
-                path.classList.add('selected');
-                alreadySelected.add(path.id); // Mark as selected to skip in future iterations
-                anyNewSelected = true;
+            // Draw debug bbox for the candidate path
+            // We'll color it green if it overlaps any expanded selection, red otherwise (updated below)
+            let overlapsAny = false;
+            for (const { expandedPolygonCollection, selectedPath } of expandedPolygonsBySelected) {
+                // Calculate the bounding box for all expanded polygons
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                expandedPolygonCollection.forEach(poly => {
+                    poly.forEach(p => {
+                        minX = Math.min(minX, p.x);
+                        minY = Math.min(minY, p.y);
+                        maxX = Math.max(maxX, p.x);
+                        maxY = Math.max(maxY, p.y);
+                    });
+                });
+                const selectionBBox = {
+                    x: minX,
+                    y: minY,
+                    width: maxX - minX,
+                    height: maxY - minY
+                };
+                // Fast AABB overlap
+                const overlaps = !(
+                    bbox.x + bbox.width < selectionBBox.x ||
+                    bbox.x > selectionBBox.x + selectionBBox.width ||
+                    bbox.y + bbox.height < selectionBBox.y ||
+                    bbox.y > selectionBBox.y + selectionBBox.height
+                );
+                if (overlaps) overlapsAny = true;
+                // Draw debug bbox for candidate path
+                drawBBoxRect(bbox, overlaps ? 'green' : 'red', `debug-path-bbox-${selectedPath.id}-${batchIndex + idx}`);
+                if (!overlaps) continue;
+                // Get the points of the current path and create expanded polygons
+                const { points } = getPathPoints(path, false);
+                const targetExpandedPolygons = createExpandedPolygonCollection(points);
+                // Draw debug polygons for the candidate path
+                targetExpandedPolygons.forEach((expandedPolygon, idx2) => {
+                    drawPolygon(expandedPolygon, 'rgba(255, 162, 0, 0.5)', `path-${path.id}-expanded-${selectedPath.id}-${batchIndex + idx}-${idx2}`);
+                });
+                // Check if any expanded polygon of the path intersects with the expanded selection
+                const isInExpandedPolygon = expandedPolygonCollection.some(expandedPolygon =>
+                    targetExpandedPolygons.some(targetPolygon =>
+                        targetPolygon.some(point => isPointInPolygon(point, expandedPolygon))
+                    )
+                );
+                if (isInExpandedPolygon) {
+                    const postalCode = path.id || 'Unknown';
+                    addToSelection(path, postalCode);
+                    path.classList.add('selected');
+                    alreadySelected.add(path.id);
+                    anyNewSelected = true;
+                    break; // No need to check other expanded polygons for this path
+                }
             }
         });
-    });
-    if (typeof reloadSelectedPostalCodes === 'function' && anyNewSelected) reloadSelectedPostalCodes();
+        batchIndex += batchSize;
+        if (typeof reloadSelectedPostalCodes === 'function') reloadSelectedPostalCodes();
+        if (batchIndex < candidatePaths.length) {
+            setTimeout(processBatch, 0); // Schedule next batch
+        }
+    }
+    processBatch();
 }
 
 // Returns the merged polygon of all currently selected paths, or null if none are selected.
