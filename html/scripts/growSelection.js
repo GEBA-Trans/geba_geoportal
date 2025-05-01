@@ -63,6 +63,11 @@ export function growSelection() {
     const indicator = document.getElementById('grow-selection-indicator');
     const progressText = document.getElementById('grow-selection-progress');
     if (indicator) indicator.style.display = 'flex';
+    // Hide sidebar and zoom controls during grow selection
+    const sidebar = document.getElementById('sidebar');
+    const zoomControls = document.getElementById('zoom-controls');
+    if (sidebar) sidebar.style.display = 'none';
+    if (zoomControls) zoomControls.style.display = 'none';
     const totalBatches = Math.ceil(candidatePaths.length / batchSize);
 
     function updateProgress() {
@@ -143,8 +148,10 @@ export function growSelection() {
         if (batchIndex < candidatePaths.length) {
             setTimeout(processBatch, 0); // Schedule next batch
         } else {
-            // Hide the indicator when done
+            // Hide the indicator and restore sidebar/zoom controls when done
             if (indicator) indicator.style.display = 'none';
+            if (sidebar) sidebar.style.display = '';
+            if (zoomControls) zoomControls.style.display = '';
         }
     }
     processBatch();
