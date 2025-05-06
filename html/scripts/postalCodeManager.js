@@ -430,19 +430,15 @@ export function enablePostalCodeClicks() {
     isPostalCodeClicksEnabled = true;
 }
 
-document.getElementById('loading-color').addEventListener('input', (e) => {
-    const color = e.target.value;
-    updatePostalCodeSelectionColor('loading', color);
-});
-
-document.getElementById('delivery-color').addEventListener('input', (e) => {
-    const color = e.target.value;
-    updatePostalCodeSelectionColor('delivery', color);
-});
-
-document.getElementById('selected-color').addEventListener('input', (e) => {
-    const color = e.target.value;
-    updatePostalCodeSelectionColor('selected', color);
+// Dynamically set up color picker event listeners for all modes
+MODES.forEach(mode => {
+    const colorInput = document.getElementById(`${mode}-color`);
+    if (colorInput) {
+        colorInput.addEventListener('input', (e) => {
+            const color = e.target.value;
+            updatePostalCodeSelectionColor(mode, color);
+        });
+    }
 });
 
 function updatePostalCodeSelectionColor(mode, color) {
