@@ -99,17 +99,13 @@ main {
     color: white;
 }
 
-#loading-postalcodes,
-#delivery-postalcodes,
-#selected-postalcodes {
+[id$='-postalcodes'] {
     margin-bottom: 1.5rem;
     flex-grow: 1;
     overflow-y: auto;
 }
 
-#loading-postalcodes h2,
-#delivery-postalcodes h2,
-#selected-postalcodes h2 {
+[id$='-postalcodes'] h2 {
     font-size: 1.2rem;
     margin-bottom: 1rem;
     color: #2c3e50;
@@ -168,22 +164,6 @@ path {
 
 path:hover {
     fill-opacity: 0.7;
-}
-
-path.selected {
-    stroke-width: 1;
-}
-
-path.selected.loading {
-    fill: #f1c40f;
-}
-
-path.selected.delivery {
-    fill: #3498db;
-}
-
-path.selected.selected {
-    fill: #a259f7;
 }
 
 #lookup-results {
