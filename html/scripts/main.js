@@ -1,12 +1,107 @@
 import { loadSVG } from './mapLoader.js';
 import { initializeZoomPan, setupZoomControls, setupPanning, triggerZoomVisible } from './zoomPan.js';
-import { setupPostalCodeClicks, loadSelectedPostalCodes, setMode, togglePostalCode } from './postalCodeManager.js';
+import { setupPostalCodeClicks, loadSelectedPostalCodes, setMode, togglePostalCode, MODES, updatePostalCodeLists, clearAllPostalCodes, clearAllForMode } from './postalCodeManager.js';
 import { setupModeToggle, setupLookupButton } from './uiSetup.js';
 import { connectWebSocket } from './websocket.js';
 import { setupLassoSelector } from './areaSelector.js';
 import { initializeTooltips } from './tooltip.js';
 import { populateRegionDropdown, handleRegionChange } from './regionManager.js';
 import { exportPostalCodeNeighbours } from './exportNeighbours.js';
+
+const MODE_COOKIE = 'enabledModes';
+let enabledModes = [...MODES];
+
+function saveEnabledModes() {
+    document.cookie = `${MODE_COOKIE}=${JSON.stringify(enabledModes)}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
+}
+
+function loadEnabledModes() {
+    const cookieValue = document.cookie.split('; ').find(row => row.startsWith(`${MODE_COOKIE}=`));
+    if (cookieValue) {
+        try {
+            enabledModes = JSON.parse(cookieValue.split('=')[1]);
+        } catch (e) {
+            enabledModes = [...MODES];
+        }
+    } else {
+        enabledModes = [...MODES];
+    }
+}
+
+function renderModeUI() {
+    const modeToggle = document.getElementById('mode-toggle');
+    modeToggle.innerHTML = '';
+    const listsContainer = document.getElementById('postalcode-lists');
+    listsContainer.innerHTML = '';
+    enabledModes.forEach((mode, idx) => {
+        const button = document.createElement('button');
+        button.id = `${mode}-mode`;
+        button.className = '';
+        button.innerHTML = `${mode.charAt(0).toUpperCase() + mode.slice(1)}\n<input type="color" id="${mode}-color" value="${mode === 'loading' ? '#f1c40f' : mode === 'delivery' ? '#3498db' : '#a259f7'}" class="color-picker">`;
+        modeToggle.appendChild(button);
+    });
+    enabledModes.forEach(mode => {
+        const container = document.createElement('div');
+        container.id = `${mode}-postalcodes`;
+        const h2 = document.createElement('h2');
+        h2.textContent = `${mode.charAt(0).toUpperCase() + mode.slice(1)} PostalCodes`;
+        const ul = document.createElement('ul');
+        ul.id = `${mode}-list`;
+        container.appendChild(h2);
+        container.appendChild(ul);
+        listsContainer.appendChild(container);
+    });
+    // Set the first enabled mode as selected (active)
+    if (enabledModes.length > 0) {
+        setMode(enabledModes[0]);
+        const firstBtn = document.getElementById(`${enabledModes[0]}-mode`);
+        if (firstBtn) firstBtn.classList.add('active');
+    }
+    import('./uiSetup.js').then(({ setupModeToggle }) => setupModeToggle());
+    updatePostalCodeLists();
+}
+
+function clearDisabledModesPostalCodes() {
+    MODES.forEach(mode => {
+        if (!enabledModes.includes(mode)) {
+            clearAllForMode(mode);
+        }
+    });
+}
+
+function renderModeSettingsPanel() {
+    const panel = document.getElementById('mode-settings-panel');
+    panel.innerHTML = '';
+    MODES.forEach(mode => {
+        const label = document.createElement('label');
+        label.className = 'switch';
+        label.style.display = 'flex';
+        label.style.alignItems = 'center';
+        label.style.marginBottom = '8px';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.checked = enabledModes.includes(mode);
+        input.style.marginRight = '8px';
+        input.addEventListener('change', () => {
+            if (input.checked) {
+                if (!enabledModes.includes(mode)) enabledModes.push(mode);
+            } else {
+                enabledModes = enabledModes.filter(m => m !== mode);
+            }
+            saveEnabledModes();
+            renderModeUI();
+            clearDisabledModesPostalCodes();
+            renderModeSettingsPanel();
+        });
+        const slider = document.createElement('span');
+        slider.className = 'slider';
+        slider.style.marginRight = '10px';
+        label.appendChild(input);
+        label.appendChild(slider);
+        label.appendChild(document.createTextNode(mode.charAt(0).toUpperCase() + mode.slice(1)));
+        panel.appendChild(label);
+    });
+}
 
 function initializeApp() {
     loadSVG()
@@ -65,6 +160,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const debugBtn = document.getElementById('clear-svg-debug-overlays-button');
     if (debugBtn && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
         debugBtn.style.display = 'inline-block';
+    }
+
+    loadEnabledModes();
+    renderModeUI();
+    clearDisabledModesPostalCodes();
+
+    // Gear icon logic
+    const gearBtn = document.getElementById('mode-settings-gear');
+    const panel = document.getElementById('mode-settings-panel');
+    if (gearBtn && panel) {
+        gearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            renderModeSettingsPanel();
+        });
+        document.addEventListener('click', (e) => {
+            if (!panel.contains(e.target) && e.target !== gearBtn) {
+                panel.style.display = 'none';
+            }
+        });
     }
 });
 

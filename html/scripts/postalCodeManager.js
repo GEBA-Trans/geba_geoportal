@@ -71,7 +71,8 @@ export function togglePostalCode(pathElement, postalCode, mode, isFromLasso = fa
         }
     }
 
-    const selectedColor = document.getElementById(`${mode}-color`).value;
+    const colorInput = document.getElementById(`${mode}-color`);
+    const selectedColor = colorInput ? colorInput.value : (mode === 'loading' ? '#f1c40f' : mode === 'delivery' ? '#3498db' : '#a259f7');
     pathElement.style.fill = targetSet.has(postalCode) ? selectedColor : '';
 
     updatePostalCodeLists();
@@ -86,6 +87,8 @@ export function updatePostalCodeLists() {
 
 function updateList(listId, postalCodes, mode) {
     const list = document.getElementById(listId);
+    if (!list) return; // Fix: skip if the list element does not exist
+
     list.innerHTML = '';
 
     if (postalCodes.size > 0) {
@@ -211,7 +214,7 @@ function removePostalCode(postalCode) {
     saveSelectedPostalCodes();
 }
 
-function clearAllPostalCodes(postalCodes) {
+export function clearAllPostalCodes(postalCodes) {
     postalCodes.forEach(postalCode => {
         const pathElement = document.getElementById(postalCode);
         if (pathElement) {
@@ -225,6 +228,10 @@ function clearAllPostalCodes(postalCodes) {
     postalCodes.clear();
     updatePostalCodeLists();
     saveSelectedPostalCodes();
+}
+
+export function clearAllForMode(mode) {
+    clearAllPostalCodes(postalCodeState[mode].postalCodes);
 }
 
 function highlightPostalCode(postalCode, highlight) {
@@ -252,7 +259,8 @@ export function updatePostalCodeCount(postalCode, count) {
 export function setMode(mode) {
     currentMode = mode;
     MODES.forEach(m => {
-        document.getElementById(`${m}-mode`).classList.toggle('active', mode === m);
+        const btn = document.getElementById(`${m}-mode`);
+        if (btn) btn.classList.toggle('active', mode === m);
     });
     setToolMode(mode);
 }
@@ -274,7 +282,10 @@ export function loadSelectedPostalCodes() {
 
             updatePostalCodeLists();
             MODES.forEach(mode => {
-                updatePostalCodeSelectionColor(mode, document.getElementById(`${mode}-color`).value);
+                const colorInput = document.getElementById(`${mode}-color`);
+                if (colorInput) {
+                    updatePostalCodeSelectionColor(mode, colorInput.value);
+                }
             });
             document.querySelectorAll('#map-container svg path').forEach(path => {
                 path.classList.remove(...MODES);
