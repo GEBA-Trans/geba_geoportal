@@ -67,17 +67,7 @@
                     </span>
                     <span id="country-count">0 / 0</span> <!-- Move the counter here -->
                 </div>
-                <div id="mode-toggle">
-                    <button id="loading-mode" class="active">Loading
-                        <input type="color" id="loading-color" value="#f1c40f" class="color-picker">
-                    </button>
-                    <button id="delivery-mode">Delivery
-                        <input type="color" id="delivery-color" value="#3498db" class="color-picker">
-                    </button>
-                    <button id="selected-mode">Selected
-                        <input type="color" id="selected-color" value="#a259f7" class="color-picker">
-                    </button>
-                </div>
+                <div id="mode-toggle"></div>
                 <!-- Add the new toggle switch here -->
                 <div id="select-countries-container">
                     <label class="switch">
@@ -86,18 +76,7 @@
                     </label>
                     <span id="select-mode-text"><i class="fas fa-map-marker-alt"></i> Selecting Postal Codes</span>
                 </div>
-                <div id="loading-postalcodes">
-                    <h2>Loading PostalCodes</h2>
-                    <ul id="loading-list"></ul>
-                </div>
-                <div id="delivery-postalcodes">
-                    <h2>Delivery PostalCodes</h2>
-                    <ul id="delivery-list"></ul>
-                </div>
-                <div id="selected-postalcodes">
-                    <h2>Selected PostalCodes</h2>
-                    <ul id="selected-list"></ul>
-                </div>
+                <div id="postalcode-lists"></div>
                 <button id="lookup-button" class="lookup-button">Lookup</button>
                 <button id="export-neighbours-button">Export neighbours</button>
             </div>
@@ -130,5 +109,33 @@
         </div>
     <!-- Update the script import to use the new main.js -->
     <script type="module" src="scripts/main.js"></script>
+    <script type="module">
+        import { MODES } from './scripts/postalCodeManager.js';
+
+        const modeToggle = document.getElementById('mode-toggle');
+        const listsContainer = document.getElementById('postalcode-lists');
+
+        // Generate mode toggle buttons and color pickers
+        MODES.forEach((mode, idx) => {
+            const button = document.createElement('button');
+            button.id = `${mode}-mode`;
+            button.className = idx === 0 ? 'active' : '';
+            button.innerHTML = `${mode.charAt(0).toUpperCase() + mode.slice(1)}\n<input type="color" id="${mode}-color" value="${mode === 'loading' ? '#f1c40f' : mode === 'delivery' ? '#3498db' : '#a259f7'}" class="color-picker">`;
+            modeToggle.appendChild(button);
+        });
+
+        // Generate postal code list containers
+        MODES.forEach(mode => {
+            const container = document.createElement('div');
+            container.id = `${mode}-postalcodes`;
+            const h2 = document.createElement('h2');
+            h2.textContent = `${mode.charAt(0).toUpperCase() + mode.slice(1)} PostalCodes`;
+            const ul = document.createElement('ul');
+            ul.id = `${mode}-list`;
+            container.appendChild(h2);
+            container.appendChild(ul);
+            listsContainer.appendChild(container);
+        });
+    </script>
 </body>
 </html>

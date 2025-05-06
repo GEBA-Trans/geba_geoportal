@@ -115,16 +115,12 @@ main {
     color: #2c3e50;
 }
 
-#loading-list,
-#delivery-list,
-#selected-list {
+[id$='-list'] {
     list-style-type: none;
     padding: 0;
 }
 
-#loading-list li,
-#delivery-list li,
-#selected-list li {
+[id$='-list'] li {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -132,9 +128,7 @@ main {
     transition: background-color 0.3s;
 }
 
-#loading-list li:hover,
-#delivery-list li:hover,
-#selected-list li:hover {
+[id$='-list'] li:hover {
     background-color: #f5f7fa;
 }
 
