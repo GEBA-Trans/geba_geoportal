@@ -9,7 +9,7 @@ import { populateRegionDropdown, handleRegionChange } from './regionManager.js';
 import { exportPostalCodeNeighbours } from './exportNeighbours.js';
 
 const MODE_COOKIE = 'enabledModes';
-let enabledModes = [...MODES];
+let enabledModes = ["loading", "delivery"];
 
 function saveEnabledModes() {
     document.cookie = `${MODE_COOKIE}=${JSON.stringify(enabledModes)}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
@@ -21,10 +21,10 @@ function loadEnabledModes() {
         try {
             enabledModes = JSON.parse(cookieValue.split('=')[1]);
         } catch (e) {
-            enabledModes = [...MODES];
+            enabledModes = ["loading", "delivery"];
         }
     } else {
-        enabledModes = [...MODES];
+        enabledModes = ["loading", "delivery"];
     }
 }
 
