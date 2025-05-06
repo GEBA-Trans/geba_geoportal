@@ -145,18 +145,19 @@ document.addEventListener('DOMContentLoaded', function() {
     renderModeUI();
     // clearDisabledModesPostalCodes();
 
-    // Gear icon logic
-    const gearBtn = document.getElementById('mode-settings-gear');
-    const panel = document.getElementById('select-modegroup-container');
-    if (gearBtn && panel) {
-        gearBtn.addEventListener('click', (e) => {
+    // Lock icon logic (replaces gear icon logic)
+    const lockBtn = document.getElementById('mode-settings-gear');
+    const lockIcon = document.getElementById('mode-lock-icon');
+    const modegroupPanel = document.getElementById('select-modegroup-container');
+    const modegroupSwitch = document.getElementById('select-modegroup');
+    if (lockBtn && lockIcon && modegroupPanel && modegroupSwitch) {
+        lockBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        });
-        document.addEventListener('click', (e) => {
-            if (!panel.contains(e.target) && e.target !== gearBtn) {
-                panel.style.display = 'none';
-            }
+            const isDisabled = modegroupSwitch.disabled;
+            modegroupSwitch.disabled = !isDisabled;
+            modegroupPanel.classList.toggle('disabled', !isDisabled);
+            lockIcon.classList.toggle('fa-lock-open', isDisabled);
+            lockIcon.classList.toggle('fa-lock', !isDisabled);
         });
     }
 

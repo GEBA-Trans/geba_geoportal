@@ -145,6 +145,28 @@ main {
     margin-bottom: 1rem;
 }
 
+#select-modegroup-container.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+    background: repeating-linear-gradient(135deg, #eee, #eee 10px, #ddd 10px, #ddd 20px);
+    border: 1.5px solid #b0b0b0;
+}
+
+#select-modegroup-container.disabled #select-modegroup-text {
+    color: #b0b0b0;
+    font-style: italic;
+    font-weight: bold;
+    position: relative;
+}
+
+#select-modegroup-container.disabled #select-modegroup-text:after {
+    content: ' (Locked)';
+    color: #b71c1c;
+    font-size: 13px;
+    margin-left: 6px;
+    font-weight: bold;
+}
+
 #select-modegroup-text {
     font-size: 14px;
     color: #333;

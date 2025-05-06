@@ -67,16 +67,16 @@
                     </span>
                     <span id="country-count">0 / 0</span> <!-- Move the counter here -->
                 </div>
-                <div id="select-countries-container" class="select-toggle-container">
+                <div id="select-countries-container" class="select-toggle-container ">
                     <label class="switch">
                         <input type="checkbox" id="select-countries">
                         <span class="slider"></span>
                     </label>
                     <span id="select-mode-text"><i class="fas fa-map-marker-alt"></i> Selecting Postal Codes</span>
                 </div>
-                <div id="select-modegroup-container" class="select-toggle-container" style="display:none;">
+                <div id="select-modegroup-container" class="select-toggle-container disabled">
                     <label class="switch">
-                        <input type="checkbox" id="select-modegroup">
+                        <input type="checkbox" id="select-modegroup" disabled>
                         <span class="slider"></span>
                     </label>
                     <span id="select-modegroup-text"><i class="fas fa-mouse-pointer"></i> Single Select</span>
@@ -85,7 +85,7 @@
                     <div class="row align-items-center mb-3" id="mode-toggle-row">
                         <div class="col pe-0" id="mode-toggle"></div>
                         <div class="col-auto ps-1">
-                            <button id="mode-settings-gear" title="Mode Settings" class="btn btn-link p-0 d-flex align-items-center justify-content-end mode-gear-btn"><i class="fas fa-gear"></i></button>
+                            <button id="mode-settings-gear" title="Mode Lock" class="btn btn-link p-0 d-flex align-items-center justify-content-end mode-gear-btn"><i class="fas fa-lock" id="mode-lock-icon"></i></button>
                         </div>
                     </div>
                 </div>
