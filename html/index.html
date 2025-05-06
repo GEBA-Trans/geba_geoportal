@@ -74,11 +74,17 @@
                     </label>
                     <span id="select-mode-text"><i class="fas fa-map-marker-alt"></i> Selecting Postal Codes</span>
                 </div>
+                <div id="select-modegroup-container" style="display: none; margin: 10px 0 0 0;"">
+                    <label class="switch">
+                        <input type="checkbox" id="select-modegroup">
+                        <span class="slider"></span>
+                    </label>
+                    <span id="select-modegroup-text">Loading/Delivery</span>
+                </div>
                 <div id="mode-toggle-container" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
                     <div id="mode-toggle"></div>
                     <button id="mode-settings-gear" title="Mode Settings" style="background: none; border: none; cursor: pointer; font-size: 1.2em; padding: 0 6px;"><i class="fas fa-gear"></i></button>
                 </div>
-                <div id="mode-settings-panel" style="display: none; margin: 10px 0 0 0;"></div>
                 <div id="postalcode-lists"></div>
                 <button id="lookup-button" class="lookup-button">Lookup</button>
                 <button id="export-neighbours-button">Export neighbours</button>

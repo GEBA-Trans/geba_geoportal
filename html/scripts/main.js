@@ -28,6 +28,15 @@ function loadEnabledModes() {
     }
 }
 
+function syncModeGroupToggle() {
+    const modegroupToggle = document.getElementById('select-modegroup');
+    const modegroupText = document.getElementById('select-modegroup-text');
+    if (!modegroupToggle || !modegroupText) return;
+    const isSelected = enabledModes.length === 1 && enabledModes[0] === 'selected';
+    modegroupToggle.checked = isSelected;
+    modegroupText.textContent = isSelected ? 'Selected' : 'Loading/Delivery';
+}
+
 function renderModeUI() {
     const modeToggle = document.getElementById('mode-toggle');
     modeToggle.innerHTML = '';
@@ -59,6 +68,7 @@ function renderModeUI() {
     }
     import('./uiSetup.js').then(({ setupModeToggle }) => setupModeToggle());
     updatePostalCodeLists();
+    syncModeGroupToggle();
 }
 
 function clearDisabledModesPostalCodes() {
@@ -66,40 +76,6 @@ function clearDisabledModesPostalCodes() {
         if (!enabledModes.includes(mode)) {
             clearAllForMode(mode);
         }
-    });
-}
-
-function renderModeSettingsPanel() {
-    const panel = document.getElementById('mode-settings-panel');
-    panel.innerHTML = '';
-    MODES.forEach(mode => {
-        const label = document.createElement('label');
-        label.className = 'switch';
-        label.style.display = 'flex';
-        label.style.alignItems = 'center';
-        label.style.marginBottom = '8px';
-        const input = document.createElement('input');
-        input.type = 'checkbox';
-        input.checked = enabledModes.includes(mode);
-        input.style.marginRight = '8px';
-        input.addEventListener('change', () => {
-            if (input.checked) {
-                if (!enabledModes.includes(mode)) enabledModes.push(mode);
-            } else {
-                enabledModes = enabledModes.filter(m => m !== mode);
-            }
-            saveEnabledModes();
-            renderModeUI();
-            clearDisabledModesPostalCodes();
-            renderModeSettingsPanel();
-        });
-        const slider = document.createElement('span');
-        slider.className = 'slider';
-        slider.style.marginRight = '10px';
-        label.appendChild(input);
-        label.appendChild(slider);
-        label.appendChild(document.createTextNode(mode.charAt(0).toUpperCase() + mode.slice(1)));
-        panel.appendChild(label);
     });
 }
 
@@ -168,12 +144,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Gear icon logic
     const gearBtn = document.getElementById('mode-settings-gear');
-    const panel = document.getElementById('mode-settings-panel');
+    const panel = document.getElementById('select-modegroup-container');
     if (gearBtn && panel) {
         gearBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-            renderModeSettingsPanel();
         });
         document.addEventListener('click', (e) => {
             if (!panel.contains(e.target) && e.target !== gearBtn) {
@@ -181,6 +156,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Hook up mode group toggle
+    const modegroupToggle = document.getElementById('select-modegroup');
+    if (modegroupToggle) {
+        modegroupToggle.addEventListener('change', function() {
+            if (modegroupToggle.checked) {
+                enabledModes = ['selected'];
+            } else {
+                enabledModes = ['loading', 'delivery'];
+            }
+            saveEnabledModes();
+            renderModeUI();
+            clearDisabledModesPostalCodes();
+        });
+    }
+    syncModeGroupToggle();
 });
 
 // Global error display utility
