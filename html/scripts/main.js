@@ -34,7 +34,7 @@ function syncModeGroupToggle() {
     if (!modegroupToggle || !modegroupText) return;
     const isSelected = enabledModes.length === 1 && enabledModes[0] === 'selected';
     modegroupToggle.checked = isSelected;
-    modegroupText.textContent = isSelected ? 'Selected' : 'Loading/Delivery';
+    modegroupText.textContent = isSelected ? 'Loading Delivery' : 'Single Select';
 }
 
 function renderModeUI() {
