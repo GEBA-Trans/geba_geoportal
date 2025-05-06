@@ -145,15 +145,10 @@ function drawLasso() {
     const lasso = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
     lasso.setAttribute('id', 'lasso');
     lasso.setAttribute('points', selectionPoints.map(p => `${p.x},${p.y}`).join(' '));
-    // Use mode color for lasso
+    // DRY: Use color input for current mode
     let color = '#ff0000'; // fallback
-    if (currentMode === 'loading') {
-        const loadingColorInput = document.getElementById('loading-color');
-        if (loadingColorInput) color = loadingColorInput.value;
-    } else if (currentMode === 'delivery') {
-        const deliveryColorInput = document.getElementById('delivery-color');
-        if (deliveryColorInput) color = deliveryColorInput.value;
-    }
+    const colorInput = document.getElementById(`${currentMode}-color`);
+    if (colorInput) color = colorInput.value;
     lasso.setAttribute('fill', color + '22'); // 13% opacity
     lasso.setAttribute('stroke', color);
     lasso.setAttribute('stroke-width', '2');
