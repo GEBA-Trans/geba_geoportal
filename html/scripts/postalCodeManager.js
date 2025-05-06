@@ -227,12 +227,14 @@ export function clearAllPostalCodes(postalCodes) {
             }
         }
     });
+    console.log('DEV: Clearing all postal codes:', postalCodes);
     postalCodes.clear();
     updatePostalCodeLists();
     saveSelectedPostalCodes();
 }
 
 export function clearAllForMode(mode) {
+    console.log('DEV: Clearing all postal codes for mode:', mode);
     clearAllPostalCodes(postalCodeState[mode].postalCodes);
 }
 
@@ -272,7 +274,7 @@ export function loadSelectedPostalCodes() {
         try {
             loadExpandedCountries();
 
-            MODES.forEach(mode => postalCodeState[mode].postalCodes.clear());
+            // MODES.forEach(mode => postalCodeState[mode].postalCodes.clear());
 
             Object.keys(localStorage).forEach(key => {
                 if (key.startsWith(STORAGE_NAME)) {

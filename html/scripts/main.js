@@ -76,6 +76,7 @@ function renderModeUI() {
 function clearDisabledModesPostalCodes() {
     MODES.forEach(mode => {
         if (!enabledModes.includes(mode)) {
+            console.log(`Clearing postal codes for disabled mode: ${mode}`);
             clearAllForMode(mode);
         }
     });
@@ -142,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     loadEnabledModes();
     renderModeUI();
-    clearDisabledModesPostalCodes();
+    // clearDisabledModesPostalCodes();
 
     // Gear icon logic
     const gearBtn = document.getElementById('mode-settings-gear');
