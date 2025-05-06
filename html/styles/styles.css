@@ -100,27 +100,31 @@ main {
 }
 
 #loading-postalcodes,
-#delivery-postalcodes {
+#delivery-postalcodes,
+#selected-postalcodes {
     margin-bottom: 1.5rem;
     flex-grow: 1;
     overflow-y: auto;
 }
 
 #loading-postalcodes h2,
-#delivery-postalcodes h2 {
+#delivery-postalcodes h2,
+#selected-postalcodes h2 {
     font-size: 1.2rem;
     margin-bottom: 1rem;
     color: #2c3e50;
 }
 
 #loading-list,
-#delivery-list {
+#delivery-list,
+#selected-list {
     list-style-type: none;
     padding: 0;
 }
 
 #loading-list li,
-#delivery-list li {
+#delivery-list li,
+#selected-list li {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -129,7 +133,8 @@ main {
 }
 
 #loading-list li:hover,
-#delivery-list li:hover {
+#delivery-list li:hover,
+#selected-list li:hover {
     background-color: #f5f7fa;
 }
 
