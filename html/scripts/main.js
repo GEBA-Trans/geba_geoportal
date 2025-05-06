@@ -34,7 +34,9 @@ function syncModeGroupToggle() {
     if (!modegroupToggle || !modegroupText) return;
     const isSelected = enabledModes.length === 1 && enabledModes[0] === 'selected';
     modegroupToggle.checked = isSelected;
-    modegroupText.textContent = isSelected ? 'Loading Delivery' : 'Single Select';
+    modegroupText.innerHTML = isSelected
+        ? '<i class="fas fa-location-arrow"></i> Single Select'
+        : '<i class="fas fa-map-signs"></i> Loading/Delivery';
 }
 
 function renderModeUI() {

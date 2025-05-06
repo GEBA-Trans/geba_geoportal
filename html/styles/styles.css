@@ -128,10 +128,20 @@ main {
     padding: 0 6px;
 }
 
-#select-modegroup-container {
+.select-toggle-container {
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.select-toggle-container span {
+    font-size: 14px;
+    color: #333;
+}
+
+#select-modegroup-container {
     margin-bottom: 1rem;
 }
 
@@ -466,19 +476,6 @@ input:checked+.slider:before {
 }
 
 .toggle-all-container span {
-    font-size: 14px;
-    color: #333;
-}
-
-#select-countries-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    border-radius: 4px;
-}
-
-#select-countries-container span {
     font-size: 14px;
     color: #333;
 }
