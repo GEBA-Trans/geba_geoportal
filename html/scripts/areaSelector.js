@@ -229,7 +229,7 @@ function selectLassoedPathsInSelection() {
             if (isInSelection || lassoInsidePath) {
                 const postalCode = path.id || 'Unknown';
                 addToSelection(path, postalCode);
-                path.classList.add('selected');
+                path.classList.add('selected', currentMode);
                 path.style.filter = '';
 
                 if (selectCountries && parentGroup) {

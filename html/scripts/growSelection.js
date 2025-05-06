@@ -2,18 +2,23 @@ import { showError } from './main.js';
 import { selectionSize } from './settings.js';
 import { getPathPoints, isPointInPolygon, mergePolygons } from './polygonUtils.js';
 import { drawPolygon, drawBBoxRect } from './svgDebugUtils.js';
-import { getSelectedPostalCodes } from './postalCodeManager.js';
-import { setMode } from './postalCodeManager.js';
+import { getSelectedPostalCodes, setMode, MODES } from './postalCodeManager.js';
 
 // Expands the current selection by a configurable size, highlights expanded areas, and adds intersecting polygons to the selection.
 export function growSelection() {
-    // Determine active and other mode
-    const isLoadingMode = document.getElementById('loading-mode')?.classList.contains('active');
-    const activeMode = isLoadingMode ? 'loading' : 'delivery';
-    const otherMode = isLoadingMode ? 'delivery' : 'loading';
+    // Determine active mode dynamically
+    const activeMode = MODES.find(mode => document.getElementById(`${mode}-mode`)?.classList.contains('active')) || MODES[0];
+    // All other modes
+    const otherModes = MODES.filter(mode => mode !== activeMode);
 
     // Select all visible paths in the current mode if none are selected
-    let selectedPaths = Array.from(document.querySelectorAll(`#map-container svg path.selected.${activeMode}`));
+    let selectedPaths;
+    if (activeMode === 'selected') {
+        selectedPaths = Array.from(document.querySelectorAll(`#map-container svg path.selected.selected`))
+            .filter(path => !MODES.some(mode => mode !== 'selected' && path.classList.contains('selected') && path.classList.contains(mode)));
+    } else {
+        selectedPaths = Array.from(document.querySelectorAll(`#map-container svg path.selected.${activeMode}`));
+    }
     if (selectedPaths.length === 0) {
         // Select all visible paths in the current mode
         selectedPaths = Array.from(document.querySelectorAll(`#map-container svg path.${activeMode}`)).filter(path =>
@@ -35,13 +40,20 @@ export function growSelection() {
     // Set of already selected ids in the active mode
     const alreadySelected = new Set(selectedPaths.map(p => p.id));
 
-    // Only consider as candidates: not already selected in active mode, not selected in other mode, and visible
-    const candidatePaths = Array.from(document.querySelectorAll('#map-container svg path')).filter(path =>
-        !alreadySelected.has(path.id) &&
-        !(path.classList.contains('selected') && path.classList.contains(otherMode)) &&
-        path.style.display !== 'none' &&
-        (!path.closest('g') || path.closest('g').style.display !== 'none')
-    );
+    // Only consider as candidates: not already selected in active mode, not selected in any other mode, and visible
+    const candidatePaths = Array.from(document.querySelectorAll('#map-container svg path')).filter(path => {
+        if (alreadySelected.has(path.id)) return false;
+        if (activeMode === 'selected') {
+            // Exclude if path is selected in any other mode except 'selected'
+            if (MODES.some(mode => mode !== 'selected' && path.classList.contains('selected') && path.classList.contains(mode))) return false;
+        } else {
+            // Exclude if path is selected in any mode except the current one
+            if (otherModes.some(mode => path.classList.contains('selected') && path.classList.contains(mode))) return false;
+        }
+        if (path.style.display === 'none') return false;
+        if (path.closest('g') && path.closest('g').style.display === 'none') return false;
+        return true;
+    });
 
     // Precompute expanded polygons for each selected path
     const expandedPolygonsBySelected = selectedPaths.map(selectedPath => {

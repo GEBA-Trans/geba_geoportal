@@ -1,12 +1,13 @@
-import { setMode } from './postalCodeManager.js';
+import { setMode, MODES } from './postalCodeManager.js';
 import { lookupCompanies } from './websocket.js';
 
 export function setupModeToggle() {
-    const loadingButton = document.getElementById('loading-mode');
-    const deliveryButton = document.getElementById('delivery-mode');
-
-    loadingButton.addEventListener('click', () => setMode('loading'));
-    deliveryButton.addEventListener('click', () => setMode('delivery'));
+    MODES.forEach(mode => {
+        const button = document.getElementById(`${mode}-mode`);
+        if (button) {
+            button.addEventListener('click', () => setMode(mode));
+        }
+    });
 }
 
 export function setupLookupButton() {

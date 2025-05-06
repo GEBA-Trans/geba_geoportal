@@ -183,6 +183,10 @@ path.selected.delivery {
     fill: #3498db;
 }
 
+path.selected.selected {
+    fill: #a259f7;
+}
+
 #lookup-results {
     display: none;
     padding: 1.5rem;
