@@ -40,7 +40,7 @@ function syncModeGroupToggle() {
 }
 
 function renderModeUI() {
-    console.log('Rendering mode UI...');
+    // console.log('Rendering mode UI...');
     const modeToggle = document.getElementById('mode-toggle');
     modeToggle.innerHTML = '';
     const listsContainer = document.getElementById('postalcode-lists');
@@ -64,14 +64,14 @@ function renderModeUI() {
         listsContainer.appendChild(container);
     });
     // Set the first enabled mode as selected (active)
-    console.log('Enabled modes:', enabledModes);
+    // console.log('Enabled modes:', enabledModes);
     if (enabledModes.length > 0) {
         setMode(enabledModes[0]);
-        console.log(`Setting mode to: ${enabledModes[0]}`);
+        // console.log(`Setting mode to: ${enabledModes[0]}`);
         const firstBtn = document.getElementById(`${enabledModes[0]}-mode`);
         if (firstBtn) firstBtn.classList.add('active');
     }
-    console.log('Rendering mode UI with enabled modes:', enabledModes);
+    // console.log('Rendering mode UI with enabled modes:', enabledModes);
     import('./uiSetup.js').then(({ setupModeToggle }) => setupModeToggle());
     updatePostalCodeLists();
     syncModeGroupToggle();
@@ -80,7 +80,7 @@ function renderModeUI() {
 function clearDisabledModesPostalCodes() {
     MODES.forEach(mode => {
         if (!enabledModes.includes(mode)) {
-            console.log(`Clearing postal codes for disabled mode: ${mode}`);
+            // console.log(`Clearing postal codes for disabled mode: ${mode}`);
             clearAllForMode(mode);
         }
     });
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const modegroupToggle = document.getElementById('select-modegroup');
-    console.log('Mode group toggle:', modegroupToggle);
+    // console.log('Mode group toggle:', modegroupToggle);
     if (modegroupToggle) {
         modegroupToggle.addEventListener('change', function() {
             if (modegroupToggle.checked) {
