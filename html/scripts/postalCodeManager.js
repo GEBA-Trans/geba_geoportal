@@ -3,6 +3,8 @@ import { getColorVariation } from './mapLoader.js'; // Add this import
 import { showError } from './main.js';
 import { setToolMode, isAreaSelectorActive } from './areaSelector.js';
 
+// UI initialization for mode toggles and postal code lists is now handled in main.js
+
 export const MODES = ['loading', 'delivery', 'selected'];
 const STORAGE_NAME = 'selectedPostalCodes';
 const EXPANDED_COUNTRIES_COOKIE = 'expandedCountries';

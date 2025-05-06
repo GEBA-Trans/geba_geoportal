@@ -112,33 +112,5 @@
         </div>
     <!-- Update the script import to use the new main.js -->
     <script type="module" src="scripts/main.js"></script>
-    <script type="module">
-        import { MODES } from './scripts/postalCodeManager.js';
-
-        const modeToggle = document.getElementById('mode-toggle');
-        const listsContainer = document.getElementById('postalcode-lists');
-
-        // Generate mode toggle buttons and color pickers
-        MODES.forEach((mode, idx) => {
-            const button = document.createElement('button');
-            button.id = `${mode}-mode`;
-            button.className = idx === 0 ? 'active' : '';
-            button.innerHTML = `${mode.charAt(0).toUpperCase() + mode.slice(1)}\n<input type="color" id="${mode}-color" value="${mode === 'loading' ? '#f1c40f' : mode === 'delivery' ? '#3498db' : '#a259f7'}" class="color-picker">`;
-            modeToggle.appendChild(button);
-        });
-
-        // Generate postal code list containers
-        MODES.forEach(mode => {
-            const container = document.createElement('div');
-            container.id = `${mode}-postalcodes`;
-            const h2 = document.createElement('h2');
-            h2.textContent = `${mode.charAt(0).toUpperCase() + mode.slice(1)} PostalCodes`;
-            const ul = document.createElement('ul');
-            ul.id = `${mode}-list`;
-            container.appendChild(h2);
-            container.appendChild(ul);
-            listsContainer.appendChild(container);
-        });
-    </script>
 </body>
 </html>
