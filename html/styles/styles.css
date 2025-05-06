@@ -172,6 +172,21 @@ main {
     color: #333;
 }
 
+#select-modegroups-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+.mode-gear-btn-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+}
+
 .modegroup-slider-container {
     display: flex;
     align-items: center;
