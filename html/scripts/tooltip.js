@@ -60,7 +60,8 @@ export function initializeTooltips() {
         { element: document.getElementById('zoom-visible'), tooltipText: 'Zoom to visible area', placement: 'top' },
         { element: document.getElementById('lasso-button'), tooltipText: 'Toggle lasso tool', placement: 'top' },
         { element: document.getElementById('grow-selection-button'), tooltipText: 'Expand selection area', placement: 'top' },
-        { element: document.getElementById('clear-selected-button'), tooltipText: 'Clear selection area', placement: 'top' }
+        { element: document.getElementById('clear-selected-button'), tooltipText: 'Clear selection area', placement: 'top' },
+        { element: document.getElementById('mode-settings-lock'), tooltipText: 'Changing mode will delete the selected postal codes', placement: 'top' }
     ];
 
     tooltipElements.forEach(({ element, tooltipText, placement }) => {
