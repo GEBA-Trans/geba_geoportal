@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // clearDisabledModesPostalCodes();
 
     // Lock icon logic (replaces gear icon logic)
-    const lockBtn = document.getElementById('mode-settings-gear');
+    const lockBtn = document.getElementById('mode-settings-lock');
     const lockIcon = document.getElementById('mode-lock-icon');
     const modegroupPanel = document.getElementById('select-modegroup-container');
     const modegroupSwitch = document.getElementById('select-modegroup');
