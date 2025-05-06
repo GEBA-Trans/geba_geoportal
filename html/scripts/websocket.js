@@ -1,4 +1,4 @@
-import { updatePostalCodeCount, updatePostalCodeLists, getSelectedPostalCodes } from './postalCodeManager.js';
+import { updatePostalCodeCount, updatePostalCodeLists, getSelectedPostalCodes, MODES } from './postalCodeManager.js';
 import { showError } from './main.js';
 
 let socket;
@@ -157,10 +157,10 @@ function processPendingWebSocketMessages() {
 
 function lookupCompanies() {
     const selectedPostalCodes = getSelectedPostalCodes();
-    const payload = {
-        loadingPostalCodes: selectedPostalCodes.loading,
-        deliveryPostalCodes: selectedPostalCodes.delivery
-    };
+    const payload = {};
+    MODES.forEach(mode => {
+        payload[`${mode}PostalCodes`] = selectedPostalCodes[mode];
+    });
     if (lookupSocket.readyState === WebSocket.OPEN) {
         lookupSocket.send(JSON.stringify(payload));
     } else {

@@ -92,6 +92,8 @@ main {
     transition: background-color 0.3s, color 0.3s;
     border-radius: 5px;
     font-weight: 500;
+    position: relative;
+    padding-right: 30px;
 }
 
 #mode-toggle button.active {
@@ -99,28 +101,172 @@ main {
     color: white;
 }
 
-#loading-postalcodes,
-#delivery-postalcodes {
+#mode-toggle button .color-picker {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border: none;
+    background-color: currentColor;
+}
+
+.mode-toggle-flex {
+    width: 100%;
+}
+
+.mode-toggle-flex > #mode-toggle {
+    flex: 11 1 0%;
+}
+
+.mode-toggle-flex > .mode-gear-btn {
+    flex: 1 1 0%;
+    justify-content: flex-end;
+    align-items: center;
+    font-size: 1.2em;
+    padding: 0 6px;
+}
+
+.select-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.select-toggle-container span {
+    font-size: 14px;
+    color: #333;
+}
+
+#select-modegroup-container {
+    margin-bottom: 1rem;
+}
+
+#select-modegroup-container.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+    background: repeating-linear-gradient(135deg, #eee, #eee 10px, #ddd 10px, #ddd 20px);
+    border: 1.5px solid #b0b0b0;
+}
+
+#select-modegroup-container.disabled #select-modegroup-text {
+    color: #b0b0b0;
+    font-style: italic;
+    font-weight: bold;
+    position: relative;
+}
+
+#select-modegroup-container.disabled #select-modegroup-text:after {
+    content: ' (Locked)';
+    color: #b71c1c;
+    font-size: 13px;
+    margin-left: 6px;
+    font-weight: bold;
+}
+
+#select-modegroup-text {
+    font-size: 14px;
+    color: #333;
+}
+
+#select-modegroups-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+.mode-gear-btn-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+}
+
+.modegroup-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+    justify-content: center;
+}
+
+.modegroup-label-left,
+.modegroup-label-right {
+    font-size: 14px;
+    color: #333;
+    min-width: 80px;
+    text-align: center;
+    user-select: none;
+}
+
+.modegroup-slider {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 24px;
+}
+
+.modegroup-slider input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.modegroup-slider .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.modegroup-slider .slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.modegroup-slider input:checked + .slider {
+    background-color: #2196F3;
+}
+
+.modegroup-slider input:checked + .slider:before {
+    transform: translateX(24px);
+}
+
+[id$='-postalcodes'] {
     margin-bottom: 1.5rem;
     flex-grow: 1;
     overflow-y: auto;
 }
 
-#loading-postalcodes h2,
-#delivery-postalcodes h2 {
+[id$='-postalcodes'] h2 {
     font-size: 1.2rem;
     margin-bottom: 1rem;
     color: #2c3e50;
 }
 
-#loading-list,
-#delivery-list {
+[id$='-list'] {
     list-style-type: none;
     padding: 0;
 }
 
-#loading-list li,
-#delivery-list li {
+[id$='-list'] li {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -128,8 +274,7 @@ main {
     transition: background-color 0.3s;
 }
 
-#loading-list li:hover,
-#delivery-list li:hover {
+[id$='-list'] li:hover {
     background-color: #f5f7fa;
 }
 
@@ -138,7 +283,7 @@ main {
     width: 100%;
     padding: 0.5rem;
     margin-top: 0.5rem;
-    background-color: #3498db;
+    background-color: #3498db !important;
     color: white;
     border: none;
     border-radius: 5px;
@@ -169,18 +314,6 @@ path {
 
 path:hover {
     fill-opacity: 0.7;
-}
-
-path.selected {
-    stroke-width: 1;
-}
-
-path.selected.loading {
-    fill: #f1c40f;
-}
-
-path.selected.delivery {
-    fill: #3498db;
 }
 
 #lookup-results {
@@ -380,19 +513,6 @@ input:checked+.slider:before {
 }
 
 .toggle-all-container span {
-    font-size: 14px;
-    color: #333;
-}
-
-#select-countries-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    border-radius: 4px;
-}
-
-#select-countries-container span {
     font-size: 14px;
     color: #333;
 }
@@ -693,22 +813,6 @@ button, .grow-selection-button, #clear-svg-debug-overlays-button, .delete-btn, .
 
 .remove-country-btn:hover {
     color: #c82333;
-}
-
-#mode-toggle button {
-    position: relative;
-    padding-right: 30px;
-}
-
-#mode-toggle button .color-picker {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    border: none;
-    background-color: currentColor;
 }
 
 #export-neighbours-button {

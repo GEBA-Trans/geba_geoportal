@@ -3,19 +3,20 @@ import { getColorVariation } from './mapLoader.js'; // Add this import
 import { showError } from './main.js';
 import { setToolMode, isAreaSelectorActive } from './areaSelector.js';
 
-const LOADING_MODE = 'loading';
-const DELIVERY_MODE = 'delivery';
+// UI initialization for mode toggles and postal code lists is now handled in main.js
+
+export const MODES = ['loading', 'delivery', 'selected'];
 const STORAGE_NAME = 'selectedPostalCodes';
 const EXPANDED_COUNTRIES_COOKIE = 'expandedCountries';
 
 let currentMode = 'loading';
-const loadingPostalCodes = new Set();
-const deliveryPostalCodes = new Set();
-const postalCodeCounts = new Map();
-let expandedCountries = {
-    [LOADING_MODE]: new Set(),
-    [DELIVERY_MODE]: new Set()
-};
+const postalCodeState = MODES.reduce((acc, mode) => {
+    acc[mode] = {
+        postalCodes: new Set(),
+        expandedCountries: new Set()
+    };
+    return acc;
+}, {});
 
 let isPostalCodeClicksEnabled = true;
 
@@ -30,31 +31,25 @@ function handlePostalCodeClick(e) {
         const postalCode = e.target.id || 'Unknown';
         const parentGroup = e.target.closest('g');
         const parentId = parentGroup ? parentGroup.id : 'No parent';
-        // console.log(`Clicked path: ${postalCode}, Parent group: ${parentId}`);
         const mode = currentMode;
         togglePostalCode(e.target, postalCode, mode);
     }
 }
 
 export function togglePostalCode(pathElement, postalCode, mode, isFromLasso = false) {
-    const targetSet = mode === 'loading' ? loadingPostalCodes : deliveryPostalCodes;
-    const hiddenSet = mode === 'loading' ? deliveryPostalCodes : loadingPostalCodes;
+    const targetSet = postalCodeState[mode].postalCodes;
+    const hiddenSets = MODES.filter(m => m !== mode).map(m => postalCodeState[m].postalCodes);
 
     if (isFromLasso) {
-        // Always add when using lasso
-        hiddenSet.delete(postalCode);
+        hiddenSets.forEach(set => set.delete(postalCode));
         targetSet.add(postalCode);
-        pathElement.classList.remove('selected', 'loading', 'delivery');
+        pathElement.classList.remove(...MODES);
         pathElement.classList.add('selected', mode);
-        // sendToWebSocket('select', postalCode);
     } else {
-        // Toggle when clicking individually
         if (targetSet.has(postalCode)) {
             targetSet.delete(postalCode);
             pathElement.classList.remove('selected', mode);
-            // sendToWebSocket('deselect', postalCode);
 
-            // Check if "select countries" toggle is on
             if (document.getElementById('select-countries').checked) {
                 const parentGroup = pathElement.closest('g');
                 const country = parentGroup ? parentGroup.id : null;
@@ -63,13 +58,11 @@ export function togglePostalCode(pathElement, postalCode, mode, isFromLasso = fa
                 }
             }
         } else {
-            hiddenSet.delete(postalCode);
+            hiddenSets.forEach(set => set.delete(postalCode));
             targetSet.add(postalCode);
-            pathElement.classList.remove('selected', 'loading', 'delivery');
+            pathElement.classList.remove(...MODES);
             pathElement.classList.add('selected', mode);
-            // sendToWebSocket('select', postalCode);
 
-            // Check if "select countries" toggle is on
             if (document.getElementById('select-countries').checked) {
                 const parentGroup = pathElement.closest('g');
                 const country = parentGroup ? parentGroup.id : null;
@@ -80,7 +73,8 @@ export function togglePostalCode(pathElement, postalCode, mode, isFromLasso = fa
         }
     }
 
-    const selectedColor = mode === 'loading' ? document.getElementById('loading-color').value : document.getElementById('delivery-color').value;
+    const colorInput = document.getElementById(`${mode}-color`);
+    const selectedColor = colorInput ? colorInput.value : (mode === 'loading' ? '#f1c40f' : mode === 'delivery' ? '#3498db' : '#a259f7');
     pathElement.style.fill = targetSet.has(postalCode) ? selectedColor : '';
 
     updatePostalCodeLists();
@@ -88,12 +82,15 @@ export function togglePostalCode(pathElement, postalCode, mode, isFromLasso = fa
 }
 
 export function updatePostalCodeLists() {
-    updateList('loading-list', loadingPostalCodes);
-    updateList('delivery-list', deliveryPostalCodes);
+    MODES.forEach(mode => {
+        updateList(`${mode}-list`, postalCodeState[mode].postalCodes, mode);
+    });
 }
 
-function updateList(listId, postalCodes) {
+function updateList(listId, postalCodes, mode) {
     const list = document.getElementById(listId);
+    if (!list) return; // Fix: skip if the list element does not exist
+
     list.innerHTML = '';
 
     if (postalCodes.size > 0) {
@@ -105,7 +102,6 @@ function updateList(listId, postalCodes) {
     }
 
     const groupedPostalCodes = groupPostalCodesByCountry(postalCodes);
-    const mode = listId === 'loading-list' ? LOADING_MODE : DELIVERY_MODE;
 
     for (const [country, codes] of Object.entries(groupedPostalCodes)) {
         const countryElement = document.createElement('div');
@@ -113,7 +109,7 @@ function updateList(listId, postalCodes) {
         
         const countryHeader = document.createElement('div');
         countryHeader.className = 'country-header';
-        const isExpanded = expandedCountries[mode].has(country);
+        const isExpanded = postalCodeState[mode].expandedCountries.has(country);
         countryHeader.innerHTML = `
             <button class="toggle-btn" aria-expanded="${isExpanded}" title="${isExpanded ? 'Collapse' : 'Expand'}">
                 <i class="fas fa-chevron-${isExpanded ? 'down' : 'right'}"></i>
@@ -144,7 +140,7 @@ function updateList(listId, postalCodes) {
                 </button>
             `;
             if (!isValidPostalCode) {
-                li.classList.add('greyed-out'); // Add class for greyed-out style
+                li.classList.add('greyed-out');
             }
             li.addEventListener('mouseenter', () => highlightPostalCode(postalCode, true));
             li.addEventListener('mouseleave', () => highlightPostalCode(postalCode, false));
@@ -190,21 +186,16 @@ function groupPostalCodesByCountry(postalCodes) {
             }
             grouped[country].push(postalCode);
         } else {
-            // If postal code is not found, add it to the 'Hidden' category
             if (!grouped['Hidden']) {
                 grouped['Hidden'] = [];
             }
             grouped['Hidden'].push(postalCode);
-            // Only log for dev, not user
             console.warn('DEV: Postal code not found:', postalCode);
         }
-
     });
     if (grouped['Hidden'] && grouped['Hidden'].length === 0) {
-        console.warn('i should delete hidden');
         delete grouped['Hidden'];
     }
-    // Move the 'Hidden' group to the end
     if (grouped['Hidden']) {
         const hiddenGroup = grouped['Hidden'];
         delete grouped['Hidden'];
@@ -214,37 +205,37 @@ function groupPostalCodesByCountry(postalCodes) {
 }
 
 function removePostalCode(postalCode) {
-    loadingPostalCodes.delete(postalCode);
-    deliveryPostalCodes.delete(postalCode);
-    postalCodeCounts.delete(postalCode);
+    MODES.forEach(mode => postalCodeState[mode].postalCodes.delete(postalCode));
     const pathElement = document.getElementById(postalCode);
     if (pathElement) {
-        pathElement.classList.remove('selected', 'loading', 'delivery');
+        pathElement.classList.remove(...MODES);
         pathElement.style.fill = '';
-        highlightPostalCode(postalCode, false); // Remove highlight when postal code is removed
+        highlightPostalCode(postalCode, false);
     }
     updatePostalCodeLists();
     saveSelectedPostalCodes();
-    // sendToWebSocket('deselect', postalCode);
 }
 
-function clearAllPostalCodes(postalCodes) {
+export function clearAllPostalCodes(postalCodes) {
     postalCodes.forEach(postalCode => {
         const pathElement = document.getElementById(postalCode);
         if (pathElement) {
-            pathElement.classList.remove('selected', 'loading', 'delivery');
+            pathElement.classList.remove(...MODES);
             pathElement.style.fill = '';
-            // Only apply grayscale if isAreaSelectorActive is defined and true
             if (typeof isAreaSelectorActive !== 'undefined' && isAreaSelectorActive) {
                 pathElement.style.filter = 'grayscale(75%)';
             }
         }
-        // sendToWebSocket('deselect', postalCode);
     });
+    console.log('DEV: Clearing all postal codes:', postalCodes);
     postalCodes.clear();
-    postalCodeCounts.clear();
     updatePostalCodeLists();
     saveSelectedPostalCodes();
+}
+
+export function clearAllForMode(mode) {
+    console.log('DEV: Clearing all postal codes for mode:', mode);
+    clearAllPostalCodes(postalCodeState[mode].postalCodes);
 }
 
 function highlightPostalCode(postalCode, highlight) {
@@ -265,15 +256,17 @@ function highlightPostalCode(postalCode, highlight) {
 }
 
 export function updatePostalCodeCount(postalCode, count) {
-    postalCodeCounts.set(postalCode, count);
+    postalCodeState[currentMode].postalCodes.add(postalCode);
     updatePostalCodeLists();
 }
 
 export function setMode(mode) {
     currentMode = mode;
-    document.getElementById('loading-mode').classList.toggle('active', mode === 'loading');
-    document.getElementById('delivery-mode').classList.toggle('active', mode === 'delivery');
-    setToolMode(mode); // Add this line to update the lasso mode
+    MODES.forEach(m => {
+        const btn = document.getElementById(`${m}-mode`);
+        if (btn) btn.classList.toggle('active', mode === m);
+    });
+    setToolMode(mode);
 }
 
 export function loadSelectedPostalCodes() {
@@ -281,38 +274,33 @@ export function loadSelectedPostalCodes() {
         try {
             loadExpandedCountries();
 
-            // Clear existing sets
-            loadingPostalCodes.clear();
-            deliveryPostalCodes.clear();
+            // MODES.forEach(mode => postalCodeState[mode].postalCodes.clear());
 
-            // Load postal codes from local storage
             Object.keys(localStorage).forEach(key => {
                 if (key.startsWith(STORAGE_NAME)) {
                     const [_, mode, country] = key.split('_');
                     const postalCodes = JSON.parse(localStorage.getItem(key));
-                    const targetSet = mode === LOADING_MODE ? loadingPostalCodes : deliveryPostalCodes;
-                    loadPostalCodesFromData(postalCodes, targetSet, mode, country);
+                    loadPostalCodesFromData(postalCodes, postalCodeState[mode].postalCodes, mode, country);
                 }
             });
 
             updatePostalCodeLists();
-            updatePostalCodeSelectionColor('loading', document.getElementById('loading-color').value);
-            updatePostalCodeSelectionColor('delivery', document.getElementById('delivery-color').value);
-            // Ensure SVG paths have correct classes after loading
+            MODES.forEach(mode => {
+                const colorInput = document.getElementById(`${mode}-color`);
+                if (colorInput) {
+                    updatePostalCodeSelectionColor(mode, colorInput.value);
+                }
+            });
             document.querySelectorAll('#map-container svg path').forEach(path => {
-                path.classList.remove('selected', 'loading', 'delivery');
+                path.classList.remove(...MODES);
             });
-            loadingPostalCodes.forEach(postalCode => {
-                const path = document.getElementById(postalCode);
-                if (path) {
-                    path.classList.add('selected', 'loading');
-                }
-            });
-            deliveryPostalCodes.forEach(postalCode => {
-                const path = document.getElementById(postalCode);
-                if (path) {
-                    path.classList.add('selected', 'delivery');
-                }
+            MODES.forEach(mode => {
+                postalCodeState[mode].postalCodes.forEach(postalCode => {
+                    const path = document.getElementById(postalCode);
+                    if (path) {
+                        path.classList.add('selected', mode);
+                    }
+                });
             });
             resolve();
         } catch (error) {
@@ -331,37 +319,33 @@ function loadPostalCodesFromData(data, targetSet, mode, country) {
     }
 
     data.forEach(postalCode => {
-        const fullPostalCode = country + postalCode; // Add the country code back
+        const fullPostalCode = country + postalCode;
         const pathElement = document.getElementById(fullPostalCode);
         targetSet.add(fullPostalCode);
-        if (pathElement) {
-            // pendingPostalCodes.add(fullPostalCode);
-        } else {
+        if (!pathElement) {
             console.warn(`Postal code not found: ${fullPostalCode}`);
         }
     });
 }
 
 function saveSelectedPostalCodes() {
-    const data = {
-        [LOADING_MODE]: Array.from(loadingPostalCodes),
-        [DELIVERY_MODE]: Array.from(deliveryPostalCodes)
-    };
+    const data = MODES.reduce((acc, mode) => {
+        acc[mode] = Array.from(postalCodeState[mode].postalCodes);
+        return acc;
+    }, {});
 
-    // Clear existing postal codes in local storage
     Object.keys(localStorage).forEach(key => {
         if (key.startsWith(STORAGE_NAME)) {
             localStorage.removeItem(key);
         }
     });
 
-    // Save postal codes in local storage based on country code
     Object.keys(data).forEach(mode => {
         const postalCodes = data[mode];
         const groupedByCountry = postalCodes.reduce((acc, code) => {
             const country = code.slice(0, 2);
             if (!acc[country]) acc[country] = [];
-            acc[country].push(code.slice(2)); // Remove the first two characters (country code)
+            acc[country].push(code.slice(2));
             return acc;
         }, {});
 
@@ -373,33 +357,35 @@ function saveSelectedPostalCodes() {
 }
 
 function saveExpandedCountries() {
-    const data = {
-        [LOADING_MODE]: Array.from(expandedCountries[LOADING_MODE]),
-        [DELIVERY_MODE]: Array.from(expandedCountries[DELIVERY_MODE])
-    };
+    const data = MODES.reduce((acc, mode) => {
+        acc[mode] = Array.from(postalCodeState[mode].expandedCountries);
+        return acc;
+    }, {});
     localStorage.setItem(EXPANDED_COUNTRIES_COOKIE, JSON.stringify(data));
 }
 
 function loadExpandedCountries() {
     const data = JSON.parse(localStorage.getItem(EXPANDED_COUNTRIES_COOKIE));
     if (data) {
-        expandedCountries[LOADING_MODE] = new Set(data[LOADING_MODE] || []);
-        expandedCountries[DELIVERY_MODE] = new Set(data[DELIVERY_MODE] || []);
+        MODES.forEach(mode => {
+            postalCodeState[mode].expandedCountries = new Set(data[mode] || []);
+        });
     }
 }
 
 export function getSelectedPostalCodes() {
-    return {
-        loading: Array.from(loadingPostalCodes),
-        delivery: Array.from(deliveryPostalCodes)
-    };
+    return MODES.reduce((acc, mode) => {
+        acc[mode] = Array.from(postalCodeState[mode].postalCodes);
+        return acc;
+    }, {});
 }
 
 export function toggleCountryExpansion(country, mode) {
-    if (expandedCountries[mode].has(country)) {
-        expandedCountries[mode].delete(country);
+    const expandedCountries = postalCodeState[mode].expandedCountries;
+    if (expandedCountries.has(country)) {
+        expandedCountries.delete(country);
     } else {
-        expandedCountries[mode].add(country);
+        expandedCountries.add(country);
     }
     saveExpandedCountries();
     updatePostalCodeLists();
@@ -407,21 +393,19 @@ export function toggleCountryExpansion(country, mode) {
 
 export function addAllPostalCodes(country, mode) {
     const allPaths = document.querySelectorAll(`#map-container svg g#${country} path`);
-    const targetSet = mode === LOADING_MODE ? loadingPostalCodes : deliveryPostalCodes;
-    const hiddenSet = mode === LOADING_MODE ? deliveryPostalCodes : loadingPostalCodes;
+    const targetSet = postalCodeState[mode].postalCodes;
+    const hiddenSets = MODES.filter(m => m !== mode).map(m => postalCodeState[m].postalCodes);
 
     allPaths.forEach(path => {
         const postalCode = path.id;
         if (postalCode) {
-            hiddenSet.delete(postalCode);
+            hiddenSets.forEach(set => set.delete(postalCode));
             targetSet.add(postalCode);
-            path.classList.remove('selected', 'loading', 'delivery');
+            path.classList.remove(...MODES);
             path.classList.add('selected', mode);
-            // Update the fill color for the added postal code
-            const selectedColor = mode === 'loading' ? document.getElementById('loading-color').value : document.getElementById('delivery-color').value;
-            path.style.fill = selectedColor; // Set the fill color for the postal code
-            path.style.filter = ''; // Remove the grayscale filter
-            // sendToWebSocket('select', postalCode);
+            const selectedColor = document.getElementById(`${mode}-color`).value;
+            path.style.fill = selectedColor;
+            path.style.filter = '';
         }
     });
 
@@ -430,10 +414,8 @@ export function addAllPostalCodes(country, mode) {
 }
 
 function removeAllPostalCodes(country, mode) {
-    // console.log(`Removing all postal codes for country: ${country}, mode: ${mode}`);
-    const targetSet = mode === LOADING_MODE ? loadingPostalCodes : deliveryPostalCodes;
+    const targetSet = postalCodeState[mode].postalCodes;
     
-    // First, remove all postal codes that start with the country code
     const postalCodesToRemove = Array.from(targetSet).filter(code => {
         const pathElement = document.getElementById(code);
         return pathElement && pathElement.closest(`g#${country}`);
@@ -446,9 +428,8 @@ function removeAllPostalCodes(country, mode) {
             pathElement.classList.remove('selected', mode);
             pathElement.style.fill = '';
             if (isAreaSelectorActive) {
-                pathElement.style.filter = 'grayscale(75%)'; // Reapply the grayscale filter only if lasso is active
+                pathElement.style.filter = 'grayscale(75%)';
             }
-            // sendToWebSocket('deselect', postalCode);
         }
     });
 
@@ -457,31 +438,26 @@ function removeAllPostalCodes(country, mode) {
 }
 
 export function disablePostalCodeClicks() {
-    // console.log("Postal code clicks have been disabled.");
     isPostalCodeClicksEnabled = false;
 }
 
 export function enablePostalCodeClicks() {
-    // console.log("Postal code clicks have been enabled.");
     isPostalCodeClicksEnabled = true;
 }
 
-// Add event listeners for color pickers
-document.getElementById('loading-color').addEventListener('input', (e) => {
-    const color = e.target.value;
-    // document.getElementById('loading-mode').style.backgroundColor = color; // Update button color
-    updatePostalCodeSelectionColor('loading', color); // Update selection color
+// Dynamically set up color picker event listeners for all modes
+MODES.forEach(mode => {
+    const colorInput = document.getElementById(`${mode}-color`);
+    if (colorInput) {
+        colorInput.addEventListener('input', (e) => {
+            const color = e.target.value;
+            updatePostalCodeSelectionColor(mode, color);
+        });
+    }
 });
 
-document.getElementById('delivery-color').addEventListener('input', (e) => {
-    const color = e.target.value;
-    // document.getElementById('delivery-mode').style.backgroundColor = color; // Update button color
-    updatePostalCodeSelectionColor('delivery', color); // Update selection color
-});
-
-// Function to update postal code selection color
 function updatePostalCodeSelectionColor(mode, color) {
-    const postalCodes = mode === 'loading' ? loadingPostalCodes : deliveryPostalCodes;
+    const postalCodes = postalCodeState[mode].postalCodes;
     const countryColors = new Map();
 
     postalCodes.forEach(postalCode => {
@@ -492,14 +468,13 @@ function updatePostalCodeSelectionColor(mode, color) {
             if (!countryColors.has(country)) {
                 countryColors.set(country, getColorVariation(color, 0.7 + (Math.random() * 0.3)));
             }
-            pathElement.style.fill = countryColors.get(country); // Update the fill color of the postal code
+            pathElement.style.fill = countryColors.get(country);
         }
     });
 }
 
 export function reloadSelectedPostalCodes() {
     loadSelectedPostalCodes().then(() => {
-        // console.log('Selected postal codes reloaded.');
     }).catch(error => {
         showError('Failed to reload selected postal codes. Please refresh the page.');
         console.error('DEV: Error reloading selected postal codes:', error);
