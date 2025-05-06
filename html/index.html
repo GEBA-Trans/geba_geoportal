@@ -74,16 +74,20 @@
                     </label>
                     <span id="select-mode-text"><i class="fas fa-map-marker-alt"></i> Selecting Postal Codes</span>
                 </div>
-                <div id="select-modegroup-container" class="select-toggle-container">
+                <div id="select-modegroup-container" class="select-toggle-container" style="display:none;">
                     <label class="switch">
                         <input type="checkbox" id="select-modegroup">
                         <span class="slider"></span>
                     </label>
                     <span id="select-modegroup-text"><i class="fas fa-mouse-pointer"></i> Single Select</span>
                 </div>
-                <div id="mode-toggle-container" class="d-flex align-items-center gap-2 mode-toggle-flex">
-                    <div id="mode-toggle" class="flex-grow-1"></div>
-                    <button id="mode-settings-gear" title="Mode Settings" class="btn btn-link p-0 d-flex align-items-center justify-content-end mode-gear-btn"><i class="fas fa-gear"></i></button>
+                <div id="mode-toggle-container" class="mode-toggle-flex">
+                    <div class="row align-items-center mb-3" id="mode-toggle-row">
+                        <div class="col pe-0" id="mode-toggle"></div>
+                        <div class="col-auto ps-1">
+                            <button id="mode-settings-gear" title="Mode Settings" class="btn btn-link p-0 d-flex align-items-center justify-content-end mode-gear-btn"><i class="fas fa-gear"></i></button>
+                        </div>
+                    </div>
                 </div>
                 <div id="postalcode-lists"></div>
                 <button id="lookup-button" class="lookup-button">Lookup</button>
