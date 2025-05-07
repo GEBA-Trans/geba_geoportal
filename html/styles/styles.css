@@ -595,7 +595,7 @@ path.postal-code {
     display: block;
 }
 
-.country-count {
+#country-count {
     background-color: #3498db;
     color: white;
     padding: 0.2rem 0.5rem;
@@ -608,12 +608,12 @@ path.postal-code {
     position: relative;
 }
 
-.country-count:hover {
+#country-count:hover {
     background-color: #2980b9;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
-.country-count:hover .tooltip {
+#country-count:hover .tooltip {
     visibility: visible;
     opacity: 1;
 }

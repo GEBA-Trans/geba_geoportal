@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add event listener to toggle the visibility of the country list
     document.getElementById('country-count').addEventListener('click', function() {
-        const countryList = document.getElementById('country-list');
+        const countryList = document.getElementById('country-sidebar');
         countryList.classList.toggle('visible');
     });
 
