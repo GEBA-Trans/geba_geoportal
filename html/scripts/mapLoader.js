@@ -276,7 +276,7 @@ export async function loadSVG(textZoom = 2) {
                 const bbox = path.getBBox();
                 const cx = bbox.x + bbox.width / 2;
                 const cy = bbox.y + bbox.height / 2;
-                crosshairs(svgElement, cx, cy, 18 * textZoom, '#0d6efd', 2);
+                crosshairs(svgElement, cx, cy, 18 * textZoom, bbox);
             });
 
             path.addEventListener('mouseout', () => {
@@ -386,8 +386,8 @@ function simplifyPath(path) {
     path.setAttribute('data-simplified-d', simplifiedD);
 }
 
-// Show two contra-rotating half circles at the given SVG x, y
-export function crosshairs(svgElement, x, y, radius = 18, color = '#0d6efd', strokeWidth = 2) {
+// Show two contra-rotating half circles at the given SVG x, y and a dotted box around the given bbox
+export function crosshairs(svgElement, x, y, radius = 10, bbox = null) {
     let group = svgElement.querySelector('#crosshair-group');
     if (!group) {
         group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -413,12 +413,8 @@ export function crosshairs(svgElement, x, y, radius = 18, color = '#0d6efd', str
     const d1 = `M ${x - r1} ${y} A ${r1} ${r1} 0 0 1 ${x + r1} ${y}`;
     const d2 = `M ${x + r2} ${y} A ${r2} ${r2} 0 0 1 ${x - r2} ${y}`;
     half1.setAttribute('d', d1);
-    half1.setAttribute('stroke', color);
-    half1.setAttribute('stroke-width', strokeWidth);
     half1.setAttribute('fill', 'none');
     half2.setAttribute('d', d2);
-    half2.setAttribute('stroke', color);
-    half2.setAttribute('stroke-width', strokeWidth);
     half2.setAttribute('fill', 'none');
     // Animate contra-rotation
     let start = null;
@@ -429,12 +425,52 @@ export function crosshairs(svgElement, x, y, radius = 18, color = '#0d6efd', str
         const angle1 = (elapsed / 1000) * 90; // 90deg/sec
         const angle2 = -(elapsed / 1000) * 120; // -120deg/sec
         half1.setAttribute('transform', `rotate(${angle1} ${x} ${y})`);
+        half1.setAttribute('style', 'stroke: #0553DD !important; stroke-width: 3px !important; fill: none !important;');
         half2.setAttribute('transform', `rotate(${angle2} ${x} ${y})`);
+        half2.setAttribute('style', 'stroke: #F7B82D !important; stroke-width: 2px !important; fill: none !important;');
         animFrame = requestAnimationFrame(animate);
     }
     animate(0);
     group._animFrame = animFrame;
     group.style.display = '';
+
+    // Add or update a dotted box around the path's bbox
+    let borderRect = svgElement.querySelector('#crosshair-border-rect');
+    const hoverLabelGroup = svgElement.querySelector('#hover-label-group');
+    if (!borderRect) {
+        borderRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        borderRect.setAttribute('id', 'crosshair-border-rect');
+        borderRect.setAttribute('fill', 'none');
+        borderRect.setAttribute('stroke', '#0d6efd');
+        borderRect.setAttribute('stroke-width', '2');
+        borderRect.setAttribute('stroke-dasharray', '6,4');
+        borderRect.setAttribute('pointer-events', 'none');
+        if (hoverLabelGroup) {
+            svgElement.insertBefore(borderRect, hoverLabelGroup);
+        } else {
+            svgElement.appendChild(borderRect);
+        }
+    } else {
+        if (hoverLabelGroup) {
+            svgElement.insertBefore(borderRect, hoverLabelGroup);
+        } else {
+            svgElement.appendChild(borderRect);
+        }
+    }
+    if (bbox) {
+        borderRect.setAttribute('x', bbox.x);
+        borderRect.setAttribute('y', bbox.y);
+        borderRect.setAttribute('width', bbox.width);
+        borderRect.setAttribute('height', bbox.height);
+        borderRect.style.display = '';
+    } else {
+        borderRect.style.display = 'none';
+    }
+    // Make crosshair group and its children non-clickable
+    group.setAttribute('pointer-events', 'none');
+    half1.setAttribute('pointer-events', 'none');
+    half2.setAttribute('pointer-events', 'none');
+
     return group;
 }
 
