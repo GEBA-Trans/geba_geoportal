@@ -9,7 +9,7 @@
       {
         "value": "/?map=GEBA_MAP_EU.svg",
         "text": "Europe",
-        "countries": ["ALBANIE","BELGIE","BOSNIE--HER","BULGARIJE","DENEMARKEN","DUITSLAND","ENGELAND","ESTLAND","FINLAND","FRANKRIJK","HONGARIJE","IERLAND","ITALIE","KROATIE","LETLAND","LITHOUWE","LUXEMBURG","MACEDONIE","MOLDAVIE","MONTENEGRO","NEDERLAND","NOORWEGEN","OEKRAINE","OOSTENRIJK","POLEN","PORTUGAL","ROEMENIE","SERVIE","SLOVENIE","SLOWAKIJE","SPANJE","TSJECHIE","ZWEDEN","ZWITSERLAND"]
+        "countries": ["Albania","Belgium","Bosnia-Herzegovina","Bulgaria","Denmark","Germany","England","Estonia","Finland","France","Hungary","Ireland","Italy","Croatia","Latvia","Lithuania","Luxembourg","North Macedonia","Moldova","Montenegro","Netherlands","Norway","Ukraine","Austria","Poland","Portugal","Romania","Serbia","Slovenia","Slovakia","Spain","Czechia","Sweden","Switzerland"]
       }
     ]
   },  {
@@ -18,32 +18,32 @@
       {
         "value": "/?map=GEBA_MAP_EU.svg",
         "text": "GEBA Europe",
-        "countries": ["BELGIE","DENEMARKEN","DUITSLAND","ENGELAND","FRANKRIJK","HONGARIJE","ITALIE","KROATIE","LUXEMBURG","NEDERLAND","OOSTENRIJK","POLEN","SLOVENIE","SLOWAKIJE","SPANJE","TSJECHIE","ZWITSERLAND"]
+        "countries": ["Belgium","Denmark","Germany","England","France","Hungary","Italy","Croatia","Luxembourg","Netherlands","Austria","Poland","Slovenia","Slovakia","Spain","Czechia","Switzerland"]
       },
       {
         "value": "/?map=GEBA_MAP_EU.svg",
         "text": "Benelux",
-        "countries": ["NEDERLAND", "BELGIE", "LUXEMBURG"]
+        "countries": ["Netherlands", "Belgium", "Luxembourg"]
       },
       {
         "value": "/?map=GEBA_MAP_EU.svg",
         "text": "Benelux and Germany",
-        "countries": ["NEDERLAND", "BELGIE", "LUXEMBURG", "DUITSLAND"]
+        "countries": ["Netherlands", "Belgium", "Luxembourg", "Germany"]
       },
-    {
+      {
         "value": "/?map=GEBA_MAP_EU.svg",
-        "text": "Alpenlanden",
-        "countries": ["OOSTENRIJK", "ZWITSERLAND", "DUITSLAND", "ITALIE", "FRANKRIJK", "SLOVENIE"]
+        "text": "Alpine countries",
+        "countries": ["Austria", "Switzerland", "Germany", "Italy", "France", "Slovenia"]
       },
       {
         "value": "/?map=GEBA_MAP_EU.svg",
         "text": "Balkan",
-        "countries": ["ALBANIE", "BOSNIE--HER", "BULGARIJE", "KROATIE", "KOSOVO", "MACEDONIE", "MONTENEGRO", "ROEMENIE", "SERVIE", "SLOVENIE"]
+        "countries": ["Albania", "Bosnia-Herzegovina", "Bulgaria", "Croatia", "Kosovo", "North Macedonia", "Montenegro", "Romania", "Serbia", "Slovenia"]
       },
       {
         "value": "/?map=GEBA_MAP_EU.svg",
         "text": "Scandinavia",
-        "countries": ["DENEMARKEN", "NOORWEGEN", "ZWEDEN"]
+        "countries": ["Denmark", "Norway", "Sweden"]
       }
     ]
   }
