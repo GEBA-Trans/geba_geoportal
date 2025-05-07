@@ -141,6 +141,37 @@ export async function loadSVG(textZoom = 2) {
             path.setAttribute('data-original-d', path.getAttribute('d'));
         });
 
+        // Add a top-level hover label group (hidden by default)
+        let hoverLabelGroup = svgElement.querySelector('#hover-label-group');
+        if (!hoverLabelGroup) {
+            hoverLabelGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            hoverLabelGroup.setAttribute('id', 'hover-label-group');
+            hoverLabelGroup.style.pointerEvents = 'none';
+            hoverLabelGroup.style.display = 'none';
+
+            const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            bgRect.setAttribute('id', 'hover-label-bg');
+            bgRect.setAttribute('rx', '8');
+            bgRect.setAttribute('ry', '8');
+            bgRect.setAttribute('fill', '#0d6efd'); // Bootstrap primary color
+            bgRect.setAttribute('stroke', '#fff');
+            bgRect.setAttribute('stroke-width', '1');
+            hoverLabelGroup.appendChild(bgRect);
+
+            const labelText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            labelText.setAttribute('id', 'hover-label-text');
+            labelText.setAttribute('fill', '#fff');
+            labelText.setAttribute('font-size', `${14 * textZoom}`);
+            labelText.setAttribute('font-weight', 'bold');
+            labelText.setAttribute('text-anchor', 'middle');
+            labelText.setAttribute('alignment-baseline', 'middle');
+            hoverLabelGroup.appendChild(labelText);
+
+            svgElement.appendChild(hoverLabelGroup);
+        }
+        const hoverLabelBg = svgElement.querySelector('#hover-label-bg');
+        const hoverLabelText = svgElement.querySelector('#hover-label-text');
+
         // Add labels for each path
         paths.forEach(path => {
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -151,6 +182,7 @@ export async function loadSVG(textZoom = 2) {
             text.setAttribute("font-size", `${10 * textZoom}`); // Set font size based on text zoom
             text.setAttribute("fill", "black"); // Set text color
             text.setAttribute("pointer-events", "none"); // Prevent text from being selectable
+            // Remove initial visibility hidden so text is visible by default
             // Find the parent group or create one if it doesn't exist
             let parentGroup = path.parentElement;
             if (parentGroup.tagName !== 'g') {
@@ -188,23 +220,80 @@ export async function loadSVG(textZoom = 2) {
             }
 
             // Add hover effect with enhanced visibility
-            path.addEventListener('mouseover', () => {
-                text.setAttribute("font-size", `${14 * textZoom}`); // Increase font size on hover
-                text.setAttribute("font-weight", "bold"); // Make text bold
-                text.setAttribute("fill", "white"); // Change text color to white
-                text.setAttribute("background-color", "rgba(0, 0, 0, 0.7)"); // Add background color
-                document.getElementById('map-container').style.cursor = 'pointer'; // Change cursor for postal codes
-                const countryName = path.parentElement.id; // Get the country name from the parent group ID
-                const postalCode = path.id; // Get the postal code from the path ID
-                text.textContent = `${countryName} - ${postalCode}`; // Show country and postal code
+            path.addEventListener('mouseover', (event) => {
+                text.setAttribute("font-weight", "bold");
+                text.setAttribute("fill", "white");
+                document.getElementById('map-container').style.cursor = 'pointer';
+                const postalCode = path.id;
+                // Show label and attach to mouse
+                function updateLabelPosition(e) {
+                    const svgPoint = svgElement.createSVGPoint();
+                    svgPoint.x = e.clientX;
+                    svgPoint.y = e.clientY;
+                    const ctm = svgElement.getScreenCTM().inverse();
+                    const pointerSVG = svgPoint.matrixTransform(ctm);
+                    const offsetX = 8 * textZoom;
+                    const offsetY = 12 * textZoom;
+                    const textBBox = hoverLabelText.getBBox();
+                    const padX = 7 * textZoom;
+                    const padY = 8 * textZoom;
+                    const widthPad = 14 * textZoom;
+                    const heightPad = 14 * textZoom;
+                    const boxW = textBBox.width + widthPad;
+                    const boxH = textBBox.height + heightPad;
+                    const boxX = pointerSVG.x + offsetX;
+                    const boxY = pointerSVG.y - offsetY - boxH;
+                    hoverLabelBg.setAttribute('x', boxX);
+                    hoverLabelBg.setAttribute('y', boxY);
+                    hoverLabelBg.setAttribute('width', boxW);
+                    hoverLabelBg.setAttribute('height', boxH);
+                    // Set tspans with correct offset
+                    hoverLabelText.innerHTML = '';
+                    const countryTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                    countryTspan.setAttribute('x', boxX + boxW / 2);
+                    countryTspan.setAttribute('y', boxY + padY + (10 * textZoom));
+                    countryTspan.setAttribute('font-size', `${10 * textZoom}`);
+                    countryTspan.setAttribute('font-weight', 'normal');
+                    countryTspan.textContent = path.parentElement.id;
+                    const codeTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                    codeTspan.setAttribute('x', boxX + boxW / 2);
+                    codeTspan.setAttribute('y', boxY + padY + (10 * textZoom) + 16 * textZoom);
+                    codeTspan.setAttribute('font-size', `${18 * textZoom}`);
+                    codeTspan.setAttribute('font-weight', 'bold');
+                    codeTspan.textContent = postalCode;
+                    hoverLabelText.appendChild(countryTspan);
+                    hoverLabelText.appendChild(codeTspan);
+                }
+                // Initial position
+                updateLabelPosition(event);
+                svgElement.addEventListener('mousemove', updateLabelPosition);
+                hoverLabelGroup.style.display = '';
+                hoverLabelGroup.parentNode.appendChild(hoverLabelGroup);
+                // Store for removal
+                path._hoverMoveHandler = updateLabelPosition;
+
+                // Show crosshairs at the original path center
+                const bbox = path.getBBox();
+                const cx = bbox.x + bbox.width / 2;
+                const cy = bbox.y + bbox.height / 2;
+                crosshairs(svgElement, cx, cy, 18 * textZoom, bbox);
             });
+
             path.addEventListener('mouseout', () => {
-                text.setAttribute("font-size", `${10 * textZoom}`); // Reset font size when not hovering
-                text.setAttribute("font-weight", "normal"); // Reset text weight
-                text.setAttribute("fill", "black"); // Reset text color
-                text.removeAttribute("background-color"); // Remove background color
-                document.getElementById('map-container').style.cursor = ''; // Reset cursor
-                text.textContent = path.id.substring(3); // Reset text to postal code only
+                text.setAttribute("font-weight", "normal");
+                text.setAttribute("fill", "black");
+                document.getElementById('map-container').style.cursor = '';
+                text.textContent = path.id.substring(3);
+                hoverLabelGroup.style.display = 'none';
+                // Remove mousemove handler
+                if (path._hoverMoveHandler) {
+                    svgElement.removeEventListener('mousemove', path._hoverMoveHandler);
+                    path._hoverMoveHandler = null;
+                }
+
+                // Hide crosshair group
+                const crosshairGroup = svgElement.querySelector('#crosshair-group');
+                if (crosshairGroup) crosshairGroup.style.display = 'none';
             });
 
             loadedCountries.push(countryId);
@@ -295,5 +384,93 @@ function simplifyPath(path) {
     }
     const simplifiedD = `M${points.join(' L')} Z`;
     path.setAttribute('data-simplified-d', simplifiedD);
+}
+
+// Show two contra-rotating half circles at the given SVG x, y and a dotted box around the given bbox
+export function crosshairs(svgElement, x, y, radius = 10, bbox = null) {
+    let group = svgElement.querySelector('#crosshair-group');
+    if (!group) {
+        group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        group.setAttribute('id', 'crosshair-group');
+        svgElement.appendChild(group);
+    }
+    // Create or select the two half-circle paths
+    let half1 = group.querySelector('.crosshair-half1');
+    let half2 = group.querySelector('.crosshair-half2');
+    if (!half1) {
+        half1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        half1.setAttribute('class', 'crosshair-half1');
+        group.appendChild(half1);
+    }
+    if (!half2) {
+        half2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        half2.setAttribute('class', 'crosshair-half2');
+        group.appendChild(half2);
+    }
+    // Path for half circle (top)
+    const r1 = radius;
+    const r2 = radius * 0.8;
+    const d1 = `M ${x - r1} ${y} A ${r1} ${r1} 0 0 1 ${x + r1} ${y}`;
+    const d2 = `M ${x + r2} ${y} A ${r2} ${r2} 0 0 1 ${x - r2} ${y}`;
+    half1.setAttribute('d', d1);
+    half1.setAttribute('fill', 'none');
+    half2.setAttribute('d', d2);
+    half2.setAttribute('fill', 'none');
+    // Animate contra-rotation
+    let start = null;
+    let animFrame;
+    function animate(ts) {
+        if (!start) start = ts;
+        const elapsed = ts - start;
+        const angle1 = (elapsed / 1000) * 90; // 90deg/sec
+        const angle2 = -(elapsed / 1000) * 120; // -120deg/sec
+        half1.setAttribute('transform', `rotate(${angle1} ${x} ${y})`);
+        half1.setAttribute('style', 'stroke: #0553DD !important; stroke-width: 3px !important; fill: none !important;');
+        half2.setAttribute('transform', `rotate(${angle2} ${x} ${y})`);
+        half2.setAttribute('style', 'stroke: #F7B82D !important; stroke-width: 2px !important; fill: none !important;');
+        animFrame = requestAnimationFrame(animate);
+    }
+    animate(0);
+    group._animFrame = animFrame;
+    group.style.display = '';
+
+    // Add or update a dotted box around the path's bbox
+    let borderRect = svgElement.querySelector('#crosshair-border-rect');
+    const hoverLabelGroup = svgElement.querySelector('#hover-label-group');
+    if (!borderRect) {
+        borderRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        borderRect.setAttribute('id', 'crosshair-border-rect');
+        borderRect.setAttribute('fill', 'none');
+        borderRect.setAttribute('stroke', '#0d6efd');
+        borderRect.setAttribute('stroke-width', '2');
+        borderRect.setAttribute('stroke-dasharray', '6,4');
+        borderRect.setAttribute('pointer-events', 'none');
+        if (hoverLabelGroup) {
+            svgElement.insertBefore(borderRect, hoverLabelGroup);
+        } else {
+            svgElement.appendChild(borderRect);
+        }
+    } else {
+        if (hoverLabelGroup) {
+            svgElement.insertBefore(borderRect, hoverLabelGroup);
+        } else {
+            svgElement.appendChild(borderRect);
+        }
+    }
+    if (bbox) {
+        borderRect.setAttribute('x', bbox.x);
+        borderRect.setAttribute('y', bbox.y);
+        borderRect.setAttribute('width', bbox.width);
+        borderRect.setAttribute('height', bbox.height);
+        borderRect.style.display = '';
+    } else {
+        borderRect.style.display = 'none';
+    }
+    // Make crosshair group and its children non-clickable
+    group.setAttribute('pointer-events', 'none');
+    half1.setAttribute('pointer-events', 'none');
+    half2.setAttribute('pointer-events', 'none');
+
+    return group;
 }
 
