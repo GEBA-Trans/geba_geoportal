@@ -141,6 +141,37 @@ export async function loadSVG(textZoom = 2) {
             path.setAttribute('data-original-d', path.getAttribute('d'));
         });
 
+        // Add a top-level hover label group (hidden by default)
+        let hoverLabelGroup = svgElement.querySelector('#hover-label-group');
+        if (!hoverLabelGroup) {
+            hoverLabelGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            hoverLabelGroup.setAttribute('id', 'hover-label-group');
+            hoverLabelGroup.style.pointerEvents = 'none';
+            hoverLabelGroup.style.display = 'none';
+
+            const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            bgRect.setAttribute('id', 'hover-label-bg');
+            bgRect.setAttribute('rx', '8');
+            bgRect.setAttribute('ry', '8');
+            bgRect.setAttribute('fill', '#0d6efd'); // Bootstrap primary color
+            bgRect.setAttribute('stroke', '#fff');
+            bgRect.setAttribute('stroke-width', '1');
+            hoverLabelGroup.appendChild(bgRect);
+
+            const labelText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            labelText.setAttribute('id', 'hover-label-text');
+            labelText.setAttribute('fill', '#fff');
+            labelText.setAttribute('font-size', `${14 * textZoom}`);
+            labelText.setAttribute('font-weight', 'bold');
+            labelText.setAttribute('text-anchor', 'middle');
+            labelText.setAttribute('alignment-baseline', 'middle');
+            hoverLabelGroup.appendChild(labelText);
+
+            svgElement.appendChild(hoverLabelGroup);
+        }
+        const hoverLabelBg = svgElement.querySelector('#hover-label-bg');
+        const hoverLabelText = svgElement.querySelector('#hover-label-text');
+
         // Add labels for each path
         paths.forEach(path => {
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -151,6 +182,7 @@ export async function loadSVG(textZoom = 2) {
             text.setAttribute("font-size", `${10 * textZoom}`); // Set font size based on text zoom
             text.setAttribute("fill", "black"); // Set text color
             text.setAttribute("pointer-events", "none"); // Prevent text from being selectable
+            // Remove initial visibility hidden so text is visible by default
             // Find the parent group or create one if it doesn't exist
             let parentGroup = path.parentElement;
             if (parentGroup.tagName !== 'g') {
@@ -188,23 +220,80 @@ export async function loadSVG(textZoom = 2) {
             }
 
             // Add hover effect with enhanced visibility
-            path.addEventListener('mouseover', () => {
-                text.setAttribute("font-size", `${14 * textZoom}`); // Increase font size on hover
-                text.setAttribute("font-weight", "bold"); // Make text bold
-                text.setAttribute("fill", "white"); // Change text color to white
-                text.setAttribute("background-color", "rgba(0, 0, 0, 0.7)"); // Add background color
-                document.getElementById('map-container').style.cursor = 'pointer'; // Change cursor for postal codes
-                const countryName = path.parentElement.id; // Get the country name from the parent group ID
-                const postalCode = path.id; // Get the postal code from the path ID
-                text.textContent = `${countryName} - ${postalCode}`; // Show country and postal code
+            path.addEventListener('mouseover', (event) => {
+                text.setAttribute("font-weight", "bold");
+                text.setAttribute("fill", "white");
+                document.getElementById('map-container').style.cursor = 'pointer';
+                const postalCode = path.id;
+                // Show label and attach to mouse
+                function updateLabelPosition(e) {
+                    const svgPoint = svgElement.createSVGPoint();
+                    svgPoint.x = e.clientX;
+                    svgPoint.y = e.clientY;
+                    const ctm = svgElement.getScreenCTM().inverse();
+                    const pointerSVG = svgPoint.matrixTransform(ctm);
+                    const offsetX = 8 * textZoom;
+                    const offsetY = 12 * textZoom;
+                    const textBBox = hoverLabelText.getBBox();
+                    const padX = 7 * textZoom;
+                    const padY = 8 * textZoom;
+                    const widthPad = 14 * textZoom;
+                    const heightPad = 14 * textZoom;
+                    const boxW = textBBox.width + widthPad;
+                    const boxH = textBBox.height + heightPad;
+                    const boxX = pointerSVG.x + offsetX;
+                    const boxY = pointerSVG.y - offsetY - boxH;
+                    hoverLabelBg.setAttribute('x', boxX);
+                    hoverLabelBg.setAttribute('y', boxY);
+                    hoverLabelBg.setAttribute('width', boxW);
+                    hoverLabelBg.setAttribute('height', boxH);
+                    // Set tspans with correct offset
+                    hoverLabelText.innerHTML = '';
+                    const countryTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                    countryTspan.setAttribute('x', boxX + boxW / 2);
+                    countryTspan.setAttribute('y', boxY + padY + (10 * textZoom));
+                    countryTspan.setAttribute('font-size', `${10 * textZoom}`);
+                    countryTspan.setAttribute('font-weight', 'normal');
+                    countryTspan.textContent = path.parentElement.id;
+                    const codeTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                    codeTspan.setAttribute('x', boxX + boxW / 2);
+                    codeTspan.setAttribute('y', boxY + padY + (10 * textZoom) + 16 * textZoom);
+                    codeTspan.setAttribute('font-size', `${18 * textZoom}`);
+                    codeTspan.setAttribute('font-weight', 'bold');
+                    codeTspan.textContent = postalCode;
+                    hoverLabelText.appendChild(countryTspan);
+                    hoverLabelText.appendChild(codeTspan);
+                }
+                // Initial position
+                updateLabelPosition(event);
+                svgElement.addEventListener('mousemove', updateLabelPosition);
+                hoverLabelGroup.style.display = '';
+                hoverLabelGroup.parentNode.appendChild(hoverLabelGroup);
+                // Store for removal
+                path._hoverMoveHandler = updateLabelPosition;
+
+                // Show crosshairs at the original path center
+                const bbox = path.getBBox();
+                const cx = bbox.x + bbox.width / 2;
+                const cy = bbox.y + bbox.height / 2;
+                crosshairs(svgElement, cx, cy, 18 * textZoom, '#0d6efd', 2);
             });
+
             path.addEventListener('mouseout', () => {
-                text.setAttribute("font-size", `${10 * textZoom}`); // Reset font size when not hovering
-                text.setAttribute("font-weight", "normal"); // Reset text weight
-                text.setAttribute("fill", "black"); // Reset text color
-                text.removeAttribute("background-color"); // Remove background color
-                document.getElementById('map-container').style.cursor = ''; // Reset cursor
-                text.textContent = path.id.substring(3); // Reset text to postal code only
+                text.setAttribute("font-weight", "normal");
+                text.setAttribute("fill", "black");
+                document.getElementById('map-container').style.cursor = '';
+                text.textContent = path.id.substring(3);
+                hoverLabelGroup.style.display = 'none';
+                // Remove mousemove handler
+                if (path._hoverMoveHandler) {
+                    svgElement.removeEventListener('mousemove', path._hoverMoveHandler);
+                    path._hoverMoveHandler = null;
+                }
+
+                // Hide crosshair circle
+                const crosshairCircle = svgElement.querySelector('#crosshair-circle');
+                if (crosshairCircle) crosshairCircle.style.display = 'none';
             });
 
             loadedCountries.push(countryId);
@@ -295,5 +384,23 @@ function simplifyPath(path) {
     }
     const simplifiedD = `M${points.join(' L')} Z`;
     path.setAttribute('data-simplified-d', simplifiedD);
+}
+
+// Show a circle at the given SVG x, y with the given radius and color
+export function crosshairs(svgElement, x, y, radius = 18, color = '#0d6efd', strokeWidth = 2) {
+    let crosshairCircle = svgElement.querySelector('#crosshair-circle');
+    if (!crosshairCircle) {
+        crosshairCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        crosshairCircle.setAttribute('id', 'crosshair-circle');
+        crosshairCircle.setAttribute('fill', 'none');
+        svgElement.appendChild(crosshairCircle);
+    }
+    crosshairCircle.setAttribute('cx', x);
+    crosshairCircle.setAttribute('cy', y);
+    crosshairCircle.setAttribute('r', radius);
+    crosshairCircle.setAttribute('stroke', color);
+    crosshairCircle.setAttribute('stroke-width', strokeWidth);
+    crosshairCircle.style.display = '';
+    return crosshairCircle;
 }
 
