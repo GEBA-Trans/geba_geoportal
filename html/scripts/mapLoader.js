@@ -291,9 +291,9 @@ export async function loadSVG(textZoom = 2) {
                     path._hoverMoveHandler = null;
                 }
 
-                // Hide crosshair circle
-                const crosshairCircle = svgElement.querySelector('#crosshair-circle');
-                if (crosshairCircle) crosshairCircle.style.display = 'none';
+                // Hide crosshair group
+                const crosshairGroup = svgElement.querySelector('#crosshair-group');
+                if (crosshairGroup) crosshairGroup.style.display = 'none';
             });
 
             loadedCountries.push(countryId);
@@ -386,21 +386,55 @@ function simplifyPath(path) {
     path.setAttribute('data-simplified-d', simplifiedD);
 }
 
-// Show a circle at the given SVG x, y with the given radius and color
+// Show two contra-rotating half circles at the given SVG x, y
 export function crosshairs(svgElement, x, y, radius = 18, color = '#0d6efd', strokeWidth = 2) {
-    let crosshairCircle = svgElement.querySelector('#crosshair-circle');
-    if (!crosshairCircle) {
-        crosshairCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        crosshairCircle.setAttribute('id', 'crosshair-circle');
-        crosshairCircle.setAttribute('fill', 'none');
-        svgElement.appendChild(crosshairCircle);
+    let group = svgElement.querySelector('#crosshair-group');
+    if (!group) {
+        group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        group.setAttribute('id', 'crosshair-group');
+        svgElement.appendChild(group);
     }
-    crosshairCircle.setAttribute('cx', x);
-    crosshairCircle.setAttribute('cy', y);
-    crosshairCircle.setAttribute('r', radius);
-    crosshairCircle.setAttribute('stroke', color);
-    crosshairCircle.setAttribute('stroke-width', strokeWidth);
-    crosshairCircle.style.display = '';
-    return crosshairCircle;
+    // Create or select the two half-circle paths
+    let half1 = group.querySelector('.crosshair-half1');
+    let half2 = group.querySelector('.crosshair-half2');
+    if (!half1) {
+        half1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        half1.setAttribute('class', 'crosshair-half1');
+        group.appendChild(half1);
+    }
+    if (!half2) {
+        half2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        half2.setAttribute('class', 'crosshair-half2');
+        group.appendChild(half2);
+    }
+    // Path for half circle (top)
+    const r1 = radius;
+    const r2 = radius * 0.8;
+    const d1 = `M ${x - r1} ${y} A ${r1} ${r1} 0 0 1 ${x + r1} ${y}`;
+    const d2 = `M ${x + r2} ${y} A ${r2} ${r2} 0 0 1 ${x - r2} ${y}`;
+    half1.setAttribute('d', d1);
+    half1.setAttribute('stroke', color);
+    half1.setAttribute('stroke-width', strokeWidth);
+    half1.setAttribute('fill', 'none');
+    half2.setAttribute('d', d2);
+    half2.setAttribute('stroke', color);
+    half2.setAttribute('stroke-width', strokeWidth);
+    half2.setAttribute('fill', 'none');
+    // Animate contra-rotation
+    let start = null;
+    let animFrame;
+    function animate(ts) {
+        if (!start) start = ts;
+        const elapsed = ts - start;
+        const angle1 = (elapsed / 1000) * 90; // 90deg/sec
+        const angle2 = -(elapsed / 1000) * 120; // -120deg/sec
+        half1.setAttribute('transform', `rotate(${angle1} ${x} ${y})`);
+        half2.setAttribute('transform', `rotate(${angle2} ${x} ${y})`);
+        animFrame = requestAnimationFrame(animate);
+    }
+    animate(0);
+    group._animFrame = animFrame;
+    group.style.display = '';
+    return group;
 }
 
