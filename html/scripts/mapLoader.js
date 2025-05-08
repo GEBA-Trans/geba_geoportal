@@ -2,6 +2,78 @@ import { triggerZoomVisible } from './zoomPan.js';
 
 const TOGGLE_STATES_COOKIE = 'countryToggleStates';
 
+// Debug label positions collector
+let existingLabels = {};
+let debugLabels = {};
+function updateDebugConsole() {
+    const debugDiv = document.getElementById('debug-console');
+    const pre = document.getElementById('debug-json-output');
+    if (!debugDiv || !pre) return;
+    // Only show debug console on localhost
+    if ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+        debugDiv.style.display = 'block';
+    }
+    // Merge existingLabels and debugLabels
+    const mergedLabels = JSON.parse(JSON.stringify(existingLabels));
+    for (const key in debugLabels) {
+        if (!mergedLabels[key]) mergedLabels[key] = [];
+        mergedLabels[key] = mergedLabels[key].concat(debugLabels[key]);
+    }
+    pre.textContent = JSON.stringify(mergedLabels, null, 2);
+}
+if (typeof window !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', () => {
+        const copyBtn = document.getElementById('copy-debug-json');
+        if (copyBtn) {
+            copyBtn.onclick = () => {
+                const pre = document.getElementById('debug-json-output');
+                if (pre) {
+                    // Try modern clipboard API
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(pre.textContent).then(() => {
+                            copyBtn.textContent = 'Copied!';
+                            setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1200);
+                        });
+                    } else {
+                        // Fallback for older browsers
+                        const textarea = document.createElement('textarea');
+                        textarea.value = pre.textContent;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        try {
+                            document.execCommand('copy');
+                            copyBtn.textContent = 'Copied!';
+                            setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1200);
+                        } catch (err) {}
+                        document.body.removeChild(textarea);
+                    }
+                }
+            };
+        }
+
+        const undoBtn = document.getElementById('undo-debug-json');
+        if (undoBtn) {
+            undoBtn.onclick = () => {
+                // Remove the last label position added (from debugLabels)
+                const keys = Object.keys(debugLabels);
+                if (keys.length > 0) {
+                    const lastKey = keys[keys.length - 1];
+                    if (debugLabels[lastKey].length > 0) {
+                        debugLabels[lastKey].pop();
+                        if (debugLabels[lastKey].length === 0) {
+                            delete debugLabels[lastKey];
+                        }
+                        updateDebugConsole();
+                        // Remove and redraw debug labels
+                        const svgElement = document.querySelector('#map-container svg');
+                        if (svgElement) renderDebugLabels(svgElement);
+                    }
+                }
+            };
+        }
+    });
+}
+
 export function getColorVariation(color, factor) {
     // Convert hex color to RGB
     const r = parseInt(color.slice(1, 3), 16);
@@ -130,6 +202,18 @@ export async function loadSVG(textZoom = 2) {
         const colorsResponse = await fetch('data/colors.json');
         const colors = await colorsResponse.json();
 
+        // Fetch polylabel positions if available
+        existingLabels = {};
+        debugLabels = {};
+        try {
+            const labelPosResponse = await fetch('data/labelPositions.json');
+            if (labelPosResponse.ok) {
+                existingLabels = await labelPosResponse.json();
+            }
+        } catch (e) {
+            // If not found, fallback to bbox
+        }
+
         const response = await fetch(mapPath);
         const svgContent = await response.text();
         document.getElementById('map-container').innerHTML += svgContent;
@@ -174,26 +258,51 @@ export async function loadSVG(textZoom = 2) {
 
         // Add labels for each path
         paths.forEach(path => {
-            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.textContent = path.id.substring(3); // Remove the first three characters from the path's ID
-            text.setAttribute("x", path.getBBox().x + path.getBBox().width / 2); // Center the text
-            text.setAttribute("y", path.getBBox().y + path.getBBox().height / 2); // Center the text
-            text.setAttribute("text-anchor", "middle"); // Center alignment
-            text.setAttribute("font-size", `${10 * textZoom}`); // Set font size based on text zoom
-            text.setAttribute("fill", "black"); // Set text color
-            text.setAttribute("pointer-events", "none"); // Prevent text from being selectable
-            // Remove initial visibility hidden so text is visible by default
-            // Find the parent group or create one if it doesn't exist
-            let parentGroup = path.parentElement;
-            if (parentGroup.tagName !== 'g') {
-                // If path isn't in a group, wrap it in one
-                parentGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                path.parentElement.insertBefore(parentGroup, path);
-                parentGroup.appendChild(path);
+            // Support multiple label positions per region
+            let labelEntries = existingLabels[path.id];
+            if (labelEntries && !Array.isArray(labelEntries)) {
+                labelEntries = [labelEntries];
             }
-    
-            // Add the text to the same group as the path
-            parentGroup.appendChild(text);
+            if (labelEntries && Array.isArray(labelEntries)) {
+                labelEntries.forEach((pos, idx) => {
+                    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    text.textContent = path.id.substring(3); // Remove the first three characters from the path's ID
+                    text.setAttribute("x", pos.x);
+                    text.setAttribute("y", pos.y);
+                    text.setAttribute("text-anchor", "middle");
+                    text.setAttribute("font-size", `${10 * textZoom}`);
+                    // Only color blue on localhost
+                    text.setAttribute("fill", (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? "#0074D9" : "black");
+                    text.setAttribute("pointer-events", "none");
+                    let parentGroup = path.parentElement;
+                    if (parentGroup.tagName !== 'g') {
+                        parentGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                        path.parentElement.insertBefore(parentGroup, path);
+                        parentGroup.appendChild(path);
+                    }
+                    parentGroup.appendChild(text);
+                });
+            } else {
+                // fallback to bbox center if no label positions
+                const bbox = path.getBBox();
+                const labelX = bbox.x + bbox.width / 2;
+                const labelY = bbox.y + bbox.height / 2;
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.textContent = path.id.substring(3);
+                text.setAttribute("x", labelX);
+                text.setAttribute("y", labelY);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("font-size", `${10 * textZoom}`);
+                text.setAttribute("fill", "black");
+                text.setAttribute("pointer-events", "none");
+                let parentGroup = path.parentElement;
+                if (parentGroup.tagName !== 'g') {
+                    parentGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    path.parentElement.insertBefore(parentGroup, path);
+                    parentGroup.appendChild(path);
+                }
+                parentGroup.appendChild(text);
+            }
 
             // Set the fill color based on the path's ID or group's ID
             const countryId = path.id.includes('-') ? path.parentElement.id : path.id; // Check if ID contains '-' and look at parent if true
@@ -221,6 +330,7 @@ export async function loadSVG(textZoom = 2) {
 
             // Add hover effect with enhanced visibility
             path.addEventListener('mouseover', (event) => {
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("font-weight", "bold");
                 text.setAttribute("fill", "white");
                 document.getElementById('map-container').style.cursor = 'pointer';
@@ -276,10 +386,11 @@ export async function loadSVG(textZoom = 2) {
                 const bbox = path.getBBox();
                 const cx = bbox.x + bbox.width / 2;
                 const cy = bbox.y + bbox.height / 2;
-                crosshairs(svgElement, cx, cy, 18 * textZoom, bbox);
+                crosshairs(svgElement, cx, cy, 18 * textZoom, bbox, path.id);
             });
 
             path.addEventListener('mouseout', () => {
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("font-weight", "normal");
                 text.setAttribute("fill", "black");
                 document.getElementById('map-container').style.cursor = '';
@@ -294,6 +405,23 @@ export async function loadSVG(textZoom = 2) {
                 // Hide crosshair group
                 const crosshairGroup = svgElement.querySelector('#crosshair-group');
                 if (crosshairGroup) crosshairGroup.style.display = 'none';
+            });
+
+            // Add click event for easy label position copy
+            path.addEventListener('click', (event) => {
+                // Get SVG coordinates from click event
+                const svgPoint = svgElement.createSVGPoint();
+                svgPoint.x = event.clientX;
+                svgPoint.y = event.clientY;
+                const ctm = svgElement.getScreenCTM().inverse();
+                const pointerSVG = svgPoint.matrixTransform(ctm);
+                // Add to debugLabels
+                if (!debugLabels[path.id]) debugLabels[path.id] = [];
+                debugLabels[path.id].push({ x: pointerSVG.x, y: pointerSVG.y });
+                updateDebugConsole();
+                renderDebugLabels(svgElement, textZoom);
+                // Log in copy-paste format for convenience
+                console.log(`"${path.id}": { "x": ${pointerSVG.x}, "y": ${pointerSVG.y } }`);
             });
 
             loadedCountries.push(countryId);
@@ -360,6 +488,8 @@ export async function loadSVG(textZoom = 2) {
             height: viewBox.height
         };
 
+        renderDebugLabels(svgElement, textZoom);
+
         // Hide loader
         document.getElementById('loader').style.display = 'none';
 
@@ -387,7 +517,8 @@ function simplifyPath(path) {
 }
 
 // Show two contra-rotating half circles at the given SVG x, y and a dotted box around the given bbox
-export function crosshairs(svgElement, x, y, radius = 10, bbox = null) {
+export function crosshairs(svgElement, x, y, radius = 10, bbox = null, pathId = null) {
+    // console.log('[CROSSHAIR DEBUG] x:', x, 'y:', y, 'id:', pathId); // Debug output for label placement
     let group = svgElement.querySelector('#crosshair-group');
     if (!group) {
         group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -472,5 +603,27 @@ export function crosshairs(svgElement, x, y, radius = 10, bbox = null) {
     half2.setAttribute('pointer-events', 'none');
 
     return group;
+}
+
+function renderDebugLabels(svgElement, textZoom = 2) {
+    // Remove all previous debug label elements
+    const oldDebugs = svgElement.querySelectorAll('.debug-label-text');
+    oldDebugs.forEach(el => el.remove());
+    // Draw new debug labels
+    for (const key in debugLabels) {
+        debugLabels[key].forEach((pos, idx) => {
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.textContent = key.substring(3); // Remove the first three characters from the path's ID
+            text.setAttribute("x", pos.x);
+            text.setAttribute("y", pos.y);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("font-size", `${10 * textZoom}`);
+            text.setAttribute("fill", "red");
+            text.setAttribute("class", "debug-label-text");
+            text.setAttribute("pointer-events", "none");
+            // Add to the SVG root so it's always visible
+            svgElement.appendChild(text);
+        });
+    }
 }
 

@@ -55,7 +55,6 @@
                     </div>
                     <ul id="countries"></ul>
                 </div>
-                <!-- Move controls here, inside the map container -->
             </div>
             <div id="sidebar">
                 <!-- Add dropdown menu here -->
@@ -94,6 +93,14 @@
                 <div id="postalcode-lists"></div>
                 <button id="lookup-button" class="lookup-button">Lookup</button>
                 <button id="export-neighbours-button">Export neighbours</button>
+                <div id="debug-console" style="display: none; background: #222; color: #fff; font-family: monospace; padding: 12px; margin: 12px 0 0 0; border-top: 2px solid #444;">
+                    <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                        <span style="flex:1; font-weight: bold;">Label Position Debug JSON</span>
+                        <button id="copy-debug-json" style="margin-left: 8px;">Copy</button>
+                        <button id="undo-debug-json" style="margin-left: 8px;">Undo</button>
+                    </div>
+                    <pre id="debug-json-output" style="white-space: pre-wrap; word-break: break-all; margin:0;"></pre>
+                </div>
             </div>
         </main>
         
