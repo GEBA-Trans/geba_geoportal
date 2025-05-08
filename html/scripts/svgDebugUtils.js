@@ -1,7 +1,11 @@
 // Utility functions for drawing debug SVG shapes
 
+function isDevelopment() {
+    return location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+}
+
 export function drawPolygon(polygon, color, id) {
-    if (!(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
+    if (!isDevelopment()) return;
     // Remove any existing debug shape with this id
     const svgElement = document.querySelector('#map-container svg');
     let existing = svgElement.querySelector(`#${id}`);
@@ -18,7 +22,7 @@ export function drawPolygon(polygon, color, id) {
 }
 
 export function drawBBoxRect(bbox, color, id) {
-    if (!(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) return;
+    if (!isDevelopment()) return;
     // Remove any existing debug shape with this id
     const svgElement = document.querySelector('#map-container svg');
     let existing = svgElement.querySelector(`#${id}`);

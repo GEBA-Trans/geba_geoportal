@@ -1,16 +1,20 @@
 import { growSelection } from './growSelection.js';
 import { sendToneighboursocket } from './websocket.js'; // Import the function to send data to the neighbor WebSocket
 
+function isDevelopment() {
+    return location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+}
+
 export function exportPostalCodeNeighbours() {
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    if (isDevelopment()) {
         console.log('Starting exportPostalCodeNeighbours...');
     }
     const paths = document.querySelectorAll('#map-container svg path');
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    if (isDevelopment()) {
         console.log(`Found ${paths.length} total paths.`);
     }
     const visiblePaths = Array.from(paths).filter(path => path.style.display !== 'none');
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    if (isDevelopment()) {
         console.log(`Filtered to ${visiblePaths.length} visible paths.`);
     }
     const neighboursMap = new Map();
@@ -28,17 +32,17 @@ export function exportPostalCodeNeighbours() {
             }
         }
         if (!path.id) {
-            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            if (isDevelopment()) {
                 console.warn('Skipping path without ID:', path);
             }
             continue;
         }
-        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        if (isDevelopment()) {
             console.log(`Processing Path_ID: ${path.id}`);
         }
         // highlightPostalCode(path); // Visual feedback for the current Path_ID
         const neighbours = findNeighbours(path, visiblePaths);
-        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        if (isDevelopment()) {
             console.log(`Found ${neighbours.length} neighbours for Path_ID: ${path.id}`);
         }
 
@@ -48,7 +52,7 @@ export function exportPostalCodeNeighbours() {
 
         // processedCount++;
         // if (processedCount >= 50) {
-        //     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        //     if (isDevelopment()) {
         //         console.log('Debug limit reached. Stopping after 5 Path_IDs.');
         //     }
         //     break; // Stop the loop after processing 5 Path_IDs
@@ -56,17 +60,17 @@ export function exportPostalCodeNeighbours() {
     }
 
     // const csvContent = generateCSV(neighboursMap);
-    // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    // if (isDevelopment()) {
     //     console.log('Generated CSV content:', csvContent);
     // }
     // downloadCSV(csvContent, 'postal_code_neighbours.csv');
-    // if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    // if (isDevelopment()) {
     //     console.log('CSV download triggered.');
     // }
 }
 
 function findNeighbours(targetPath, paths) {
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    if (isDevelopment()) {
         console.log(`Finding neighbours for Path_ID: ${targetPath.id}`);
     }
 
@@ -90,7 +94,7 @@ function findNeighbours(targetPath, paths) {
     targetPath.classList.remove('selected');
     selectedPaths.forEach(path => path.classList.remove('selected'));
 
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    if (isDevelopment()) {
         console.log(`neighbours found for Path_ID ${targetPath.id}:`, neighbours);
     }
     return neighbours;

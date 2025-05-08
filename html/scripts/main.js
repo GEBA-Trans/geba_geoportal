@@ -8,6 +8,10 @@ import { initializeTooltips } from './tooltip.js';
 import { populateRegionDropdown, handleRegionChange } from './regionManager.js';
 import { exportPostalCodeNeighbours } from './exportNeighbours.js';
 
+function isDevelopment() {
+    return location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+}
+
 const MODE_COOKIE = 'enabledModes';
 let enabledModes = ["loading", "delivery"];
 
@@ -104,7 +108,7 @@ function initializeApp() {
             document.getElementById('export-neighbours-button').addEventListener('click', exportPostalCodeNeighbours);
         })
         .catch(error => {
-            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            if (isDevelopment()) {
                 console.error('Error initializing app:', error);
             }
         });
@@ -140,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Show debug overlays button only on localhost
     const debugBtn = document.getElementById('clear-svg-debug-overlays-button');
-    if (debugBtn && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    if (debugBtn && isDevelopment()) {
         debugBtn.style.display = 'inline-block';
     }
 
