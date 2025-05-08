@@ -409,19 +409,21 @@ export async function loadSVG(textZoom = 2) {
 
             // Add click event for easy label position copy
             path.addEventListener('click', (event) => {
-                // Get SVG coordinates from click event
-                const svgPoint = svgElement.createSVGPoint();
-                svgPoint.x = event.clientX;
-                svgPoint.y = event.clientY;
-                const ctm = svgElement.getScreenCTM().inverse();
-                const pointerSVG = svgPoint.matrixTransform(ctm);
-                // Add to debugLabels
-                if (!debugLabels[path.id]) debugLabels[path.id] = [];
-                debugLabels[path.id].push({ x: pointerSVG.x, y: pointerSVG.y });
-                updateDebugConsole();
-                renderDebugLabels(svgElement, textZoom);
-                // Log in copy-paste format for convenience
-                console.log(`"${path.id}": { "x": ${pointerSVG.x}, "y": ${pointerSVG.y } }`);
+                if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                    // Get SVG coordinates from click event
+                    const svgPoint = svgElement.createSVGPoint();
+                    svgPoint.x = event.clientX;
+                    svgPoint.y = event.clientY;
+                    const ctm = svgElement.getScreenCTM().inverse();
+                    const pointerSVG = svgPoint.matrixTransform(ctm);
+                    // Add to debugLabels
+                    if (!debugLabels[path.id]) debugLabels[path.id] = [];
+                    debugLabels[path.id].push({ x: pointerSVG.x, y: pointerSVG.y });
+                    updateDebugConsole();
+                    renderDebugLabels(svgElement, textZoom);
+                    // Log in copy-paste format for convenience
+                    console.log(`"${path.id}": { "x": ${pointerSVG.x}, "y": ${pointerSVG.y } }`);
+                }
             });
 
             loadedCountries.push(countryId);
