@@ -5,12 +5,17 @@ const TOGGLE_STATES_COOKIE = 'countryToggleStates';
 // Debug label positions collector
 let existingLabels = {};
 let debugLabels = {};
+
+function isDevelopment() {
+    return location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+}
+
 function updateDebugConsole() {
     const debugDiv = document.getElementById('debug-console');
     const pre = document.getElementById('debug-json-output');
     if (!debugDiv || !pre) return;
     // Only show debug console on localhost
-    if ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    if (isDevelopment()) {
         debugDiv.style.display = 'block';
     }
     // Merge existingLabels and debugLabels
@@ -272,7 +277,7 @@ export async function loadSVG(textZoom = 2) {
                     text.setAttribute("text-anchor", "middle");
                     text.setAttribute("font-size", `${10 * textZoom}`);
                     // Only color blue on localhost
-                    text.setAttribute("fill", (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? "#0074D9" : "black");
+                    text.setAttribute("fill", isDevelopment() ? "#0074D9" : "black");
                     text.setAttribute("pointer-events", "none");
                     let parentGroup = path.parentElement;
                     if (parentGroup.tagName !== 'g') {
@@ -409,7 +414,7 @@ export async function loadSVG(textZoom = 2) {
 
             // Add click event for easy label position copy
             path.addEventListener('click', (event) => {
-                if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                if (isDevelopment()) {
                     // Get SVG coordinates from click event
                     const svgPoint = svgElement.createSVGPoint();
                     svgPoint.x = event.clientX;

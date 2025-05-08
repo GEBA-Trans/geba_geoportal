@@ -1,6 +1,10 @@
 // Store references for cleanup
 const tooltipCleanupHandlers = [];
 
+function isDevelopment() {
+    return location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+}
+
 function initializeTooltip(element, tooltipText, placement) {
     const tooltip = document.createElement('div');
     tooltip.className = 'tooltip';
@@ -36,7 +40,7 @@ function initializeTooltip(element, tooltipText, placement) {
         element.removeEventListener('mouseenter', mouseEnterHandler);
         element.removeEventListener('mouseleave', mouseLeaveHandler);
         if (tooltip.parentNode) tooltip.parentNode.removeChild(tooltip);
-        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        if (isDevelopment()) {
             // Only show debug logs on localhost
         }
         popperInstance.destroy && popperInstance.destroy();
