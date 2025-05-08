@@ -45,7 +45,10 @@
             <div id="map-container" class="no-select">
                 <!-- SVG map will be inserted here -->
                 <div id="country-sidebar">
-                    <h2>Loaded Countries</h2> <!-- Remove the counter from here -->
+                    <h2 style="display: flex; align-items: center; justify-content: space-between; margin-top: 0;">
+                        Loaded Countries
+                        <button id="country-sidebar-close" title="Close Sidebar" class="sidebar-close-btn">&times;</button>
+                    </h2>
                     <div class="toggle-all-container">
                         <label class="switch">
                             <input type="checkbox" id="toggle-all-countries" checked>

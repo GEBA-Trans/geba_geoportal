@@ -132,6 +132,13 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('country-count').addEventListener('click', function() {
         const countryList = document.getElementById('country-sidebar');
         countryList.classList.toggle('visible');
+        // Attach close button event listener every time sidebar is shown
+        const closeBtn = document.getElementById('country-sidebar-close');
+        if (closeBtn) {
+            closeBtn.onclick = function() {
+                countryList.classList.remove('visible');
+            };
+        }
     });
 
     // Initialize tooltips
